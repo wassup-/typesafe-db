@@ -1,11 +1,7 @@
 #ifndef _WHERE_CLAUSES_HPP
 #define _WHERE_CLAUSES_HPP
 
-#include "int_sequence.hpp"
 #include "lexical_cast.hpp"
-#include "nth_type_of.hpp"
-#include "record.hpp"
-#include "type_sequence.hpp"
 
 #include <string>
 #include <sstream>
@@ -52,12 +48,12 @@ namespace fp {
             where_eq(T v) : value(v) { }
 
             template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) == value);
+                return (fp::get<I>(r) == value);
             }
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " = " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " = " << lexical_cast<std::string>(value) << ')';
                 return ss.str();
             }
         };
@@ -76,7 +72,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " != " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " != " << lexical_cast<std::string>(value) << ')';
                 return ss.str();
             }
         };
@@ -95,7 +91,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " < " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " < " << lexical_cast<std::string>(value) << ')';
                 return ss.str();
             }
         };
@@ -114,7 +110,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " > " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " > " << lexical_cast<std::string>(value) << ')';
                 return ss.str();
             }
         };
@@ -133,7 +129,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " <= " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " <= " << lexical_cast<std::string>(value) << ')';
                 return ss.str();
             }
         };
@@ -152,7 +148,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " >= " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " >= " << lexical_cast<std::string>(value) << ')';
                 return ss.str();
             }
         };
@@ -171,7 +167,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << TDescriptor::template field<I>::name << " LIKE \"%" << lexical_cast<std::string>(value) << "%\")";
+                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " LIKE \"%" << lexical_cast<std::string>(value) << "%\")";
                 return ss.str();
             }
         };
@@ -189,7 +185,7 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << m_left.to_string<TDescriptor > () << " OR " << m_right.to_string<TDescriptor>() << ')';
+                ss << '(' << m_left.to_string<TDescriptor> () << " OR " << m_right.to_string<TDescriptor>() << ')';
                 return ss.str();
             }
         };
@@ -207,45 +203,81 @@ namespace fp {
 
             template<typename TDescriptor> std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << m_left.to_string<TDescriptor > () << " AND " << m_right.to_string<TDescriptor>() << ')';
+                ss << '(' << m_left.to_string<TDescriptor>() << " AND " << m_right.to_string<TDescriptor>() << ')';
                 return ss.str();
             }
         };
     }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_eq<I, typename field<TDescriptor, I>::type> eq(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_eq<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_neq<I, typename field<TDescriptor, I>::type> neq(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_neq<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_lt<I, typename field<TDescriptor, I>::type> lt(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_lt<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_gt<I, typename field<TDescriptor, I>::type> gt(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_gt<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_lte<I, typename field<TDescriptor, I>::type> lte(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_lte<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_gte<I, typename field<TDescriptor, I>::type> gte(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_gte<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
+    template<typename TDescriptor, int I>
+    inline where_clauses::where_contains<I, typename field<TDescriptor, I>::type> contains(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
+        return where_clauses::where_contains<I, typename field<TDescriptor, I>::type>(v);
+    }
+    
 
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_eq<I, T> operator==(field<TDescriptor, I>, T v) {
-        return where_clauses::where_eq<I, T>(v);
+    template<typename TDescriptor, int I>
+    inline auto operator==(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::eq(f, v)) {
+        return fp::eq(f, v);
     }
 
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_neq<I, T> operator!=(field<TDescriptor, I>, T v) {
-        return where_clauses::where_neq<I, T>(v);
+    template<typename TDescriptor, int I>
+    inline auto operator!=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::neq(f, v)) {
+        return fp::neq(f, v);
     }
 
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_lt<I, T> operator<(field<TDescriptor, I>, T v) {
-        return where_clauses::where_lt<I, T>(v);
+    template<typename TDescriptor, int I>
+    inline auto operator<(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::lt(f, v)) {
+        return fp::lt(f, v);
     }
 
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_gt<I, T> operator>(field<TDescriptor, I>, T v) {
-        return where_clauses::where_gt<I, T>(v);
+    template<typename TDescriptor, int I>
+    inline auto operator>(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::gt(f, v)) {
+        return fp::gt(f, v);
     }
 
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_lte<I, T> operator<=(field<TDescriptor, I>, T v) {
-        return where_clauses::where_lte<I, T>(v);
+    template<typename TDescriptor, int I>
+    inline auto operator<=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::lte(f, v)) {
+        return fp::lte(f, v);
     }
 
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_gte<I, T> operator>=(field<TDescriptor, I>, T v) {
-        return where_clauses::where_gte<I, T>(v);
+    template<typename TDescriptor, int I>
+    inline auto operator>=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::gte(f, v)) {
+        return fp::gte(f, v);
     }
-
-    template<typename TDescriptor, int I, typename T>
-    inline where_clauses::where_contains<I, T> operator%(field<TDescriptor, I>, T v) {
-        return where_clauses::where_contains<I, T>(v);
+    
+    template<typename TDescriptor, int I>
+    inline auto operator%(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::contains(f, v)) {
+        return fp::contains(f, v);
     }
 }
 
