@@ -5,10 +5,11 @@
 #ifndef _TYPE_EXTRACTOR_HPP
 #define _TYPE_EXTRACTOR_HPP
 
-#include "int_sequence.hpp"
-#include "type_sequence.hpp"
+#include "nth_type_of.hpp"
 
 namespace fp {
+	template<int...> struct int_seq;
+	template<typename...> struct type_seq;
 	template<typename, typename> struct extract_types;
 
 	template<int... I, typename... T> struct extract_types<int_seq<I...>, type_seq<T...> > {

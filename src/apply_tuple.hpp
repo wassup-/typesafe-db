@@ -5,52 +5,23 @@
 #ifndef _APPLY_TUPLE_HPP
 #define _APPLY_TUPLE_HPP
 
+#include "impl/apply_tuple_impl.hpp"
+
 #include <tuple>
 
 namespace fp {
-	template<int C, int N> struct tuple_applier {
-		struct constructor {
-			template<typename TType, typename... TTuple, typename... TArg>
-			static TType apply(std::tuple<TTuple...> const & t, TArg &&... arg) {
-				return tuple_applier<C + 1, N>::constructor::template apply<TType>(t, std::forward<TArg>(arg)..., std::get<C>(t));
-			}
-		};
-
-		struct function {
-			template<typename Fn, typename... TTuple, typename... TArg>
-			static typename Fn::return_type apply(Fn fn, std::tuple<TTuple...> const & t, TArg &&... arg) {
-				return tuple_applier<C + 1, N>::function::apply(fn, t, std::forward<TArg>(arg)..., std::get<C>(t));
-			}
-		};
-	};
-	template<int N> struct tuple_applier<N, N> {
-		struct constructor {
-			template<typename TType, typename... TTuple, typename... TArg>
-			static TType apply(std::tuple<TTuple...> const & t, TArg &&... arg) {
-				return TType(std::forward<TArg>(arg)...);
-			}
-		};
-
-		struct function {
-			template<typename Fn, typename... TTuple, typename... TArg>
-			static typename Fn::return_type apply(Fn fn, std::tuple<TTuple...> const & t, TArg &&... arg) {
-				return fn(std::forward<TArg>(arg)...);
-			}
-		};
-	};
-
 	template<int N> struct apply_tuple {
 		struct constructor {
 			template<typename TType, typename... TTuple, typename... TArg>
 			static TType apply(std::tuple<TTuple...> const & t, TArg &&... arg) {
-				return tuple_applier<0, N>::constructor::template apply<TType>(t, std::forward<TArg>(arg)...);
+				return impl::apply_tuple_impl<0, N>::constructor::template apply<TType>(t, std::forward<TArg>(arg)...);
 			}
 		};
 
 		struct function {
 			template<typename Fn, typename... TTuple, typename... TArg>
 			static typename Fn::return_type apply(Fn fn, std::tuple<TTuple...> const & t, TArg &&... arg) {
-				return tuple_applier<0, N>::function::apply(fn, t, std::forward<TArg>(arg)...);
+				return impl::apply_tuple_impl<0, N>::function::apply(fn, t, std::forward<TArg>(arg)...);
 			}
 		};
 	};

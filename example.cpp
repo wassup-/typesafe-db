@@ -1,14 +1,14 @@
-#include "type_sequence.hpp"
-#include "int_sequence.hpp"
-#include "record.hpp"
-#include "mysql_engine.hpp"
+#include "src/type_sequence.hpp"
+#include "src/int_sequence.hpp"
+#include "src/record.hpp"
+#include "src/mysql_engine.hpp"
 
-#include "table.hpp"
-#include "primary_key.hpp"
-#include "select_query.hpp"
-#include "where_query.hpp"
-#include "limit_query.hpp"
-#include "where_select_query.hpp"
+#include "src/table.hpp"
+#include "src/primary_key.hpp"
+#include "src/select_query.hpp"
+#include "src/where_query.hpp"
+#include "src/limit_query.hpp"
+#include "src/where_select_query.hpp"
 
 #include <iostream>
 #include <string>

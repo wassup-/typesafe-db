@@ -53,7 +53,8 @@ namespace fp {
         }
     };
 
-    template<typename TQuery> typename std::enable_if<is_query<TQuery>::value, limit_query<TQuery> >::type limit(TQuery const & q, int l) {
+    template<typename TQuery>
+    typename std::enable_if<is_query<TQuery>::value, limit_query<TQuery> >::type limit(TQuery const & q, int l) {
         return limit_query<TQuery > (q, l);
     }
 

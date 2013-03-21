@@ -5,7 +5,6 @@
 #ifndef _RECORD_HPP
 #define _RECORD_HPP
 
-#include "int_sequence.hpp"
 #include "field.hpp"
 #include "nth_type_of.hpp"
 #include "type_sequence.hpp"
@@ -15,12 +14,6 @@
 
 namespace fp {
 
-    /**
-     * This type represents a record
-     * the first typename represents a descriptor 
-     * the second typename represents an int sequence (template<int...> struct int_seq)
-     * the int sequence is needed to do the mapping between field indices
-     */
     template<typename TDescriptor, int... Fields> struct record {
     public:
         typedef type_seq<typename TDescriptor::template field<Fields>::type...> types;

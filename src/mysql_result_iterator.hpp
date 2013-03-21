@@ -7,7 +7,7 @@
 
 namespace fp {
     namespace mysql {
-        namespace priv {
+        namespace impl {
             struct result_iterator_impl;
         }
 
@@ -24,7 +24,7 @@ namespace fp {
             typedef typename traits_type::difference_type difference_type;
             typedef typename traits_type::iterator_category iterator_category;
         protected:
-            priv::result_iterator_impl * m_impl;
+            impl::result_iterator_impl * m_impl;
         public:
             result_iterator(basic_result & res) : m_impl(0) { }
             ~result_iterator() { }

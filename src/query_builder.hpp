@@ -5,36 +5,11 @@
 #ifndef _QUERY_BUILDER_HPP
 #define _QUERY_BUILDER_HPP
 
+#include "impl/query_builder_impl.hpp"
+
 #include <sstream>
 
 namespace fp {
-    namespace impl {
-        template<typename, typename...> struct get_where_clauses;
-        template<typename TDescriptor, typename H, typename... T> struct get_where_clauses<TDescriptor, H, T...> {
-        protected:
-            H head;
-            get_where_clauses<TDescriptor, T...> tail;
-        public:
-            get_where_clauses(H h, T... t) : head(h), tail(t...) { }
-
-            void get(std::stringstream & ss) {
-                ss << head.template to_string<TDescriptor>() << " AND ";
-                tail.get(ss);
-            }
-        };
-
-        template<typename TDescriptor, typename H> struct get_where_clauses<TDescriptor, H> {
-        protected:
-            H head;
-        public:
-            get_where_clauses(H h) : head(h) { }
-
-            void get(std::stringstream & ss) {
-                ss << head.template to_string<TDescriptor>();
-            }
-        };
-    }
-
     template<typename TDescriptor, int... Is> inline char const ** get_field_identifiers() {
         static char const * ret[sizeof...(Is)]= { get_field_identifier<TDescriptor, Is>()... };
         return ret;

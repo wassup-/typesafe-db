@@ -7,7 +7,6 @@
 
 #include "lexical_cast.hpp"
 
-#include <sstream>
 #include <mysql/mysql.h>
 
 namespace fp {
@@ -28,7 +27,7 @@ namespace fp {
             }
 
             template<int I, typename T> T get() const {
-                return lexical_cast<T > (m_data[I]);
+                return lexical_cast<T> (m_data[I]);
             }
 
             operator bool() const {

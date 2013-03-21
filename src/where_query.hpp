@@ -5,13 +5,14 @@
 #ifndef _WHERE_QUERY_HPP
 #define _WHERE_QUERY_HPP
 
+#include "impl/where_query_impl.hpp"
+
 #include "apply_tuple.hpp"
 #include "is_query.hpp"
 #include "tuple_cat.hpp"
 #include "query_builder.hpp"
 #include "where_clauses.hpp"
 
-#include <algorithm>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -23,32 +24,7 @@ namespace fp {
         enum { value = true };
     };
 
-    namespace impl {
-        template<typename Fn> Fn get_type_of(Fn);
-
-        template<typename, typename...> struct clause_evaluator;
-        template<typename TRecord, typename H, typename... T> struct clause_evaluator<TRecord, H, T...> {
-        protected:
-            H m_head;
-            clause_evaluator <TRecord, T...> m_tail;
-        public:
-            clause_evaluator(H h, T && ... t) : m_head(h), m_tail(std::forward<T> (t)...) { }
-
-            bool operator()(TRecord const & r) const {
-                return (m_head(r) && m_tail(r));
-            }
-        };
-        template<typename TRecord, typename H> struct clause_evaluator<TRecord, H> {
-        protected:
-            H m_head;
-        public:
-            clause_evaluator(H h) : m_head(h) { }
-
-            bool operator()(TRecord const & r) const {
-                return m_head(r);
-            }
-        };
-    }
+    
     
     template<typename TDescriptor, typename... TClauses> struct where_query {
         typedef TDescriptor descriptor_type;
@@ -72,7 +48,7 @@ namespace fp {
         template<int... Fs>
         std::vector<record<TDescriptor, Fs...> > evaluate(std::vector<record<TDescriptor, Fs...> > const & r) const {
             std::vector<record<TDescriptor, Fs...> > ret;
-            for (auto const & cur : r) {
+            for(auto const & cur : r) {
                 if (this->evaluate(cur)) {
                     ret.push_back(cur);
                 }
