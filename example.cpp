@@ -132,28 +132,28 @@ namespace geo {
 
 namespace fp {
 
-    template<typename TQuery> struct limited_query {
+    template<typename TQuery> struct limit_query {
     public:
-        typedef typename TQuery::table_type table_type;
-        typedef typename TQuery::record_type record_type;
+        typedef typename TQuery::descriptor_type TDescriptor;
         typedef typename TQuery::result_type result_type;
     protected:
         TQuery const m_query;
         int m_limit;
     public:
+        limit_query(TQuery const & q, int l) : m_query(q), m_limit(l) { }
 
-        limited_query(TQuery const & q, int l) : m_query(q), m_limit(l) {
-        }
-
-        bool evaluate(record_type const & rec) const {
+        template<int... Fs>
+        bool evaluate(record<TDescriptor, Fs...> const & rec) const {
             return fp::evaluate(rec, m_query);
         }
 
-        result_type select(record_type const & rec) const {
+        template<int... Fs>
+        result_type select(record<TDescriptor, Fs...> const & rec) const {
             return fp::select(rec, m_query);
         }
 
-        std::vector<result_type> apply(std::vector<record_type> const & recs) const {
+        template<int... Fs>
+        std::vector<result_type> apply(std::vector<record<TDescriptor, Fs...> > const & recs) const {
             std::vector<result_type> ret(m_limit);
             for (auto const & cur : recs) {
                 if (fp::evaluate(cur, m_query)) {
@@ -167,21 +167,21 @@ namespace fp {
         }
 
         std::string to_string() const {
-            return m_query.to_string() + " LIMIT " + lexical_cast<std::string > (m_limit);
+            return m_query.to_string() + " LIMIT " + lexical_cast<std::string>(m_limit);
         }
     };
 
-    template<typename TQuery> limited_query<TQuery> limit(TQuery const & q, int l) {
-        return limited_query<TQuery > (q, l);
+    template<typename TQuery> typename std::enable_if<is_query<TQuery>::value, limit_query<TQuery> >::type limit(TQuery const & q, int l) {
+        return limit_query<TQuery > (q, l);
     }
 
-    template<typename TQuery>
-    bool evaluate(typename TQuery::record_type const & r, limited_query<TQuery> const & q) {
+    template<typename TQuery, typename TDescriptor, int... Fs>
+    bool evaluate(record<TDescriptor, Fs...> const & r, limit_query<TQuery> const & q) {
         return q.evaluate(r);
     }
 
-    template<typename TQuery>
-    typename TQuery::result_type select(typename TQuery::record_type const & r, limited_query<TQuery> const & q) {
+    template<typename TQuery, typename TDescriptor, int... Fs>
+    typename TQuery::result_type select(record<TDescriptor, Fs...> const & r, limit_query<TQuery> const & q) {
         return q.select(r);
     }
 }
