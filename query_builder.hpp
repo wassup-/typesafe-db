@@ -4,11 +4,6 @@
 #include <sstream>
 
 namespace fp {
-
-    template<typename TDescriptor, int I> inline char const * get_field_identifier() {
-        return TDescriptor::template field<I>::name;
-    }
-
     namespace impl {
         template<typename, typename...> struct get_where_clauses;
         template<typename TDescriptor, typename H, typename... T> struct get_where_clauses<TDescriptor, H, T...> {
