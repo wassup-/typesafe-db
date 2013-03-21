@@ -2,6 +2,7 @@
 #define _SELECT_QUERY_HPP
 
 #include "back_inserter.hpp"
+#include "is_query.hpp"
 #include "query_combiner.hpp"
 #include "record.hpp"
 #include "type_extractor.hpp"
@@ -13,6 +14,11 @@
 namespace fp {
     template<typename...> struct type_seq;
     template<int...> struct int_seq;
+    template<typename, int...> struct select_query;
+    
+    template<typename TDescriptor, int... Is> struct is_query<select_query<TDescriptor, Is...> > {
+        enum { value = true };
+    };
 
     namespace impl {
         template<typename TRecord> struct query_impl;
@@ -25,32 +31,33 @@ namespace fp {
             }
         };
 
-        template<typename TDescriptor, int... Is> struct query_impl<record<TDescriptor, Is...> > {
+        template<typename TDescriptor, int... Fs> struct query_impl<record<TDescriptor, Fs...> > {
             template<int... Cs> struct result_of {
                 typedef record<TDescriptor, Cs...> type;
             };
 
             template<int... Cs>
-            static typename result_of <Cs...>::type select(record <TDescriptor, Is...> const & r) noexcept {
+            static typename result_of <Cs...>::type select(record <TDescriptor, Fs...> const & r) noexcept {
                 return typename result_of<Cs...>::type(impl::get_values_impl<typename TDescriptor::types>::template get<Cs>(r)...);
             }
         };
     }
 
     template<typename TDescriptor, int... Cs> struct select_query {
+    public:
         typedef TDescriptor descriptor_type;
-        typedef typename TDescriptor::table::type table_type;
-        typedef typename TDescriptor::record::type record_type;
-        typedef typename impl::query_impl<record_type>::template result_of < Cs...>::type result_type;
-
-        result_type apply(record_type const & r) const {
-            return impl::query_impl<record_type>::template select < Cs...>(r);
+        typedef typename impl::query_impl<typename TDescriptor::record::type>::template result_of < Cs...>::type result_type;
+    public:
+        template<int... Fs>
+        result_type apply(record<TDescriptor, Fs...> const & r) const {
+            return impl::query_impl<record<TDescriptor, Fs...> >::template select < Cs...>(r);
         }
 
-        std::vector<result_type> apply(std::vector<record_type> const & r) const {
+        template<int... Fs>
+        std::vector<result_type> apply(std::vector<record<TDescriptor, Fs...> > const & r) const {
             std::vector<result_type> ret;
             for (auto const & cur : r) {
-                ret.push_back(impl::query_impl<record_type>::template select < Cs...>(cur));
+                ret.push_back(impl::query_impl<record<TDescriptor, Fs...> >::template select < Cs...>(cur));
             }
             return ret;
         }
@@ -76,13 +83,13 @@ namespace fp {
         return combine_unique(l, r);
     }
 
-    template<typename TDescriptor, int... Cs>
-    inline auto select(typename TDescriptor::record_type const & rec, select_query<TDescriptor, Cs...> const & qry) -> decltype(qry.apply(rec)) {
+    template<typename TDescriptor, int... Cs, int... Fs>
+    inline auto select(record<TDescriptor, Fs...> const & rec, select_query<TDescriptor, Cs...> const & qry) -> decltype(qry.apply(rec)) {
         return qry.apply(rec);
     }
 
-    template<typename TDescriptor, int... Cs>
-    inline auto select(std::vector<typename TDescriptor::record_type> const & recs, select_query<TDescriptor, Cs...> const & qry) -> decltype(qry.apply(recs)) {
+    template<typename TDescriptor, int... Cs, int... Fs>
+    inline auto select(std::vector<record<TDescriptor, Fs...> > const & recs, select_query<TDescriptor, Cs...> const & qry) -> decltype(qry.apply(recs)) {
         return qry.apply(recs);
     }
 }

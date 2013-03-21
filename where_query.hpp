@@ -2,6 +2,7 @@
 #define _WHERE_QUERY_HPP
 
 #include "apply_tuple.hpp"
+#include "is_query.hpp"
 #include "tuple_cat.hpp"
 #include "query_builder.hpp"
 #include "where_clauses.hpp"
@@ -13,40 +14,41 @@
 
 namespace fp {
     template<typename, typename...> struct where_query;
-
-    template<typename Fn> Fn get_type_of(Fn);
-
-    template<typename, typename...> struct clause_evaluator;
-
-    template<typename TRecord, typename H, typename... T> struct clause_evaluator<TRecord, H, T...> {
-    protected:
-        H m_head;
-        clause_evaluator <TRecord, T...> m_tail;
-    public:
-        clause_evaluator(H h, T && ... t) : m_head(h), m_tail(std::forward<T> (t)...) { }
-
-        bool operator()(TRecord const & r) const {
-            return (m_head(r) && m_tail(r));
-        }
+    
+    template<typename TDescriptor, typename... TClauses> struct is_query<where_query<TDescriptor, TClauses...> > {
+        enum { value = true };
     };
 
-    template<typename TRecord, typename H> struct clause_evaluator<TRecord, H> {
-    protected:
-        H m_head;
-    public:
+    namespace impl {
+        template<typename Fn> Fn get_type_of(Fn);
 
-        clause_evaluator(H h) : m_head(h) { }
+        template<typename, typename...> struct clause_evaluator;
+        template<typename TRecord, typename H, typename... T> struct clause_evaluator<TRecord, H, T...> {
+        protected:
+            H m_head;
+            clause_evaluator <TRecord, T...> m_tail;
+        public:
+            clause_evaluator(H h, T && ... t) : m_head(h), m_tail(std::forward<T> (t)...) { }
 
-        bool operator()(TRecord const & r) const {
-            return m_head(r);
-        }
-    };
+            bool operator()(TRecord const & r) const {
+                return (m_head(r) && m_tail(r));
+            }
+        };
+        template<typename TRecord, typename H> struct clause_evaluator<TRecord, H> {
+        protected:
+            H m_head;
+        public:
+            clause_evaluator(H h) : m_head(h) { }
 
+            bool operator()(TRecord const & r) const {
+                return m_head(r);
+            }
+        };
+    }
+    
     template<typename TDescriptor, typename... TClauses> struct where_query {
         typedef TDescriptor descriptor_type;
-        typedef typename TDescriptor::table::type table_type;
-        typedef typename TDescriptor::record::type record_type;
-        typedef record_type result_type;
+        typedef typename TDescriptor::record::type result_type;
     protected:
         std::tuple < TClauses...> m_clauses;
     public:
@@ -57,13 +59,15 @@ namespace fp {
             return m_clauses;
         }
 
-        bool evaluate(record_type const & r) const {
-            clause_evaluator <record_type, TClauses...> eval = apply_tuple<std::tuple_size<std::tuple<TClauses...> >::value>::constructor::template apply<clause_evaluator<record_type, TClauses...> >(m_clauses);
+        template<int... Fs>
+        bool evaluate(record<TDescriptor, Fs...> const & r) const {
+            impl::clause_evaluator <record<TDescriptor, Fs...>, TClauses...> eval = apply_tuple<std::tuple_size<std::tuple<TClauses...> >::value>::constructor::template apply<impl::clause_evaluator<record<TDescriptor, Fs...>, TClauses...> >(m_clauses);
             return eval(r);
         }
 
-        std::vector<record_type> evaluate(std::vector<record_type> const & r) const {
-            std::vector<record_type> ret;
+        template<int... Fs>
+        std::vector<record<TDescriptor, Fs...> > evaluate(std::vector<record<TDescriptor, Fs...> > const & r) const {
+            std::vector<record<TDescriptor, Fs...> > ret;
             for (auto const & cur : r) {
                 if (this->evaluate(cur)) {
                     ret.push_back(cur);
@@ -74,7 +78,7 @@ namespace fp {
 
         std::string to_string() const {
             query_builder qb;
-            auto wrapper = wrap_call<decltype(get_type_of(&query_builder::build_where_query<TDescriptor, TClauses...>))>(qb, &query_builder::build_where_query<TDescriptor, TClauses...>);
+            auto wrapper = wrap_call<decltype(impl::get_type_of(&query_builder::build_where_query<TDescriptor, TClauses...>))>(qb, &query_builder::build_where_query<TDescriptor, TClauses...>);
             return call_function(wrapper, m_clauses);
         }
     };
@@ -94,13 +98,13 @@ namespace fp {
         return where_query<where_clauses::where_and<where_query<TDescriptor, TClauses...>, TClause> >(where_clauses::where_and<where_query<TDescriptor, TClauses...>, TClause >(q, c));
     }
 
-    template<typename TDescriptor, typename... TClauses>
-    auto evaluate(typename TDescriptor::record_type const & rec, where_query<TDescriptor, TClauses...> const & qry) -> decltype(qry.evaluate(rec)) {
+    template<typename TDescriptor, typename... TClauses, int... Fs>
+    auto evaluate(record<TDescriptor, Fs...> const & rec, where_query<TDescriptor, TClauses...> const & qry) -> decltype(qry.evaluate(rec)) {
         return qry.evaluate(rec);
     }
 
-    template<typename TDescriptor, typename... TClauses>
-    auto evaluate(std::vector<typename TDescriptor::record_type> const & recs, where_query<TDescriptor, TClauses...> const & qry) -> decltype(qry.evaluate(recs)) {
+    template<typename TDescriptor, typename... TClauses, int... Fs>
+    auto evaluate(std::vector<record<TDescriptor, Fs...> > const & recs, where_query<TDescriptor, TClauses...> const & qry) -> decltype(qry.evaluate(recs)) {
         return qry.evaluate(recs);
     }
 }
