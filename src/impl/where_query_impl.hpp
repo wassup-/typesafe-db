@@ -1,7 +1,7 @@
 #ifndef _WHERE_QUERY_IMPL_HPP
 #define _WHERE_QUERY_IMPL_HPP
 
-#include <algorithm>
+#include <utility>
 
 namespace fp {
 	namespace impl {

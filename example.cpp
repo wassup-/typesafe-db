@@ -141,7 +141,7 @@ int main(int argc, char ** argv) {
     auto sq1 = (fp::select_query<geo::db::city > () + geo::db::city::alpha() + geo::db::city::longitude() + geo::db::city::latitude());
     auto wq1 = (fp::where_query<geo::db::city > () + ((geo::db::city::name() % std::string("ken"))));
 
-    auto res = fp::query(engine, fp::limit(sq1 + wq1, 10));
+    auto res = fp::query(engine, sq1 + wq1);
     std::cout << "Executed query: " << engine.last_query() << std::endl;
     std::cout << "Results: " << res.size() << std::endl;
     std::cout << "----------" << std::endl;

@@ -4,9 +4,11 @@
 namespace fp {
 	namespace impl {
 		template<int, int...> struct largest_value_impl;
+
 		template<int S, int H, int... T> struct largest_value_impl<S, H, T...> {
 			enum { value = largest_value_impl<((S >= H)? S : H), T...>::value };
 		};
+		
 		template<int S> struct largest_value_impl<S> {
 			enum { value = S };
 		};

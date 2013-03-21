@@ -1,11 +1,8 @@
 #ifndef _INSERTION_SORT_IMPL_HPP
 #define _INSERTION_SORT_IMPL_HPP
 
-#include "../nth_value_of.hpp"
-
 namespace fp {
 	template<int...> struct int_seq;
-	template<typename...> struct type_seq;
 
 	template<typename, typename, typename> struct insertion_sort;
 

@@ -4,8 +4,9 @@
 #include "../sorted_values.hpp"
 
 namespace fp {
+    template<int...> struct int_seq;
 	template<int...> struct unique_values;
-        template<typename, int...> struct select_query;
+    template<typename, int...> struct select_query;
 	
 	namespace impl {
         template<typename TTable, typename, typename> struct query_combiner_impl;

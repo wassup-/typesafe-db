@@ -6,6 +6,7 @@
 namespace fp {
 	namespace impl {
         template<typename, typename...> struct get_where_clauses;
+        
         template<typename TDescriptor, typename H, typename... T> struct get_where_clauses<TDescriptor, H, T...> {
         protected:
             H head;

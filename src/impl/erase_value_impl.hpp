@@ -3,7 +3,6 @@
 
 namespace fp {
 	template<int...> struct int_seq;
-	template<typename...> struct type_seq;
 	
 	namespace impl {
 		template<int, typename, typename> struct erase_value_impl;

@@ -2,7 +2,7 @@
 #define _INT_SEQUENCE_IMPL_HPP
 
 namespace fp {
-        template<int...> struct int_seq;
+	template<int...> struct int_seq;
 	namespace impl {
 		template<int...> struct int_seq_to_array;
 		template<int, int, int, int...> struct build_range_incr;

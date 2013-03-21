@@ -17,6 +17,7 @@ namespace fp {
 		template<typename H, typename... T> struct largest_type_impl<H, T...> {
 			enum { size = _max<sizeof(H), largest_type_impl<T...>::size>::value };
 		};
+		
 		template<typename T> struct largest_type_impl<T> {
 			enum { size = sizeof(T) };
 		};
