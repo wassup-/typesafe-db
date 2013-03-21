@@ -5,60 +5,46 @@
 
 namespace fp {
 
-    template<typename TTable, int I> inline char const * get_field_identifier() {
-        return TTable::template field<I>::name;
+    template<typename TDescriptor, int I> inline char const * get_field_identifier() {
+        return TDescriptor::template field<I>::name;
     }
 
     namespace impl {
-        template<typename TTable, int...> struct get_field_identifiers_impl;
-        template<typename TTable, int H, int... T> struct get_field_identifiers_impl<TTable, H, T...> {
-            static void get(char const ** buff) {
-                *buff = get_field_identifier<TTable, H>();
-                get_field_identifiers_impl<TTable, T...>::get(buff + 1);
-            }
-        };
-        template<typename TTable, int H> struct get_field_identifiers_impl<TTable, H> {
-            static void get(char const ** buff) {
-                *buff = get_field_identifier<TTable, H>();
-            }
-        };
-
         template<typename, typename...> struct get_where_clauses;
-        template<typename TTable, typename H, typename... T> struct get_where_clauses<TTable, H, T...> {
+        template<typename TDescriptor, typename H, typename... T> struct get_where_clauses<TDescriptor, H, T...> {
         protected:
             H head;
-            get_where_clauses<TTable, T...> tail;
+            get_where_clauses<TDescriptor, T...> tail;
         public:
             get_where_clauses(H h, T... t) : head(h), tail(t...) { }
 
             void get(std::stringstream & ss) {
-                ss << head.template to_string<TTable>() << " AND ";
+                ss << head.template to_string<TDescriptor>() << " AND ";
                 tail.get(ss);
             }
         };
 
-        template<typename TTable, typename H> struct get_where_clauses<TTable, H> {
+        template<typename TDescriptor, typename H> struct get_where_clauses<TDescriptor, H> {
         protected:
             H head;
         public:
             get_where_clauses(H h) : head(h) { }
 
             void get(std::stringstream & ss) {
-                ss << head.template to_string<TTable>();
+                ss << head.template to_string<TDescriptor>();
             }
         };
     }
 
-    template<typename TTable, int... Is> inline char const ** get_field_identifiers() {
-        static char const * ret[sizeof...(Is)];
-        impl::get_field_identifiers_impl<TTable, Is...>::get(ret);
+    template<typename TDescriptor, int... Is> inline char const ** get_field_identifiers() {
+        static char const * ret[sizeof...(Is)]= { get_field_identifier<TDescriptor, Is>()... };
         return ret;
     }
 
     struct query_builder {
-        template<typename TTable, int... Cs >
+        template<typename TDescriptor, int... Cs >
         std::string build_select_query() const {
-            char const ** field_identifiers = get_field_identifiers<TTable, Cs...>();
+            char const ** field_identifiers = get_field_identifiers<TDescriptor, Cs...>();
             std::stringstream ss;
             ss << "SELECT ";
             if (sizeof...(Cs) > 0) {
@@ -67,15 +53,15 @@ namespace fp {
                     ss << ", " << field_identifiers[i];
                 }
             }
-            ss << " FROM " << TTable::table::name;
+            ss << " FROM " << TDescriptor::table::name;
             return ss.str();
         }
 
-        template<typename TTable, typename... Ts >
+        template<typename TDescriptor, typename... Ts >
         std::string build_where_query(Ts const &... ts) const {
             std::stringstream ss;
             ss << "WHERE ";
-            impl::get_where_clauses<TTable, Ts...> wc(ts...);
+            impl::get_where_clauses<TDescriptor, Ts...> wc(ts...);
             wc.get(ss);
             return ss.str();
         }

@@ -1,11 +1,6 @@
 #include "type_sequence.hpp"
 #include "int_sequence.hpp"
-#include "nth_type_of.hpp"
-#include "nth_value_of.hpp"
-#include "lexical_cast.hpp"
-#include "datasource.hpp"
 #include "record.hpp"
-#include "logic.hpp"
 #include "mysql_engine.hpp"
 
 #include "table.hpp"
@@ -22,11 +17,19 @@ namespace geo {
     namespace db {
 
         struct city {
+            typedef fp::field < city, 0 > id;
+            typedef fp::field < city, 1 > alpha;
+            typedef fp::field < city, 2 > name;
+            typedef fp::field < city, 3 > code;
+            typedef fp::field < city, 4 > longitude;
+            typedef fp::field < city, 5 > latitude;
 
             struct table {
                 typedef fp::table<int, std::string, std::string, std::string, double, double> type;
                 typedef fp::type_seq<int, std::string, std::string, std::string, double, double> fields;
                 static char const * const name;
+                
+                typedef fp::primary_key<id> primary_key;
             };
 
             struct record {
@@ -41,15 +44,6 @@ namespace geo {
                 typedef typename fp::nth_type_of_seq<I, typename table::fields>::type type;
                 static char const * const name;
             };
-
-            typedef fp::field < city, 0 > id;
-            typedef fp::field < city, 1 > alpha;
-            typedef fp::field < city, 2 > name;
-            typedef fp::field < city, 3 > code;
-            typedef fp::field < city, 4 > longitude;
-            typedef fp::field < city, 5 > latitude;
-
-            typedef fp::primary_key<id> primary_key;
         };
         char const * const city::table::name = "geo_city";
         char const * const city::fields::names[] = {
@@ -63,11 +57,17 @@ namespace geo {
         template<int I> char const * const city::field<I>::name = city::fields::names[I];
 
         struct province {
-
+            typedef fp::field < province, 0 > id;
+            typedef fp::field < province, 1 > name;
+            typedef fp::field < province, 2 > longitude;
+            typedef fp::field < province, 3 > latitude;
+            
             struct table {
                 typedef fp::table<int, std::string, double, double> type;
                 typedef fp::type_seq<int, std::string, double, double> fields;
                 static char const * const name;
+                
+                typedef fp::primary_key<id> primary_key;
             };
 
             struct record {
@@ -82,13 +82,6 @@ namespace geo {
                 typedef typename fp::nth_type_of_seq<I, typename table::fields>::type type;
                 static char const * const name;
             };
-
-            typedef fp::field < province, 0 > id;
-            typedef fp::field < province, 1 > name;
-            typedef fp::field < province, 2 > longitude;
-            typedef fp::field < province, 3 > latitude;
-
-            typedef fp::primary_key<id> primary_key;
         };
         char const * const province::table::name = "geo_province";
         char const * const province::fields::names[] = {
@@ -100,11 +93,17 @@ namespace geo {
         template<int I> char const * const province::field<I>::name = province::fields::names[I];
 
         struct country {
-
+            typedef fp::field < country, 0 > id;
+            typedef fp::field < country, 1 > name;
+            typedef fp::field < country, 2 > longitude;
+            typedef fp::field < country, 3 > latitude;
+            
             struct table {
                 typedef fp::table<int, std::string, double, double> type;
                 typedef fp::type_seq<int, std::string, double, double> fields;
                 static char const * const name;
+                
+                typedef fp::primary_key<id> primary_key;
             };
 
             struct record {
@@ -119,13 +118,6 @@ namespace geo {
                 typedef typename fp::nth_type_of_seq<I, typename table::fields>::type type;
                 static char const * const name;
             };
-
-            typedef fp::field < country, 0 > id;
-            typedef fp::field < country, 1 > name;
-            typedef fp::field < country, 2 > longitude;
-            typedef fp::field < country, 3 > latitude;
-
-            typedef fp::primary_key<id> primary_key;
         };
         char const * const country::table::name = "geo_country";
         char const * const country::fields::names[] = {
