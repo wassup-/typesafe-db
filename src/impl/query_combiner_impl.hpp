@@ -1,7 +1,7 @@
 #ifndef _QUERY_COMBINER_IMPL_HPP
 #define _QUERY_COMBINER_IMPL_HPP
 
-#include "../sorted_values.hpp"
+#include "../unique_values.hpp"
 
 namespace fp {
     template<int...> struct int_seq;
@@ -21,7 +21,7 @@ namespace fp {
                 typedef select_query<TTable, L..., R...> type;
             };
             struct unique {
-                typedef typename make_select_query<TTable, typename sorted_values<L..., R...>::type::template as<unique_values>::type::type>::type type;
+                typedef typename make_select_query<TTable, typename unique_values<L..., R...>::type>::type type;
             };
         };
     }

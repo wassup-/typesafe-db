@@ -13,9 +13,12 @@
 
 namespace fp {
     template<typename, typename> struct where_select_query;
-    
+
     template<typename TDescriptor, int... Is, typename... Cs> struct is_query<where_select_query<select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> > > {
-        enum { value = true };
+
+        enum {
+            value = true
+        };
     };
 
     template<typename TDescriptor, int... Is, typename... Cs> struct where_select_query<select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> > {
@@ -26,20 +29,22 @@ namespace fp {
         select_query<TDescriptor, Is...> const m_select;
         where_query<TDescriptor, Cs...> const m_where;
     public:
-        where_select_query(select_query<TDescriptor, Is...> const & s, where_query<TDescriptor, Cs...> const & w) : m_select(s), m_where(w) { }
+
+        where_select_query(select_query<TDescriptor, Is...> const & s, where_query<TDescriptor, Cs...> const & w) : m_select(s), m_where(w) {
+        }
 
         template<int... Fs>
         bool evaluate(record<TDescriptor, Fs...> const & rec) const {
             return fp::evaluate(rec, m_where);
         }
 
-        template<int... Fs>
+        template<int... Fs >
         result_type select(record<TDescriptor, Fs...> const & rec) const {
             return fp::select(rec, m_select);
         }
 
-        template<int... Fs>
-        std::vector<result_type> apply(std::vector<record<TDescriptor, Fs...> > const & recs) const {
+        template<int... Fs >
+        std::vector<result_type> apply(std::vector < record<TDescriptor, Fs...> > const & recs) const {
             std::vector<result_type> ret;
             for (auto const & cur : recs) {
                 if (fp::evaluate(cur, m_where)) {

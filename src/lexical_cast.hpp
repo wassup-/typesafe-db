@@ -8,10 +8,11 @@
 #include "impl/lexical_cast_impl.hpp"
 
 namespace fp {
-	template<typename Out, typename In>
-	Out lexical_cast(In const & v) {
-		return impl::lexical_cast_impl<In, Out>::cast(v);
-	}
+
+    template<typename Out, typename In>
+    inline Out lexical_cast(In const & v) {
+        return impl::lexical_cast_impl<In, Out>::cast(v);
+    }
 }
 
 #endif

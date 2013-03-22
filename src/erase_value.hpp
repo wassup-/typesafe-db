@@ -8,12 +8,12 @@
 #include "impl/erase_value_impl.hpp"
 
 namespace fp {
-	template<int...> struct int_seq;
-	template<int, int...> struct erase_value;
+    template<int...> struct int_seq;
+    template<int, int...> struct erase_value;
 
-	template<int I, int... T> struct erase_value {
-		typedef typename impl::erase_value_impl<I, int_seq<>, int_seq<T...> >::type type;
-	};
+    template<int I, int... T> struct erase_value {
+        typedef typename impl::erase_value_impl<I, int_seq<>, int_seq < T...> >::type type;
+    };
 }
 
 #endif

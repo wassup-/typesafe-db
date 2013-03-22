@@ -23,7 +23,10 @@ namespace fp {
             MYSQL * m_context;
             MYSQL_RES * m_res;
         public:
-            basic_result(MYSQL * ctx) : m_context(ctx), m_res(mysql_use_result(ctx)) { }
+
+            basic_result(MYSQL * ctx) : m_context(ctx), m_res(mysql_use_result(ctx)) {
+            }
+
             ~basic_result() {
                 mysql_free_result(m_res);
             }

@@ -18,16 +18,23 @@ namespace fp {
         protected:
             MYSQL_ROW m_data;
         public:
-            basic_row() : m_data(0) { }
-            explicit basic_row(MYSQL_ROW d) : m_data(d) { }
-            ~basic_row() { }
+
+            basic_row() : m_data(0) {
+            }
+
+            explicit basic_row(MYSQL_ROW d) : m_data(d) {
+            }
+
+            ~basic_row() {
+            }
 
             char const * operator [](int i) const {
                 return m_data[i];
             }
 
-            template<int I, typename T> T get() const {
-                return lexical_cast<T> (m_data[I]);
+            template<int I, typename T >
+            T get() const {
+                return lexical_cast<T > (m_data[I]);
             }
 
             operator bool() const {

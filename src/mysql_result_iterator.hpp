@@ -26,14 +26,24 @@ namespace fp {
         protected:
             impl::result_iterator_impl * m_impl;
         public:
-            result_iterator(basic_result & res) : m_impl(0) { }
-            ~result_iterator() { }
 
-            result_iterator & operator ++() { return *this; }
+            result_iterator(basic_result & res) : m_impl(0) {
+            }
 
-            pointer operator ->() const { return 0; }
+            ~result_iterator() {
+            }
 
-            reference operator *() const { return *operator->(); }
+            result_iterator & operator ++() {
+                return *this;
+            }
+
+            pointer operator ->() const {
+                return 0;
+            }
+
+            reference operator *() const {
+                return *operator->();
+            }
         };
     }
 }

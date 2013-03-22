@@ -5,18 +5,19 @@
 #ifndef _DROP_VALUES_HPP
 #define _DROP_VALUES_HPP
 
- #include "impl/drop_values_impl.hpp"
+#include "impl/drop_values_impl.hpp"
 
 namespace fp {
-	template<int...> struct int_seq;
-	template<int, int...> struct drop_values;
+    template<int...> struct int_seq;
+    template<int, int...> struct drop_values;
 
-	template<int C, int... I> struct drop_values {
-		typedef typename impl::drop_values_impl<C, (C == sizeof...(I)), int_seq<>, int_seq<I...> >::type type;
-	};
-	template<int C, int... I> struct drop_values_or_empty {
-		typedef typename impl::drop_values_impl<C, (C >= sizeof...(I)), int_seq<>, int_seq<I...> >::type type;
-	};
+    template<int C, int... I> struct drop_values {
+        typedef typename impl::drop_values_impl<C, (C == sizeof...(I)), int_seq<>, int_seq < I...> >::type type;
+    };
+
+    template<int C, int... I> struct drop_values_or_empty {
+        typedef typename impl::drop_values_impl<C, (C >= sizeof...(I)), int_seq<>, int_seq < I...> >::type type;
+    };
 }
 
 #endif

@@ -5,14 +5,17 @@
 #ifndef _LARGEST_VALUE_HPP
 #define _LARGEST_VALUE_HPP
 
- #include "impl/largest_value_impl.hpp"
+#include "impl/largest_value_impl.hpp"
 
 namespace fp {
-	template<int...> struct largest_value;
+    template<int...> struct largest_value;
 
-	template<int H, int... T> struct largest_value<H, T...> {
-		enum { value = impl::largest_value_impl<H, T...>::value };
-	};
+    template<int H, int... T> struct largest_value<H, T...> {
+
+        enum {
+            value = impl::largest_value_impl<H, T...>::value
+        };
+    };
 }
 
 #endif

@@ -8,8 +8,9 @@
 #include "impl/range_impl.hpp"
 
 namespace fp {
+
     template<int Min, int Max> struct range_builder {
-        typedef typename impl::range_builder_impl<(Min <= Max), Min, Max>::type type;
+        typedef typename impl::range_builder_impl < (Min <= Max), Min, Max>::type type;
     };
 
     template<int Min, int Max> typename range_builder<Min, Max>::type make_range() {

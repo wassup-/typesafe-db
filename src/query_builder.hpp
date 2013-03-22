@@ -10,12 +10,15 @@
 #include <sstream>
 
 namespace fp {
-    template<typename TDescriptor, int... Is> inline char const ** get_field_identifiers() {
-        static char const * ret[sizeof...(Is)]= { get_field_identifier<TDescriptor, Is>()... };
+
+    template<typename TDescriptor, int... Is>
+    inline char const ** get_field_identifiers() {
+        static char const * ret[sizeof...(Is)] = {get_field_identifier<TDescriptor, Is > ()...};
         return ret;
     }
 
     struct query_builder {
+
         template<typename TDescriptor, int... Cs >
         std::string build_select_query() const {
             char const ** field_identifiers = get_field_identifiers<TDescriptor, Cs...>();

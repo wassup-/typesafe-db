@@ -8,13 +8,13 @@
 #include "nth_type_of.hpp"
 
 namespace fp {
-	template<int...> struct int_seq;
-	template<typename...> struct type_seq;
-	template<typename, typename> struct extract_types;
+    template<int...> struct int_seq;
+    template<typename...> struct type_seq;
+    template<typename, typename> struct extract_types;
 
-	template<int... I, typename... T> struct extract_types<int_seq<I...>, type_seq<T...> > {
-		typedef type_seq<typename nth_type_of<I, T...>::type...> type;
-	};
+    template<int... I, typename... T> struct extract_types<int_seq<I...>, type_seq<T...> > {
+        typedef type_seq<typename nth_type_of<I, T...>::type...> type;
+    };
 }
 
 #endif

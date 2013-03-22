@@ -6,10 +6,13 @@
 #define _NTH_TYPE_OF_H
 
 namespace fp {
+    template<typename...> struct type_seq;
     template<int, typename...> struct nth_type_of;
+    template<typename...> struct first_type_of;
+    template<typename...> struct last_type_of;
 
     template<int I, typename H, typename... T> struct nth_type_of<I, H, T...> {
-        typedef typename nth_type_of < I - 1, T...>::type type;
+        typedef typename nth_type_of < (I - 1), T...>::type type;
     };
 
     template<typename H, typename... T> struct nth_type_of < 0, H, T...> {
@@ -22,12 +25,16 @@ namespace fp {
         typedef typename nth_type_of<I, Ts...>::type type;
     };
 
-    template<typename... T> struct first_type_of {
-        typedef typename nth_type_of < 0, T...>::type type;
+    template<typename H, typename... T> struct first_type_of<H, T...> {
+        typedef H type;
     };
 
-    template<typename... T> struct last_type_of {
-        typedef typename nth_type_of<sizeof...(T) - 1, T...>::type type;
+    template<typename H, typename... T> struct last_type_of<H, T...> {
+        typedef typename last_type_of < T...>::type type;
+    };
+
+    template<typename H> struct last_type_of<H> {
+        typedef H type;
     };
 }
 

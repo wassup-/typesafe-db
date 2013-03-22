@@ -5,27 +5,30 @@
 #ifndef _TYPE_SEQ_H
 #define _TYPE_SEQ_H
 
- #include "impl/type_sequence_impl.hpp"
+#include "impl/type_sequence_impl.hpp"
 
 namespace fp {
-	template<typename...> struct type_seq;
-	template<typename...> struct pack_types;
+    template<typename...> struct type_seq;
+    template<typename...> struct pack_types;
 
-	template<typename... Ts> struct type_seq {
-		enum { size = sizeof...(Ts) };
+    template<typename... Ts> struct type_seq {
 
-		template<typename T> struct extend {
-			typedef type_seq<Ts..., T> type;
-		};
+        enum {
+            size = sizeof...(Ts)
+        };
 
-		template<template<typename...> class C> struct as {
-			typedef C<Ts...> type;
-		};
-	};
+        template<typename T> struct extend {
+            typedef type_seq < Ts..., T> type;
+        };
 
-	template<typename... Ts> struct pack_types {
-		typedef type_seq<Ts...> type;
-	};
+        template<template<typename...> class C> struct as {
+            typedef C < Ts...> type;
+        };
+    };
+
+    template<typename... Ts> struct pack_types {
+        typedef type_seq < Ts...> type;
+    };
 };
 
 #endif

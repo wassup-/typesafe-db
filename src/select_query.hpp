@@ -16,9 +16,12 @@
 
 namespace fp {
     template<typename, int...> struct select_query;
-    
+
     template<typename TDescriptor, int... Is> struct is_query<select_query<TDescriptor, Is...> > {
-        enum { value = true };
+
+        enum {
+            value = true
+        };
     };
 
     template<typename TDescriptor, int... Cs> struct select_query {
@@ -26,16 +29,17 @@ namespace fp {
         typedef TDescriptor descriptor_type;
         typedef typename impl::query_impl<typename TDescriptor::record::type>::template result_of < Cs...>::type result_type;
     public:
-        template<int... Fs>
+
+        template<int... Fs >
         result_type apply(record<TDescriptor, Fs...> const & r) const {
-            return impl::query_impl<record<TDescriptor, Fs...> >::template select < Cs...>(r);
+            return impl::query_impl < record<TDescriptor, Fs...> >::template select < Cs...>(r);
         }
 
-        template<int... Fs>
-        std::vector<result_type> apply(std::vector<record<TDescriptor, Fs...> > const & r) const {
+        template<int... Fs >
+        std::vector<result_type> apply(std::vector < record<TDescriptor, Fs...> > const & r) const {
             std::vector<result_type> ret;
-            for(auto const & cur : r) {
-                ret.push_back(impl::query_impl<record<TDescriptor, Fs...> >::template select < Cs...>(cur));
+            for (auto const & cur : r) {
+                ret.push_back(impl::query_impl < record<TDescriptor, Fs...> >::template select < Cs...>(cur));
             }
             return ret;
         }
@@ -48,7 +52,7 @@ namespace fp {
 
     template<typename TDescriptor, int... Cs, int I>
     inline auto operator+(select_query<TDescriptor, Cs...> const & q, field<TDescriptor, I>) -> decltype(combine(q, select_query<TDescriptor, I>())) {
-        return combine(q, select_query<TDescriptor, I>());
+        return combine(q, select_query<TDescriptor, I > ());
     }
 
     template<typename TDescriptor, int... Cl, int... Cr>

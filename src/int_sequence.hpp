@@ -5,39 +5,52 @@
 #ifndef _INT_SEQ_H
 #define _INT_SEQ_H
 
- #include "impl/int_sequence_impl.hpp"
+#include "impl/int_sequence_impl.hpp"
 
 namespace fp {
-	template<int...> struct int_seq;
-	template<int, int> struct range_builder;
+    template<int...> struct int_seq;
+    template<int, int> struct range_builder;
 
-	template<int... Is> struct int_seq {
-		enum { size = sizeof...(Is) };
+    template<int... Is> struct int_seq {
 
-		template<template<int...> class C> struct as {
-			typedef C<Is...> type;
-		};
-	};
+        enum {
+            size = sizeof...(Is)
+        };
 
-	template<int V, int... Vs> struct occurences_of {
-		enum { value = impl::occurences_of_impl<0, V, Vs...>::value };
-	};
+        template<template<int...> class C> struct as {
+            typedef C < Is...> type;
+        };
+    };
 
-	template<int V, int... Vs> struct index_of {
-		enum { value = impl::index_of_impl<0, V, Vs...>::value };
-	};
+    template<int V, int... Vs> struct occurences_of {
 
-	template<int Min, int Max> struct range_builder {
-		typedef typename impl::range_builder_impl<Min <= Max, Min, Max>::type type;	
-	};
+        enum {
+            value = impl::occurences_of_impl < 0, V, Vs...>::value
+        };
+    };
 
-	template<int Min, int Max> typename range_builder<Min, Max>::type make_range() {
-		return typename range_builder<Min, Max>::type();
-	}
+    template<int V, int... Vs> struct index_of {
 
-	template<int V, int... Vs> struct is_contained_int {
-		enum { value = impl::is_contained_int_impl<V, Vs...>::value };
-	};
+        enum {
+            value = impl::index_of_impl < 0, V, Vs...>::value
+        };
+    };
+
+    template<int Min, int Max> struct range_builder {
+        typedef typename impl::range_builder_impl < Min <= Max, Min, Max>::type type;
+    };
+
+    template<int Min, int Max>
+    inline typename range_builder<Min, Max>::type make_range() {
+        return typename range_builder<Min, Max>::type();
+    }
+
+    template<int V, int... Vs> struct is_contained_int {
+
+        enum {
+            value = impl::is_contained_int_impl<V, Vs...>::value
+        };
+    };
 };
 
 #endif

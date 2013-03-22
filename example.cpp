@@ -27,9 +27,9 @@ namespace geo {
 
             struct table {
                 typedef fp::table<int, std::string, std::string, std::string, double, double> type;
-                typedef fp::type_seq<int, std::string, std::string, std::string, double, double> fields;
+                typedef typename type::types fields;
                 static char const * const name;
-                
+
                 typedef fp::primary_key<id> primary_key;
             };
 
@@ -62,12 +62,12 @@ namespace geo {
             typedef fp::field < province, 1 > name;
             typedef fp::field < province, 2 > longitude;
             typedef fp::field < province, 3 > latitude;
-            
+
             struct table {
                 typedef fp::table<int, std::string, double, double> type;
-                typedef fp::type_seq<int, std::string, double, double> fields;
+                typedef typename type::types fields;
                 static char const * const name;
-                
+
                 typedef fp::primary_key<id> primary_key;
             };
 
@@ -98,12 +98,12 @@ namespace geo {
             typedef fp::field < country, 1 > name;
             typedef fp::field < country, 2 > longitude;
             typedef fp::field < country, 3 > latitude;
-            
+
             struct table {
                 typedef fp::table<int, std::string, double, double> type;
-                typedef fp::type_seq<int, std::string, double, double> fields;
+                typedef typename type::types fields;
                 static char const * const name;
-                
+
                 typedef fp::primary_key<id> primary_key;
             };
 
@@ -131,17 +131,17 @@ namespace geo {
     }
 }
 
-#define GEO_USER "test"
-#define GEO_PASSWD "testpw"
-#define GEO_DB "shared"
+#define GEO_USER        "test"
+#define GEO_PASSWD      "testpw"
+#define GEO_DB          "shared"
 
 int main(int argc, char ** argv) {
     fp::mysql_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
-    
+
     auto sq1 = (fp::select_query<geo::db::city > () + geo::db::city::alpha() + geo::db::city::longitude() + geo::db::city::latitude());
     auto wq1 = (fp::where_query<geo::db::city > () + ((geo::db::city::name() % std::string("ken"))));
 
-    auto res = fp::query(engine, sq1 + wq1);
+    auto res = fp::query(engine, fp::limit(sq1 + wq1, 10));
     std::cout << "Executed query: " << engine.last_query() << std::endl;
     std::cout << "Results: " << res.size() << std::endl;
     std::cout << "----------" << std::endl;

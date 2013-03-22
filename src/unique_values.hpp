@@ -8,23 +8,12 @@
 #include "impl/unique_values_impl.hpp"
 
 namespace fp {
-	template<int...> struct int_seq;
-	template<int...> struct unique_values;
-	template<typename, typename> struct unique_values_impl;
+    template<int...> struct int_seq;
+    template<int...> struct unique_values;
 
-	template<int... S, int H, int... T> struct unique_values_impl<int_seq<S...>, int_seq<H, T...> > {
-		enum { last = last_value_of<S...>::value };
-
-		typedef typename impl::unique_values_helper<(H == last), int_seq<S...>, int_seq<H, T...> >::type type;
-	};
-
-	template<int... S> struct unique_values_impl<int_seq<S...>, int_seq<> > {
-		typedef int_seq<S...> type;
-	};
-
-	template<int H, int... T> struct unique_values<H, T...> {
-		typedef typename unique_values_impl<int_seq<H>, int_seq<T...> >::type type;
-	};
+    template<int H, int... T> struct unique_values<H, T...> {
+        typedef typename impl::unique_values_impl < int_seq<H>, int_seq < T...> >::type type;
+    };
 }
 
 #endif

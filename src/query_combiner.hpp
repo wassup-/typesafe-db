@@ -12,13 +12,13 @@ namespace fp {
     template<typename, int...> struct select_query;
 
     template<typename TTable, int... L, int... R>
-    typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::normal::type combine(select_query<TTable, L...>, select_query<TTable, R...>) {
-        return typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::normal::type();
+    inline typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::normal::type combine(select_query<TTable, L...>, select_query<TTable, R...>) {
+        return typename impl::query_combiner_impl<TTable, int_seq < L...>, int_seq < R...> >::normal::type();
     }
 
     template<typename TTable, int... L, int... R>
-    typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::unique::type combine_unique(select_query<TTable, L...>, select_query<TTable, R...>) {
-        return typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::unique::type();
+    inline typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::unique::type combine_unique(select_query<TTable, L...>, select_query<TTable, R...>) {
+        return typename impl::query_combiner_impl<TTable, int_seq < L...>, int_seq < R...> >::unique::type();
     }
 }
 

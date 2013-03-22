@@ -8,16 +8,14 @@
 #include "impl/is_contained_type_impl.hpp"
 
 namespace fp {
-	template<typename...> struct type_seq;
-	template<typename, typename...> struct is_contained_type;
+    template<typename, typename...> struct is_contained_type;
 
-	template<typename T, typename... Ts> struct is_contained_type {
-		enum { value = impl::is_contained_type_impl<T, Ts...>::value };
-	};
+    template<typename T, typename... Ts> struct is_contained_type {
 
-	template<typename T, typename... Ts> struct is_contained_type<T, type_seq<Ts...> > {
-		enum { value = impl::is_contained_type_impl<T, Ts...>::value };
-	};
+        enum {
+            value = impl::is_contained_type_impl<T, Ts...>::value
+        };
+    };
 }
 
 #endif

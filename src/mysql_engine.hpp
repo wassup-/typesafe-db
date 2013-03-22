@@ -16,12 +16,14 @@
 #include <mysql/mysql.h>
 
 namespace fp {
+
     struct mysql_engine : db_engine<mysql_engine> {
     protected:
         std::string m_last_query;
         MYSQL * m_context;
         MYSQL_RES * m_result;
     public:
+
         mysql_engine(char const * host, char const * name, char const * pass, char const * db = 0) : m_context(0) {
             m_context = mysql_init(m_context);
             if (m_context) {
@@ -41,7 +43,7 @@ namespace fp {
         }
 
         template<typename TQuery >
-        std::vector<typename TQuery::result_type> query(TQuery const & q) {
+        std::vector<typename TQuery::result_type > query(TQuery const & q) {
             std::string const qry = q.to_string();
             mysql_query(m_context, qry.c_str());
             std::vector<typename TQuery::result_type> ret;

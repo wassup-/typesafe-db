@@ -26,152 +26,205 @@ namespace fp {
 
         template<typename T> struct where_condition {
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return static_cast<T const *>(this)->operator()(r);
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return static_cast<T const *> (this)->operator()(r);
             }
 
-            template<typename TDescriptor> std::string to_string() const {
-                return static_cast<T const *>(this)->to_string<TDescriptor>();
+            template<typename TDescriptor >
+            std::string to_string() const {
+                return static_cast<T const *> (this)->to_string<TDescriptor > ();
             }
 
-            template<typename C> where_or<T, C> operator|(C c) const {
-                return where_or<T, C>(*static_cast<T const *>(this), c);
+            template<typename C >
+            where_or<T, C> operator|(C c) const {
+                return where_or<T, C > (*static_cast<T const *> (this), c);
             }
 
-            template<typename C> where_and<T, C> operator&(C c) const {
-                return where_and<T, C>(*static_cast<T const *>(this), c);
+            template<typename C >
+            where_and<T, C> operator&(C c) const {
+                return where_and<T, C > (*static_cast<T const *> (this), c);
             }
         };
 
         template<int I, typename T> struct where_eq : where_condition<where_eq<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_eq(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I>(r) == value);
+            where_eq(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (fp::get<I > (r) == value);
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " = " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " = " << lexical_cast<std::string > (value) << ')';
                 return ss.str();
             }
         };
 
         template<int I, typename T> struct where_neq : where_condition<where_neq<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_neq(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I>(r) != value);
+            where_neq(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (fp::get<I > (r) != value);
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " != " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " != " << lexical_cast<std::string > (value) << ')';
                 return ss.str();
             }
         };
 
         template<int I, typename T> struct where_lt : where_condition<where_lt<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_lt(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I>(r) < value);
+            where_lt(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (fp::get<I > (r) < value);
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " < " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " < " << lexical_cast<std::string > (value) << ')';
                 return ss.str();
             }
         };
 
         template<int I, typename T> struct where_gt : where_condition<where_gt<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_gt(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I>(r) > value);
+            where_gt(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (fp::get<I > (r) > value);
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " > " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " > " << lexical_cast<std::string > (value) << ')';
                 return ss.str();
             }
         };
 
         template<int I, typename T> struct where_lte : where_condition<where_lte<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_lte(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I>(r) <= value);
+            where_lte(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (fp::get<I > (r) <= value);
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " <= " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " <= " << lexical_cast<std::string > (value) << ')';
                 return ss.str();
             }
         };
 
         template<int I, typename T> struct where_gte : where_condition<where_gte<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_gte(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (fp::get<I>(r) >= value);
+            where_gte(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (fp::get<I > (r) >= value);
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " >= " << lexical_cast<std::string>(value) << ')';
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " >= " << lexical_cast<std::string > (value) << ')';
                 return ss.str();
             }
         };
 
         template<int I, typename T> struct where_contains : where_condition<where_contains<I, T> > {
         public:
-            enum { index = I };
+
+            enum {
+                index = I
+            };
         protected:
             T const value;
         public:
-            where_contains(T v) : value(v) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
-                return (T::npos != fp::get<I>(r).find(value));
+            where_contains(T v) : value(v) {
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
+                return (T::npos != fp::get<I > (r).find(value));
+            }
+
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << fp::get_field_identifier<TDescriptor, I>() << " LIKE \"%" << lexical_cast<std::string>(value) << "%\")";
+                ss << '(' << fp::get_field_identifier<TDescriptor, I > () << " LIKE \"%" << lexical_cast<std::string > (value) << "%\")";
                 return ss.str();
             }
         };
@@ -181,15 +234,19 @@ namespace fp {
             L m_left;
             R m_right;
         public:
-            where_or(L l, R r) : m_left(l), m_right(r) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
+            where_or(L l, R r) : m_left(l), m_right(r) {
+            }
+
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
                 return (m_left(r) || m_right(r));
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << m_left.to_string<TDescriptor> () << " OR " << m_right.to_string<TDescriptor>() << ')';
+                ss << '(' << m_left.to_string<TDescriptor > () << " OR " << m_right.to_string<TDescriptor > () << ')';
                 return ss.str();
             }
         };
@@ -199,55 +256,58 @@ namespace fp {
             L m_left;
             R m_right;
         public:
-            where_and(L l, R r) : m_left(l), m_right(r) { }
 
-            template<typename TRecord> bool operator()(TRecord const & r) const {
+            where_and(L l, R r) : m_left(l), m_right(r) {
+            }
+
+            template<typename TRecord>
+            bool operator()(TRecord const & r) const {
                 return (m_left(r) && m_right(r));
             }
 
-            template<typename TDescriptor> std::string to_string() const {
+            template<typename TDescriptor >
+            std::string to_string() const {
                 std::stringstream ss;
-                ss << '(' << m_left.to_string<TDescriptor>() << " AND " << m_right.to_string<TDescriptor>() << ')';
+                ss << '(' << m_left.to_string<TDescriptor > () << " AND " << m_right.to_string<TDescriptor > () << ')';
                 return ss.str();
             }
         };
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_eq<I, typename field<TDescriptor, I>::type> eq(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_eq<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_eq<I, typename field<TDescriptor, I>::type > (v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_neq<I, typename field<TDescriptor, I>::type> neq(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_neq<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_neq<I, typename field<TDescriptor, I>::type > (v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_lt<I, typename field<TDescriptor, I>::type> lt(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_lt<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_lt<I, typename field<TDescriptor, I>::type > (v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_gt<I, typename field<TDescriptor, I>::type> gt(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_gt<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_gt<I, typename field<TDescriptor, I>::type > (v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_lte<I, typename field<TDescriptor, I>::type> lte(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_lte<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_lte<I, typename field<TDescriptor, I>::type > (v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_gte<I, typename field<TDescriptor, I>::type> gte(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_gte<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_gte<I, typename field<TDescriptor, I>::type > (v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline where_clauses::where_contains<I, typename field<TDescriptor, I>::type> contains(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_contains<I, typename field<TDescriptor, I>::type>(v);
+        return where_clauses::where_contains<I, typename field<TDescriptor, I>::type > (v);
     }
-    
 
     template<typename TDescriptor, int I>
     inline auto operator==(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::eq(f, v)) {
@@ -278,7 +338,7 @@ namespace fp {
     inline auto operator>=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::gte(f, v)) {
         return fp::gte(f, v);
     }
-    
+
     template<typename TDescriptor, int I>
     inline auto operator%(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::contains(f, v)) {
         return fp::contains(f, v);

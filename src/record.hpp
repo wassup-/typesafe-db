@@ -21,9 +21,15 @@ namespace fp {
     protected:
         std::tuple<typename TDescriptor::template field<Fields>::type...> m_values;
     public:
-        record() : m_values() { }
-        record(typename TDescriptor::template field<Fields>::type && ... ts) : m_values(std::forward<typename TDescriptor::template field<Fields>::type > (ts)...) { }
-        record(record const & rec) : m_values(rec.m_values) { }
+
+        record() : m_values() {
+        }
+
+        record(typename TDescriptor::template field<Fields>::type && ... ts) : m_values(std::forward<typename TDescriptor::template field<Fields>::type > (ts)...) {
+        }
+
+        record(record const & rec) : m_values(rec.m_values) {
+        }
 
         int size() const {
             return SIZE;
@@ -31,43 +37,43 @@ namespace fp {
 
         template<int I>
         typename TDescriptor::template field<I>::type & get() {
-            return std::get<index_of<I, Fields...>::value>(m_values);
+            return std::get < index_of<I, Fields...>::value > (m_values);
         }
 
         template<int I>
         typename TDescriptor::template field<I>::type const & get() const {
-            return std::get<index_of<I, Fields...>::value>(m_values);
+            return std::get < index_of<I, Fields...>::value > (m_values);
         }
     };
 
     template<int I, typename TDescriptor, int... Fs>
-    auto get(record<TDescriptor, Fs...> & r) -> decltype(r.template get<I>()) {
-        return r.template get<I>();
+    inline auto get(record<TDescriptor, Fs...> & r) -> decltype(r.template get<I>()) {
+        return r.template get<I > ();
     }
 
     template<int I, typename TDescriptor, int... Fs>
-    auto get(record<TDescriptor, Fs...> const & r) -> decltype(r.template get<I>()) {
-        return r.template get<I>();
+    inline auto get(record<TDescriptor, Fs...> const & r) -> decltype(r.template get<I>()) {
+        return r.template get<I > ();
     }
 
     template<typename F, typename TDescriptor, int... Fs>
-    auto get(record<TDescriptor, Fs...> & r) -> decltype(r.template get<F::index>()) {
-        return r.template get<F::index>();
+    inline auto get(record<TDescriptor, Fs...> & r) -> decltype(r.template get<F::index>()) {
+        return r.template get<F::index > ();
     }
 
     template<typename F, typename TDescriptor, int... Fs>
-    auto get(record<TDescriptor, Fs...> const & r) -> decltype(r.template get<F::index>()) {
-        return r.template get<F::index>();
+    inline auto get(record<TDescriptor, Fs...> const & r) -> decltype(r.template get<F::index>()) {
+        return r.template get<F::index > ();
     }
 
     template<typename TDescriptor, int I, int... Fs>
-    auto get(record<TDescriptor, Fs...> & r, field<TDescriptor, I>) -> decltype(r.template get<I>()) {
-        return r.template get<I>();
+    inline auto get(record<TDescriptor, Fs...> & r, field<TDescriptor, I>) -> decltype(r.template get<I>()) {
+        return r.template get<I > ();
     }
 
     template<typename TDescriptor, int I, int... Fs>
-    auto get(record<TDescriptor, Fs...> const & r, field<TDescriptor, I>) -> decltype(r.template get<I>()) {
-        return r.template get<I>();
+    inline auto get(record<TDescriptor, Fs...> const & r, field<TDescriptor, I>) -> decltype(r.template get<I>()) {
+        return r.template get<I > ();
     }
 }
 
