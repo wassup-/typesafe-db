@@ -5,28 +5,49 @@
 #ifndef _FIELD_HPP
 #define _FIELD_HPP
 
-namespace fp {
+#include <cstddef>              // for int
+#include <string>
 
-    template<typename TDescriptor, int I> struct field {
+namespace fp {
+    template<typename, int> struct field;
+
+    template<typename> struct is_field {
 
         enum {
-            index = I
+            value = false
         };
-        typedef typename TDescriptor::template field<I>::type type;
-        static char const * name;
     };
 
-    template<typename TDescriptor, int I> char const * field<TDescriptor, I>::name = TDescriptor::template field<I>::name;
+    template<typename TDescriptor, int Idx> struct is_field<field<TDescriptor, Idx> > {
 
-    template<typename TDescriptor, int I>
-    inline char const * get_field_identifier() {
-        return field<TDescriptor, I>::name;
-    }
+        enum {
+            value = true
+        };
+    };
 
-    template<typename TDescriptor, int I>
-    inline char const * get_field_identifier(field<TDescriptor, I>) {
-        return field<TDescriptor, I>::name;
-    }
+    template<typename TDescriptor, int Idx> struct field {
+
+        enum {
+            index = Idx
+        };
+        typedef typename TDescriptor::template field<Idx>::type type;
+        
+        friend std::string to_string(field) {
+            return TDescriptor::template field<Idx>::name;
+        }
+    };
+    
+    template<int, typename...> struct combined_field;
+    template<int Idx, typename TDescriptor, int... Indices> struct combined_field<Idx, field<TDescriptor, Indices>...> {
+        friend std::string to_string(combined_field) {
+            static std::string const names[] = { to_string(field<TDescriptor, Indices>())... };
+            std::string ret = names[0];
+            for(unsigned int i = 1; i < sizeof...(Indices); ++i) {
+                ret += ", " + names[i];
+            }
+            return std::string("(") + ret + ") AS " + TDescriptor::template field<Idx>::name;
+        }
+    };
 }
 
 #endif

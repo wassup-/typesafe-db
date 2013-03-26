@@ -7,7 +7,8 @@
 
 #include "lexical_cast.hpp"
 
-#include <mysql/mysql.h>
+#include <algorithm>            // for std::swap
+#include <mysql/mysql.h>        // for MYSQL_ROW
 
 namespace fp {
     namespace mysql {
@@ -26,6 +27,11 @@ namespace fp {
             }
 
             ~basic_row() {
+            }
+
+            friend void swap(basic_row & l, basic_row & r) {
+                using std::swap;
+                swap(l.m_data, r.m_data);
             }
 
             char const * operator [](int i) const {

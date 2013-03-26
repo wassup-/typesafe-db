@@ -5,8 +5,8 @@
 #ifndef _IMPLEMENTATION_HPP
 #define _IMPLEMENTATION_HPP
 
-#include <algorithm>
-#include <type_traits>
+#include <algorithm>            // for std::swap
+#include <type_traits>          // for std::enable_if
 
 namespace fp {
 
@@ -43,12 +43,13 @@ namespace fp {
             delete m_impl;
         }
 
-        implementation * clone() const {
-            return new implementation(*this);
+        friend void swap(implementation & l, implementation & r) {
+            using std::swap;
+            swap(l.m_impl, r.m_impl);
         }
 
-        void swap(implementation & impl) {
-            std::swap(m_impl, impl.m_impl);
+        implementation * clone() const {
+            return new implementation(*this);
         }
 
         pointer operator->() const {
@@ -56,11 +57,11 @@ namespace fp {
         }
 
         implementation & operator=(pointer impl) {
-            implementation(impl).swap(*this);
+            swap(*this, implementation(impl));
         }
 
         implementation & operator=(implementation const & impl) {
-            implementation(impl.m_impl).swap(*this);
+            swap(*this, implementation(impl.m_impl));
         }
 
         bool operator==(implementation const & impl) const {

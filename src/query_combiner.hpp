@@ -7,6 +7,8 @@
 
 #include "impl/query_combiner_impl.hpp"
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int...> struct int_seq;
     template<typename, int...> struct select_query;

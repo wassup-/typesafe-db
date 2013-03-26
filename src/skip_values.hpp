@@ -7,15 +7,15 @@
 
 #include "impl/skip_values_impl.hpp"
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int, int...> struct skip_values;
 
-    template<int C, int... I> struct skip_values {
-        typedef typename impl::skip_values_helper<C, false, I...>::type type;
+    template<int C, int... I> struct skip_values : impl::skip_values_helper<C, false, I...> {
     };
 
-    template<int C, int... I> struct skip_values_or_empty {
-        typedef typename impl::skip_values_impl<C, (C >= sizeof...(I)), I...>::type type;
+    template<int C, int... I> struct skip_values_or_empty : impl::skip_values_impl<C, (C >= sizeof...(I)), I...> {
     };
 }
 

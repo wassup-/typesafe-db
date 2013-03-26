@@ -8,12 +8,14 @@
 #include "impl/mysql_engine_impl.hpp"
 
 #include "db_engine.hpp"
+#include "is_query.hpp"
 #include "mysql_basic_result.hpp"
 #include "mysql_basic_row.hpp"
-#include "record.hpp"
 
-#include <vector>
-#include <mysql/mysql.h>
+#include <algorithm>            // for std::swap
+#include <string>               // for std::string, std::to_string
+#include <vector>               // for std::vector
+#include <mysql/mysql.h>        // for MYSQL, MYSQL_RES
 
 namespace fp {
 
@@ -25,17 +27,23 @@ namespace fp {
     public:
 
         mysql_engine(char const * host, char const * name, char const * pass, char const * db = 0) : m_context(0) {
-            m_context = mysql_init(m_context);
+            m_context = ::mysql_init(m_context);
             if (m_context) {
-                m_context = mysql_real_connect(m_context, host, name, pass, 0, 0, 0, 0);
+                m_context = ::mysql_real_connect(m_context, host, name, pass, 0, 0, 0, 0);
                 if (m_context && db) {
-                    mysql_select_db(m_context, db);
+                    ::mysql_select_db(m_context, db);
                 }
             }
         }
 
         ~mysql_engine() {
-            mysql_close(m_context);
+            ::mysql_close(m_context);
+        }
+        
+        friend void swap(mysql_engine & l, mysql_engine & r) {
+            using std::swap;
+            swap(l.m_context, r.m_context);
+            swap(l.m_result, r.m_result);
         }
 
         std::string last_query() const {
@@ -43,9 +51,10 @@ namespace fp {
         }
 
         template<typename TQuery >
-        std::vector<typename TQuery::result_type > query(TQuery const & q) {
-            std::string const qry = q.to_string();
-            mysql_query(m_context, qry.c_str());
+        typename std::enable_if<is_record<typename TQuery::result_type>::value, std::vector<typename TQuery::result_type > >::type query(TQuery const & q) {
+            using std::to_string;
+            std::string const qry = to_string(q);
+            ::mysql_query(m_context, qry.c_str());
             std::vector<typename TQuery::result_type> ret;
             mysql::basic_result res(m_context);
             if (res) {
@@ -57,6 +66,15 @@ namespace fp {
             }
             m_last_query = qry;
             return ret;
+        }
+        
+        template<typename TQuery >
+        typename std::enable_if<!is_record<typename TQuery::result_type>::value, unsigned long long>::type query(TQuery const & q) {
+            using std::to_string;
+            std::string const qry = to_string(q);
+            mysql_query(m_context, qry.c_str());
+            m_last_query = qry;
+            return mysql_affected_rows(m_context);
         }
     };
 }

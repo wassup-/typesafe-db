@@ -5,9 +5,12 @@
 #ifndef _APPLY_TUPLE_HPP
 #define _APPLY_TUPLE_HPP
 
+#include "result_of.hpp"
 #include "impl/apply_tuple_impl.hpp"
 
-#include <tuple>
+#include <cstddef>      // for int
+#include <utility>      // for std::forward
+#include <tuple>        // for std::tuple, std::tuple_size
 
 namespace fp {
 
@@ -16,7 +19,7 @@ namespace fp {
         struct constructor {
 
             template<typename TType, typename... TTuple, typename... TArg>
-                    static TType apply(std::tuple < TTuple...> const & t, TArg && ... arg) {
+            static TType apply(std::tuple < TTuple...> const & t, TArg && ... arg) {
                 return impl::apply_tuple_impl < 0, N>::constructor::template apply<TType > (t, std::forward<TArg > (arg)...);
             }
         };
@@ -24,22 +27,22 @@ namespace fp {
         struct function {
 
             template<typename Fn, typename... TTuple, typename... TArg>
-                    static typename Fn::return_type apply(Fn fn, std::tuple < TTuple...> const & t, TArg && ... arg) {
+            static typename result_of<Fn>::type apply(Fn fn, std::tuple < TTuple...> const & t, TArg && ... arg) {
                 return impl::apply_tuple_impl < 0, N>::function::apply(fn, t, std::forward<TArg > (arg)...);
             }
         };
     };
 
-    template<typename> struct wrap_call;
+    template<typename> struct fn_wrapper;
 
-    template<typename TRet, typename... TArg> struct wrap_call<TRet(*)(TArg...)> {
+    template<typename TRet, typename... TArg> struct fn_wrapper<TRet(*)(TArg...)> {
     public:
-        typedef TRet return_type;
+        typedef TRet type;
     protected:
         TRet(*m_fn)(TArg...);
     public:
 
-        wrap_call(TRet(*fn)(TArg...)) : m_fn(fn) {
+        fn_wrapper(TRet(*fn)(TArg...)) : m_fn(fn) {
         }
 
         template<typename... Arg >
@@ -48,15 +51,15 @@ namespace fp {
         }
     };
 
-    template<typename TClass, typename TRet, typename... TArg> struct wrap_call<TRet(TClass::*)(TArg...)> {
+    template<typename TClass, typename TRet, typename... TArg> struct fn_wrapper<TRet(TClass::*)(TArg...)> {
     public:
-        typedef TRet return_type;
+        typedef TRet type;
     protected:
         TClass * m_obj;
         TRet(TClass::*m_fn)(TArg...);
     public:
 
-        wrap_call(TClass & obj, TRet(TClass::*fn)(TArg...)) : m_obj(&obj), m_fn(fn) {
+        fn_wrapper(TClass & obj, TRet(TClass::*fn)(TArg...)) : m_obj(&obj), m_fn(fn) {
         }
 
         template<typename... Arg >
@@ -65,24 +68,33 @@ namespace fp {
         }
     };
 
-    template<typename TClass, typename TRet, typename... TArg> struct wrap_call<TRet(TClass::*)(TArg...) const> {
+    template<typename TClass, typename TRet, typename... TArg> struct fn_wrapper<TRet(TClass::*)(TArg...) const> {
     public:
-        typedef TRet return_type;
+        typedef TRet type;
     protected:
         TClass const * m_obj;
         TRet(TClass::*m_fn)(TArg...) const;
     public:
 
-        wrap_call(TClass const & obj, TRet(TClass::*fn)(TArg...) const) : m_obj(&obj), m_fn(fn) {
+        fn_wrapper(TClass const & obj, TRet(TClass::*fn)(TArg...) const) : m_obj(&obj), m_fn(fn) {
         }
 
-        TRet operator()(TArg && ... arg) const {
-            return (m_obj->*m_fn)(std::forward<TArg > (arg)...);
+        template<typename... Arg >
+        TRet operator()(Arg... arg) const {
+            return (m_obj->*m_fn)(std::forward<Arg > (arg)...);
         }
     };
+    
+    template<typename C, typename Ret, typename... Arg> fn_wrapper<Ret(C::*)(Arg...)> wrap_fn(C & obj, Ret(C::*fn)(Arg...)) {
+        return fn_wrapper<Ret(C::*)(Arg...)>(obj, fn);
+    }
+    
+    template<typename Fn> fn_wrapper<Fn> wrap_fn(Fn fn) {
+        return fn_wrapper<Fn>(fn);
+    }
 
     template<typename Fn, typename... TTuple, typename... TArg>
-    inline auto call_function(Fn fn, std::tuple<TTuple...> const & tup, TArg && ... arg) -> decltype(apply_tuple<std::tuple_size<std::tuple<TTuple...> >::value>::function::apply(fn, tup, std::forward<TArg>(arg)...)) {
+    inline auto call_function(Fn fn, std::tuple<TTuple...> const & tup, TArg && ... arg) -> typename result_of<Fn>::type {
         return apply_tuple < std::tuple_size < std::tuple < TTuple...> >::value>::function::apply(fn, tup, std::forward<TArg > (arg)...);
     }
 

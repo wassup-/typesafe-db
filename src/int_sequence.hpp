@@ -10,6 +10,8 @@
 namespace fp {
     template<int...> struct int_seq;
     template<int, int> struct range_builder;
+    template<int...> struct skip_value;
+    template<int, int...> struct is_contained_int;
 
     template<int... Is> struct int_seq {
 
@@ -22,35 +24,26 @@ namespace fp {
         };
     };
 
-    template<int V, int... Vs> struct occurences_of {
-
-        enum {
-            value = impl::occurences_of_impl < 0, V, Vs...>::value
-        };
+    template<int V, int... Vs> struct occurences_of : impl::occurences_of_impl < 0, V, Vs...> {
     };
 
-    template<int V, int... Vs> struct index_of {
-
-        enum {
-            value = impl::index_of_impl < 0, V, Vs...>::value
-        };
+    template<int V, int... Vs> struct index_of : impl::index_of_impl < 0, V, Vs...> {
     };
 
-    template<int Min, int Max> struct range_builder {
-        typedef typename impl::range_builder_impl < Min <= Max, Min, Max>::type type;
+    template<int Min, int Max> struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> {
+    };
+
+    template<int V, int... Vs> struct is_contained_int : impl::is_contained_int_impl<V, Vs...> {
+    };
+
+    template<int H, int... T> struct skip_value<H, T...> {
+        typedef int_seq < T...> type;
     };
 
     template<int Min, int Max>
     inline typename range_builder<Min, Max>::type make_range() {
         return typename range_builder<Min, Max>::type();
     }
-
-    template<int V, int... Vs> struct is_contained_int {
-
-        enum {
-            value = impl::is_contained_int_impl<V, Vs...>::value
-        };
-    };
 };
 
 #endif

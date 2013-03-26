@@ -5,6 +5,7 @@
 #ifndef _CONCAT_VALUES_HPP
 #define _CONCAT_VALUES_HPP
 
+#include <cstddef>              // for int
 
 namespace fp {
     template<int...> struct int_seq;

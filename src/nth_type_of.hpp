@@ -5,32 +5,30 @@
 #ifndef _NTH_TYPE_OF_H
 #define _NTH_TYPE_OF_H
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<typename...> struct type_seq;
     template<int, typename...> struct nth_type_of;
     template<typename...> struct first_type_of;
     template<typename...> struct last_type_of;
+    template<int, typename> struct nth_type_of_seq;
 
-    template<int I, typename H, typename... T> struct nth_type_of<I, H, T...> {
-        typedef typename nth_type_of < (I - 1), T...>::type type;
+    template<int I, typename H, typename... T> struct nth_type_of<I, H, T...> : nth_type_of < (I - 1), T...> {
     };
 
     template<typename H, typename... T> struct nth_type_of < 0, H, T...> {
         typedef H type;
     };
 
-    template<int, typename> struct nth_type_of_seq;
-
-    template<int I, typename... Ts> struct nth_type_of_seq<I, type_seq<Ts...> > {
-        typedef typename nth_type_of<I, Ts...>::type type;
+    template<int I, typename... Ts> struct nth_type_of_seq<I, type_seq<Ts...> > : nth_type_of<I, Ts...> {
     };
 
     template<typename H, typename... T> struct first_type_of<H, T...> {
         typedef H type;
     };
 
-    template<typename H, typename... T> struct last_type_of<H, T...> {
-        typedef typename last_type_of < T...>::type type;
+    template<typename H, typename... T> struct last_type_of<H, T...> : last_type_of < T...> {
     };
 
     template<typename H> struct last_type_of<H> {

@@ -8,7 +8,8 @@
 #include "mysql_basic_row.hpp"
 #include "mysql_result_iterator.hpp"
 
-#include <mysql/mysql.h>
+#include <algorithm>            // for std::swap
+#include <mysql/mysql.h>        // for MYSQL, MYSQL_RES
 
 namespace fp {
     namespace mysql {
@@ -29,6 +30,12 @@ namespace fp {
 
             ~basic_result() {
                 mysql_free_result(m_res);
+            }
+
+            friend void swap(basic_result & l, basic_result & r) {
+                using std::swap;
+                swap(l.m_context, r.m_context);
+                swap(l.m_res, r.m_res);
             }
 
             operator bool() const {

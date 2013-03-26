@@ -10,9 +10,10 @@
 #include "is_query.hpp"
 #include "query_combiner.hpp"
 #include "record.hpp"
-#include "query_builder.hpp"
 
-#include <vector>
+#include <cstddef>      // for int
+#include <string>       // for std::string, std::to_string
+#include <vector>       // for std::vector
 
 namespace fp {
     template<typename, int...> struct select_query;
@@ -27,26 +28,29 @@ namespace fp {
     template<typename TDescriptor, int... Cs> struct select_query {
     public:
         typedef TDescriptor descriptor_type;
-        typedef typename impl::query_impl<typename TDescriptor::record::type>::template result_of < Cs...>::type result_type;
+        typedef typename impl::select_query_impl<typename TDescriptor::record::type>::template result_of < Cs...>::type result_type;
     public:
 
-        template<int... Fs >
-        result_type apply(record<TDescriptor, Fs...> const & r) const {
-            return impl::query_impl < record<TDescriptor, Fs...> >::template select < Cs...>(r);
+        friend void swap(select_query & l, select_query & r) {
+            using std::swap;
         }
 
         template<int... Fs >
-        std::vector<result_type> apply(std::vector < record<TDescriptor, Fs...> > const & r) const {
+        friend result_type select(record<TDescriptor, Fs...> const & rec, select_query const & q) {
+            return impl::select_query_impl < record<TDescriptor, Fs...> >::template select < Cs...>(rec);
+        }
+
+        template<int... Fs >
+        friend std::vector<result_type> select(std::vector < record<TDescriptor, Fs...> > const & recs, select_query const & q) {
             std::vector<result_type> ret;
-            for (auto const & cur : r) {
-                ret.push_back(impl::query_impl < record<TDescriptor, Fs...> >::template select < Cs...>(cur));
+            for (record<TDescriptor, Fs...> const & cur : recs) {
+                ret.push_back(impl::select_query_impl < record<TDescriptor, Fs...> >::template select < Cs...>(cur));
             }
             return ret;
         }
 
-        std::string to_string() const {
-            query_builder qb;
-            return qb.template build_select_query <TDescriptor, Cs...>();
+        friend std::string to_string(select_query const & q) {
+            return impl::select_query_impl<result_type>::build_select_query();
         }
     };
 
@@ -63,16 +67,6 @@ namespace fp {
     template<typename TDescriptor, int... Cl, int... Cr>
     inline auto operator|(select_query<TDescriptor, Cl...> const & l, select_query<TDescriptor, Cr...> const & r) -> decltype(combine_unique(l, r)) {
         return combine_unique(l, r);
-    }
-
-    template<typename TDescriptor, int... Cs, int... Fs>
-    inline auto select(record<TDescriptor, Fs...> const & rec, select_query<TDescriptor, Cs...> const & qry) -> decltype(qry.apply(rec)) {
-        return qry.apply(rec);
-    }
-
-    template<typename TDescriptor, int... Cs, int... Fs>
-    inline auto select(std::vector<record<TDescriptor, Fs...> > const & recs, select_query<TDescriptor, Cs...> const & qry) -> decltype(qry.apply(recs)) {
-        return qry.apply(recs);
     }
 }
 

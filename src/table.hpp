@@ -7,6 +7,8 @@
 
 #include "int_sequence.hpp"
 
+#include <cstddef>              // for std::size_t
+
 namespace fp {
     template<typename...> struct type_seq;
     template<typename, int...> struct record;

@@ -7,12 +7,13 @@
 
 #include "impl/unique_values_impl.hpp"
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int...> struct int_seq;
     template<int...> struct unique_values;
 
-    template<int H, int... T> struct unique_values<H, T...> {
-        typedef typename impl::unique_values_impl < int_seq<H>, int_seq < T...> >::type type;
+    template<int H, int... T> struct unique_values<H, T...> : impl::unique_values_impl < int_seq<H>, int_seq < T...> > {
     };
 }
 

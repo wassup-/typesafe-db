@@ -5,16 +5,20 @@
 #ifndef _DB_ENGINE_HPP
 #define _DB_ENGINE_HPP
 
-#include <string>
-#include <vector>
+#include <algorithm>    // for std::swap
+#include <string>       // for std::string
+#include <vector>       // for std::vector
 
 namespace fp {
 
     template<typename TEngine> struct db_engine {
 
-        template<typename TQuery >
-        std::vector<typename TQuery::result_type > query(TQuery const & q) {
-            return static_cast<TEngine *> (this)->query(q);
+        virtual ~db_engine() {
+        }
+
+        friend void swap(db_engine & l, db_engine & r) {
+            using std::swap;
+            swap(static_cast<TEngine &> (l), static_cast<TEngine &> (r));
         }
 
         std::string last_query() const {
@@ -23,8 +27,8 @@ namespace fp {
     };
 
     template<typename TEngine, typename TQuery>
-    inline auto query(db_engine<TEngine> & eng, TQuery const & qry) -> decltype(eng.query(qry)) {
-        return eng.query(qry);
+    inline auto query(db_engine<TEngine> & eng, TQuery && qry) -> decltype(static_cast<TEngine &>(eng).query(std::forward<TQuery>(qry))) {
+        return static_cast<TEngine &>(eng).query(std::forward<TQuery > (qry));
     }
 }
 

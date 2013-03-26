@@ -10,6 +10,8 @@
 #include "nth_value_of.hpp"
 #include "skip_values.hpp"
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int...> struct int_seq;
     template<typename, typename, typename> struct insertion_sort;
@@ -21,15 +23,13 @@ namespace fp {
             right = first_value_of < R...>::value,
         };
 
-        typedef typename impl::insertion_sort_impl < (left < right), int_seq < S...>, int_seq < L...>, int_seq < R...> >::type type;
+        using impl::insertion_sort_impl < (left < right), int_seq < S...>, int_seq < L...>, int_seq < R...> >::type;
     };
 
-    template<int... S, int... L> struct insertion_sort<int_seq<S...>, int_seq<L...>, int_seq<> > {
-        typedef typename insertion_sort < int_seq < S..., L...>, int_seq<>, int_seq<> >::type type;
+    template<int... S, int... L> struct insertion_sort<int_seq<S...>, int_seq<L...>, int_seq<> > : insertion_sort < int_seq < S..., L...>, int_seq<>, int_seq<> > {
     };
 
-    template<int... S, int... R> struct insertion_sort<int_seq<S...>, int_seq<>, int_seq<R...> > {
-        typedef typename insertion_sort < int_seq < S..., R...>, int_seq<>, int_seq<> >::type type;
+    template<int... S, int... R> struct insertion_sort<int_seq<S...>, int_seq<>, int_seq<R...> > : insertion_sort < int_seq < S..., R...>, int_seq<>, int_seq<> > {
     };
 
     template<int... S> struct insertion_sort<int_seq<S...>, int_seq<>, int_seq<> > {

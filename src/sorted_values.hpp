@@ -7,12 +7,13 @@
 
 #include "impl/sorted_values_impl.hpp"
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int...> struct int_seq;
     template<int...> struct sorted_values;
 
-    template<int... V> struct sorted_values {
-        typedef typename impl::sorted_values_impl < int_seq<>, int_seq < V...>, int_seq<> >::type type;
+    template<int... V> struct sorted_values : impl::sorted_values_impl < int_seq<>, int_seq < V...>, int_seq<> > {
     };
 }
 

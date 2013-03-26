@@ -12,18 +12,7 @@
 namespace fp {
     template<typename...> struct largest_type;
 
-    template<typename... Ts> struct largest_type {
-
-        enum {
-            size = impl::largest_type_impl < Ts...>::size
-        };
-    };
-
-    template<typename... Ts> struct largest_type<fp::type_seq<Ts...> > {
-
-        enum {
-            size = impl::largest_type_impl < Ts...>::size
-        };
+    template<typename... Ts> struct largest_type : impl::largest_type_impl < Ts...> {
     };
 }
 

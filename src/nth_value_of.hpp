@@ -5,16 +5,14 @@
 #ifndef _NTH_VALUE_OF_HPP
 #define _NTH_VALUE_OF_HPP
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int, int...> struct nth_value_of;
     template<int...> struct first_value_of;
     template<int...> struct last_value_of;
 
-    template<int I, int H, int... T> struct nth_value_of<I, H, T...> {
-
-        enum {
-            value = nth_value_of < (I - 1), T...>::value
-        };
+    template<int I, int H, int... T> struct nth_value_of<I, H, T...> : nth_value_of < (I - 1), T...> {
     };
 
     template<int H, int... T> struct nth_value_of < 0, H, T...> {
@@ -31,11 +29,7 @@ namespace fp {
         };
     };
 
-    template<int H, int... T> struct last_value_of<H, T...> {
-
-        enum {
-            value = last_value_of < T...>::value
-        };
+    template<int H, int... T> struct last_value_of<H, T...> : last_value_of < T...> {
     };
 
     template<int H> struct last_value_of<H> {

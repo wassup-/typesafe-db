@@ -1,18 +1,21 @@
-#include "src/type_sequence.hpp"
-#include "src/int_sequence.hpp"
-#include "src/record.hpp"
-#include "src/mysql_engine.hpp"
+#include "src/record.hpp"               // for fp::get
+#include "src/field.hpp"                // for fp::field
+#include "src/mysql_engine.hpp"         // for fp::mysql_engine
 
-#include "src/table.hpp"
-#include "src/primary_key.hpp"
-#include "src/select_query.hpp"
-#include "src/where_query.hpp"
-#include "src/limit_query.hpp"
-#include "src/where_select_query.hpp"
+#include "src/table.hpp"                // for fp::table
+#include "src/primary_key.hpp"          // for fp::primary_key
+#include "src/select_query.hpp"         // for fp::select
+#include "src/where_query.hpp"          // for fp::evaluate
+#include "src/limit_query.hpp"          // for fp::limit, fp::evaluate
+#include "src/update_query.hpp"         // for fp::update
+#include "src/where_select_query.hpp"   // for fp::query, fp::evaluate, fp::select
+#include "src/where_update_query.hpp"
+#include "src/largest_type.hpp"
+#include "src/impl/drop_values_impl.hpp"   // for fp::query, fp::evaluate, fp::update
 
-#include <iostream>
-#include <string>
-#include <vector>
+#include <iostream>                     // for std::cout
+#include <string>                       // for std::string
+#include <vector>                       // for std::vector
 
 namespace geo {
     namespace db {
@@ -54,6 +57,7 @@ namespace geo {
             "code",
             "longitude",
             "latitude",
+            "fullname",
         };
         template<int I> char const * const city::field<I>::name = city::fields::names[I];
 
@@ -135,23 +139,25 @@ namespace geo {
 #define GEO_PASSWD      "testpw"
 #define GEO_DB          "shared"
 
+auto sq1 = (fp::select_query<geo::db::city > () + geo::db::city::alpha() + geo::db::city::longitude() + geo::db::city::latitude());
+auto wq1 = (fp::where_query<geo::db::city > () + (geo::db::city::name() % std::string("ken")));
+auto uq1 = (fp::update_query<geo::db::city > () + (geo::db::city::latitude() ^ 0) + (geo::db::city::latitude() ^ geo::db::city::longitude()));
+
 int main(int argc, char ** argv) {
     fp::mysql_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
-
-    auto sq1 = (fp::select_query<geo::db::city > () + geo::db::city::alpha() + geo::db::city::longitude() + geo::db::city::latitude());
-    auto wq1 = (fp::where_query<geo::db::city > () + ((geo::db::city::name() % std::string("ken"))));
-
-    auto res = fp::query(engine, fp::limit(sq1 + wq1, 10));
+    
+    auto lim = fp::limit(sq1 + wq1, 10);
+    auto res = fp::query(engine, lim);
+    
     std::cout << "Executed query: " << engine.last_query() << std::endl;
     std::cout << "Results: " << res.size() << std::endl;
     std::cout << "----------" << std::endl;
-    for (auto & cur : res) {
+    for (auto const & cur : res) {
         std::cout << "Alpha: " << fp::get<geo::db::city::alpha > (cur) << std::endl;
         std::cout << "Longitude: " << fp::get<geo::db::city::longitude > (cur) << std::endl;
         std::cout << "Latitude: " << fp::get<geo::db::city::latitude > (cur) << std::endl;
         std::cout << std::endl;
     }
     std::cout << "----------" << std::endl;
-
     return 0;
 }

@@ -10,11 +10,7 @@
 namespace fp {
     template<typename, typename...> struct is_contained_type;
 
-    template<typename T, typename... Ts> struct is_contained_type {
-
-        enum {
-            value = impl::is_contained_type_impl<T, Ts...>::value
-        };
+    template<typename T, typename... Ts> struct is_contained_type : impl::is_contained_type_impl<T, Ts...> {
     };
 }
 

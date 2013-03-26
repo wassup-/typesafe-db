@@ -7,6 +7,8 @@
 
 #include "nth_type_of.hpp"
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<int...> struct int_seq;
     template<typename...> struct type_seq;

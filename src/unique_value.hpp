@@ -5,15 +5,16 @@
 #ifndef _UNIQUE_VALUE_HPP
 #define _UNIQUE_VALUE_HPP
 
+#include <cstddef>              // for int
+
 namespace fp {
     template<typename, int> struct field;
     template<typename> struct unique_value;
 
-    template<typename TDescriptor, int I> struct unique_value<field<TDescriptor, I> > {
-
-        enum {
-            index = I
-        };
+    template<typename TDescriptor, int Idx> struct unique_value<field<TDescriptor, Idx> > {
+        using field<TDescriptor, Idx>::index;
+        using field<TDescriptor, Idx>::type;
+        using field<TDescriptor, Idx>::name;
     };
 }
 

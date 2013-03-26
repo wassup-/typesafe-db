@@ -9,7 +9,10 @@
 #include "select_query.hpp"
 #include "where_query.hpp"
 
-#include <vector>
+#include <algorithm>            // for std::swap
+#include <cstddef>              // for int
+#include <string>               // for std::string, std::to_string
+#include <vector>               // for std::vector
 
 namespace fp {
     template<typename, typename> struct where_select_query;
@@ -26,57 +29,58 @@ namespace fp {
         typedef TDescriptor descriptor_type;
         typedef typename select_query<TDescriptor, Is...>::result_type result_type;
     protected:
-        select_query<TDescriptor, Is...> const m_select;
-        where_query<TDescriptor, Cs...> const m_where;
+        select_query<TDescriptor, Is...> m_select;
+        where_query<TDescriptor, Cs...> m_where;
     public:
+        where_select_query() : m_select(), m_where() {
+        }
 
         where_select_query(select_query<TDescriptor, Is...> const & s, where_query<TDescriptor, Cs...> const & w) : m_select(s), m_where(w) {
         }
 
+        where_select_query(where_select_query const & wsq) : m_select(wsq.m_select), m_where(wsq.m_where) {
+        }
+
+        where_select_query(where_select_query && wqs) : m_select(), m_where() {
+            swap(*this, wqs);
+        }
+
+        friend void swap(where_select_query & l, where_select_query & r) {
+            using std::swap;
+            swap(l.m_select, r.m_select);
+            swap(l.m_where, r.m_where);
+        }
+
         template<int... Fs>
-        bool evaluate(record<TDescriptor, Fs...> const & rec) const {
-            return fp::evaluate(rec, m_where);
+        friend bool evaluate(record<TDescriptor, Fs...> const & rec, where_select_query const & q) {
+            return evaluate(rec, q.m_where);
         }
 
         template<int... Fs >
-        result_type select(record<TDescriptor, Fs...> const & rec) const {
-            return fp::select(rec, m_select);
+        friend result_type select(record<TDescriptor, Fs...> const & rec, where_select_query const & q) {
+            return select(rec, q.m_select);
         }
 
         template<int... Fs >
-        std::vector<result_type> apply(std::vector < record<TDescriptor, Fs...> > const & recs) const {
+        friend std::vector<result_type> apply(std::vector < record<TDescriptor, Fs...> > const & recs, where_select_query const & q) {
             std::vector<result_type> ret;
-            for (auto const & cur : recs) {
-                if (fp::evaluate(cur, m_where)) {
-                    ret.push_back(fp::select(cur, m_select));
+            for (record<TDescriptor, Fs...> const & cur : recs) {
+                if (evaluate(cur, q.m_where)) {
+                    ret.push_back(select(cur, q.m_select));
                 }
             }
             return ret;
         }
 
-        std::string to_string() const {
-            return m_select.to_string() + std::string(" ") + m_where.to_string();
+        friend std::string to_string(where_select_query const & q) {
+            using std::to_string;
+            return to_string(q.m_select) + std::string(" ") + to_string(q.m_where);
         }
     };
-
-    template<typename TDescriptor, int... Is, typename... Cs, int... Fs>
-    inline bool evaluate(record<TDescriptor, Fs...> const & r, where_select_query<select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> > const & q) {
-        return q.evaluate(r);
-    }
-
-    template<typename TDescriptor, int... Is, typename... Cs, int... Fs>
-    inline auto select(record<TDescriptor, Fs...> const & r, where_select_query<select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> > const & q) -> decltype(q.select(r)) {
-        return q.select(r);
-    }
 
     template<typename TDescriptor, int... Is, typename... Cs>
     inline where_select_query<select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> > operator+(select_query<TDescriptor, Is...> const & s, where_query<TDescriptor, Cs...> const & w) {
         return where_select_query < select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> >(s, w);
-    }
-
-    template<typename TDescriptor, int... Is, typename... Cs, int... Fs>
-    inline auto query(std::vector<record<TDescriptor, Fs...> > const & r, where_select_query<select_query<TDescriptor, Is...>, where_query<TDescriptor, Cs...> > const & q) -> decltype(q.apply(r)) {
-        return q.apply(r);
     }
 }
 
