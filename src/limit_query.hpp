@@ -8,59 +8,66 @@
 #include "is_query.hpp"
 
 #include <algorithm>    // for std::swap
-#include <cstddef>      // for int
 #include <string>       // for std::string, std::to_string
+#include <utility>      // for std::forward
 
 namespace fp {
-    template<typename> struct limit_query;
+    template<typename>
+    struct limit_query;
 
-    template<typename TQuery> struct is_query<limit_query<TQuery> > {
+    template<typename TQuery>
+    struct is_query<limit_query<TQuery> > : Bool<is_query<TQuery>::value> { };
+    
+    template<typename TQuery>
+    struct is_limit_query<limit_query<TQuery> > : Bool<true> { };
 
-        enum {
-            value = true
+    template<typename TQuery>
+    struct limit_query {
+    public:
+        template<typename TRecord>
+        struct result_of {
+            using type = Invoke<typename TQuery::template result_of<TRecord>>;
         };
-    };
-
-    template<typename TQuery> struct limit_query {
-    public:
-        typedef typename TQuery::descriptor_type TDescriptor;
-        typedef typename TQuery::result_type result_type;
     protected:
-        TQuery m_query;
-        int m_limit;
+        TQuery _query;
+        int _limit;
     public:
 
-        limit_query(TQuery const & q, int l) : m_query(q), m_limit(l) {
+        limit_query() {
         }
 
-        limit_query(limit_query && q) : m_query(), m_limit() {
+        limit_query(TQuery q, int l) : _query(std::move(q)), _limit(l) {
+        }
+
+        limit_query(limit_query const &) = default;
+
+        limit_query(limit_query && q) noexcept : _query(), _limit() {
             swap(*this, q);
         }
 
-        friend void swap(limit_query & l, limit_query & r) {
+        friend void swap(limit_query & l, limit_query & r) noexcept {
             using std::swap;
-            swap(l.m_query, r.m_query);
-            swap(l.m_limit, r.m_limit);
+            swap(l._query, r._query);
+            swap(l._limit, r._limit);
         }
 
-        template<int... Fs>
-        friend bool evaluate(record<TDescriptor, Fs...> const & rec, limit_query const & q) {
-            return evaluate(rec, q.m_query);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend bool evaluate(TRecord const & rec, limit_query const & q) {
+            return evaluate(rec, q._query);
         }
 
-        template<int... Fs >
-        friend result_type select(record<TDescriptor, Fs...> const & rec, limit_query const & q) {
-            return select(rec, q.m_query);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend Invoke<result_of<TRecord>> select(TRecord const & rec, limit_query const & q) {
+            return select(rec, q._query);
         }
 
-        template<int... Fs >
-        friend std::vector<result_type> query(std::vector < record<TDescriptor, Fs...> > const & recs, limit_query const & q) {
-            typedef record<TDescriptor, Fs...> record_type;
-            std::vector<result_type> ret(q.m_limit);
-            for (record_type const & cur : recs) {
-                if (evaluate(cur, q.m_query)) {
-                    ret.push_back(select(cur, q.m_query));
-                    if (ret.size() == q.m_limit) {
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord> const & recs, limit_query const & q) {
+            std::vector<Invoke<result_of<TRecord>>> ret(q._limit);
+            for (TRecord const & cur : recs) {
+                if (evaluate(cur, q._query)) {
+                    ret.push_back(select(cur, q._query));
+                    if (ret.size() == q._limit) {
                         break;
                     }
                 }
@@ -70,13 +77,13 @@ namespace fp {
 
         friend std::string to_string(limit_query const & q) {
             using std::to_string;
-            return to_string(q.m_query) + std::string(" LIMIT ") + to_string(q.m_limit);
+            return to_string(q._query) + std::string(" LIMIT ") + to_string(q._limit);
         }
     };
 
-    template<typename TQuery>
-    inline typename std::enable_if<is_query<TQuery>::value, limit_query<TQuery> >::type limit(TQuery const & q, int l) {
-        return limit_query<TQuery > (q, l);
+    template<typename TQuery, EnableIf<is_query<TQuery>> = _>
+    inline limit_query<TQuery> limit(TQuery q, int l) {
+        return limit_query<TQuery>(std::move(q), l);
     }
 }
 

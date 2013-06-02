@@ -7,70 +7,62 @@
 
 #include "impl/where_query_impl.hpp"
 
-#include "apply_tuple.hpp"
+#include "call_with.hpp"
 #include "is_query.hpp"
 #include "tuple_cat.hpp"
+#include "type_traits.hpp"      // for fp::enable_if, fp::enable_if_c
 #include "where_clauses.hpp"
 
 #include <algorithm>            // for std::swap
-#include <cstddef>              // for int
-#include <string>               // for std::string
-#include <type_traits>          // for std::enable_if
+#include <string>               // for std::string, std::to_string
 #include <vector>               // for std::vector
 
 namespace fp {
-    template<typename, typename...> struct where_query;
+    template<typename...>
+    struct where_query;
 
-    template<typename TDescriptor, typename... TClauses> struct is_query<where_query<TDescriptor, TClauses...> > {
-
-        enum {
-            value = true
-        };
-    };
+    template<typename... TWhere>
+    struct is_query<where_query<TWhere...>> : All<All<impl::is_where_clause<TWhere>...>, is_same<DescriptorOf<TWhere>...>> { };
     
-    template<typename TDescriptor> struct where_query<TDescriptor> {
-        typedef TDescriptor descriptor_type;
-        typedef typename TDescriptor::record::type result_type;
-        
-        template<typename TClause> friend where_query<TDescriptor, TClause> operator+(where_query<TDescriptor> const & q, TClause c) {
-            return where_query<TDescriptor, TClause>(c);
-        }
-    };
+    template<typename... TWhere>
+    struct is_where_query<where_query<TWhere...>> : Bool<true> { };
 
-    template<typename TDescriptor, typename... TClauses> struct where_query {
-        typedef TDescriptor descriptor_type;
-        typedef typename TDescriptor::record::type result_type;
+    template<typename... TWhere>
+    struct where_query {
+        using descriptor_type = FirstTypeOf<DescriptorOf<TWhere>...>;
     protected:
-        std::tuple < TClauses...> m_clauses;
+        std::tuple<TWhere...> _clauses;
     public:
-        where_query() : m_clauses() {
+        where_query()
+        : _clauses() {
         }
 
-        where_query(TClauses... clauses) : m_clauses(clauses...) {
+        where_query(TWhere... clauses)
+        : _clauses(std::move(clauses)...) {
         }
 
-        where_query(where_query const & wc) : m_clauses(wc.m_clauses) {
-        }
+        where_query(where_query const &) = default;
 
-        where_query(where_query && wc) : m_clauses() {
+        where_query(where_query && wc) noexcept
+        : _clauses() {
             swap(*this, wc);
         }
 
-        friend void swap(where_query & l, where_query & r) {
+        friend void swap(where_query & l, where_query & r) noexcept {
             using std::swap;
-            swap(l.m_clauses, r.m_clauses);
+            swap(l._clauses, r._clauses);
         }
 
-        template<int... Fs>
-        friend bool evaluate(record<TDescriptor, Fs...> const & r, where_query const & q) {
-            auto wrapper = wrap_fn(&impl::where_query_impl::evaluate<TDescriptor, Fs..., TClauses...>);
-            return call_function(wrapper, q.m_clauses, r); //apply_tuple < std::tuple_size < std::tuple < TClauses...> >::value>::function::template apply < impl::clause_evaluator < record<TDescriptor, Fs...>, TClauses...> >(q.m_clauses);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend bool evaluate(TRecord const & rec, where_query const & q) {
+            bool (*eval_fn)(TRecord const &, TWhere &&...) = &impl::where_query_impl::evaluate;
+            return call_function(eval_fn, q._clauses, rec);
         }
 
-        template<int... Fs >
-        friend std::vector < record<TDescriptor, Fs...> > evaluate(std::vector < record<TDescriptor, Fs...> > const & r, where_query const & q) {
-            std::vector < record<TDescriptor, Fs...> > ret;
-            for (record<TDescriptor, Fs...> const & cur : r) {
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend std::vector<TRecord> evaluate(std::vector<TRecord> const & recs, where_query const & q) {
+            std::vector<TRecord> ret;
+            for (TRecord const & cur : recs) {
                 if (evaluate(cur, q)) {
                     ret.push_back(cur);
                 }
@@ -78,26 +70,30 @@ namespace fp {
             return ret;
         }
         
-        template<int... Fs >
-        friend std::vector < record<TDescriptor, Fs...> > query(std::vector < record<TDescriptor, Fs...> > const & r, where_query const & q) {
-            return evaluate(r, q);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend std::vector<TRecord> query(std::vector<TRecord> const & rec, where_query const & q) {
+            return evaluate(rec, q);
         }
 
         friend std::string to_string(where_query const & q) {
-            auto wrapper = wrap_fn(&impl::where_query_impl::build_where_query<TDescriptor, TClauses...>);
-            return call_function(wrapper, q.m_clauses);
+            std::string(*build_fn)(TWhere...) = &impl::where_query_impl::build_where_query<TWhere...>;
+            return call_function(build_fn, q._clauses);
         }
         
-        template<typename TClause> 
-        friend where_query<TDescriptor, TClauses..., TClause> operator+(where_query<TDescriptor, TClauses...> const & q, TClause c) {
-            typedef where_query<TDescriptor, TClauses..., TClause> return_type;
-            return call_constructor<return_type>(std::tuple_cat(q.m_clauses, std::tuple<TClause > (c)));
+        template<typename T> 
+        friend where_query<TWhere..., T> operator+(where_query const & q, T c) {
+            return call_constructor<where_query<TWhere..., T> >(std::tuple_cat(q._clauses, std::tuple<T> (c)));
         }
     };
+    
+    template<typename... TConditions>
+    inline where_query<TConditions...> where(TConditions... c) {
+        return where_query<TConditions...>(std::move(c)...);
+    }
 
-    template<typename TDescriptor, typename... TClauses, typename TClause>
-    inline where_query<where_clauses::where_and<where_query<TDescriptor, TClauses...>, TClause> > operator&(where_query<TDescriptor, TClauses...> q, TClause c) {
-        typedef where_clauses::where_and < where_query<TDescriptor, TClauses...>, TClause > clause_type;
+    template<typename TDescriptor, typename... TWhere, typename T>
+    inline where_query<where_clauses::where_and<where_query<TWhere...>, T> > operator&(where_query<TWhere...> q, T c) {
+        typedef where_clauses::where_and<where_query<TWhere...>, T> clause_type;
         typedef where_query<clause_type> return_type;
         return return_type(clause_type(q, c));
     }

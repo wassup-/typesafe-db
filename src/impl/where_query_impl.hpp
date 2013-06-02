@@ -1,86 +1,99 @@
 #ifndef _WHERE_QUERY_IMPL_HPP
 #define _WHERE_QUERY_IMPL_HPP
 
-#include <sstream>      // for std::stringstream
+#include <iostream>     // for std::ostream
+#include <sstream>      // for std::ostringstream
+#include <string>       // for std::string, std::to_string
 #include <utility>      // for std::forward
 
 namespace fp {
     namespace impl {
-        template<typename Fn> Fn get_type_of(Fn);
-
-        template<typename, typename...> struct clause_evaluator;
-        template<typename, typename...> struct get_where_clauses;
+        template<typename...>
+        struct clause_evaluator;
+        
+        template<typename...>
+        struct get_where_clauses;
+        
         struct where_query_impl;
 
-        template<typename TDescriptor, typename H, typename... T> struct clause_evaluator<TDescriptor, H, T...> {
+        template<typename H, typename... T>
+        struct clause_evaluator<H, T...> {
         protected:
-            H m_head;
-            clause_evaluator <TDescriptor, T...> m_tail;
+            H _head;
+            clause_evaluator<T...> _tail;
         public:
 
-            clause_evaluator(H h, T && ... t) : m_head(h), m_tail(std::forward<T > (t)...) {
+            clause_evaluator(H h, T && ... t)
+            : _head(h), _tail(std::forward<T > (t)...) {
             }
 
-            template<int... Is>
-            bool operator()(record<TDescriptor, Is...> const & r) const {
-                return (m_head(r) && m_tail(r));
+            template<typename... Fs>
+            bool operator()(record<Fs...> const & r) const {
+                return (_head(r) && _tail(r));
             }
         };
 
-        template<typename TDescriptor, typename H> struct clause_evaluator<TDescriptor, H> {
+        template<typename H>
+        struct clause_evaluator<H> {
         protected:
-            H m_head;
+            H _head;
         public:
 
-            clause_evaluator(H h) : m_head(h) {
+            clause_evaluator(H h)
+            : _head(h) {
             }
 
-            template<int... Is>
-            bool operator()(record<TDescriptor, Is...> const & r) const {
-                return m_head(r);
+            template<typename... Fs>
+            bool operator()(record<Fs...> const & r) const {
+                return _head(r);
             }
         };
 
-        template<typename TDescriptor, typename H, typename... T> struct get_where_clauses<TDescriptor, H, T...> {
+        template<typename H, typename... T>
+        struct get_where_clauses<H, T...> {
         protected:
             H head;
-            get_where_clauses<TDescriptor, T...> tail;
+            get_where_clauses<T...> tail;
         public:
 
-            get_where_clauses(H h, T... t) : head(h), tail(t...) {
+            get_where_clauses(H h, T... t)
+            : head(h), tail(t...) {
             }
 
-            void get(std::stringstream & ss) {
+            void get(std::ostream & ss) {
                 ss << to_string(head) << " AND ";
                 tail.get(ss);
             }
         };
 
-        template<typename TDescriptor, typename H> struct get_where_clauses<TDescriptor, H> {
+        template<typename H>
+        struct get_where_clauses<H> {
         protected:
             H head;
         public:
 
-            get_where_clauses(H h) : head(h) {
+            get_where_clauses(H h)
+            : head(h) {
             }
 
-            void get(std::stringstream & ss) {
+            void get(std::ostream & ss) {
                 ss << to_string(head);
             }
         };
 
         struct where_query_impl {
-            template<typename TDescriptor, int... Is, typename... TClauses>
-            static bool evaluate(record<TDescriptor, Is...> const & r, TClauses... c) {
-                clause_evaluator<TDescriptor, TClauses...> evaluator(std::forward<TClauses>(c)...);
+            
+            template<typename... Fs, typename... TWhere>
+            static bool evaluate(record<Fs...> const & r, TWhere &&... c) {
+                clause_evaluator<TWhere...> evaluator(std::forward<TWhere>(c)...);
                 return evaluator(r);
             }
             
-            template<typename TDescriptor, typename... Ts >
-            static std::string build_where_query(Ts const &... ts) {
-                std::stringstream ss;
+            template<typename... Ts >
+            static std::string build_where_query(Ts... ts) {
+                std::ostringstream ss;
                 ss << "WHERE ";
-                impl::get_where_clauses<TDescriptor, Ts...> wc(ts...);
+                impl::get_where_clauses<Ts...> wc(ts...);
                 wc.get(ss);
                 return ss.str();
             }

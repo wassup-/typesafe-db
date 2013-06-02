@@ -8,446 +8,478 @@
 #include "field.hpp"
 #include "lexical_cast.hpp"
 
-#include <cstddef>              // for int
 #include <algorithm>            // for std::swap
-#include <string>               // for std::string
+#include <string>               // for std::string, std::to_string
 #include <sstream>              // for std::stringstream
+#include <type_traits>          // for std::true_type, std::false_type
 
 namespace fp {
-
-    namespace where_clauses {
-        template<typename, int, typename> struct where_eq;
-        template<typename, int, typename> struct where_neq;
-        template<typename, int, typename> struct where_lt;
-        template<typename, int, typename> struct where_gt;
-        template<typename, int, typename> struct where_lte;
-        template<typename, int, typename> struct where_gte;
-        template<typename, int, typename> struct where_contains;
+    
+     namespace where_clauses {
+        template<typename> struct where_eq;
+        template<typename> struct where_neq;
+        template<typename> struct where_lt;
+        template<typename> struct where_gt;
+        template<typename> struct where_lte;
+        template<typename> struct where_gte;
+        template<typename> struct where_contains;
         template<typename, typename> struct where_or;
         template<typename, typename> struct where_and;
+        
+    }
+    
+    namespace impl {
+        template<typename>
+        struct is_where_clause : std::false_type { };
 
-        template<typename T> struct where_condition {
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_eq<TField> > : std::true_type { };
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_neq<TField> > : std::true_type { };
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_lt<TField> > : std::true_type { };
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_gt<TField> > : std::true_type { };
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_lte<TField> > : std::true_type { };
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_gte<TField> > : std::true_type { };
+        template<typename TField>
+        struct is_where_clause<where_clauses::where_contains<TField> > : std::true_type { };
+        template<typename TLeft, typename TRight>
+        struct is_where_clause<where_clauses::where_or<TLeft, TRight> > : std::true_type { };
+        template<typename TLeft, typename TRight>
+        struct is_where_clause<where_clauses::where_and<TLeft, TRight> > : std::true_type { };
+    }
+    
+    namespace where_clauses {
 
-            template<typename C >
-            where_or<T, C> operator|(C c) const {
-                return where_or<T, C > (static_cast<T const &> (*this), c);
-            }
-
-            template<typename C >
-            where_and<T, C> operator&(C c) const {
-                return where_and<T, C > (static_cast<T const &> (*this), c);
-            }
-        };
-
-        template<typename TDescriptor, int I, typename T> struct where_eq : where_condition<where_eq<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_eq {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_eq() : value() {
+            where_eq()
+            : _value() {
             }
 
-            explicit where_eq(T v) : value(v) {
+            explicit where_eq(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_eq(where_eq const & weq) : value(weq.value) {
-            }
+            where_eq(where_eq const &) = default;
             
-            where_eq(where_eq && weq) : value() {
-                swap(*this, weq);
+            where_eq(where_eq && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_eq & l, where_eq & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) == value);
+                return (get<TField>(r) == _value);
             }
 
             friend std::string to_string(where_eq const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " = " << to_string(c.value) << ')';
+                ss << '(' << to_string(TField()) << " = " << to_string(c._value) << ')';
                 return ss.str();
             }
         };
 
-        template<typename TDescriptor, int I, typename T> struct where_neq : where_condition<where_neq<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_neq {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_neq() : value() {
+            where_neq()
+            : _value() {
             }
 
-            explicit where_neq(T v) : value(v) {
+            explicit where_neq(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_neq(where_neq const & wneq) : value(wneq.value) {
-            }
+            where_neq(where_neq const &) = default;
             
-            where_neq(where_neq && wneq) : value() {
-                swap(*this, wneq);
+            where_neq(where_neq && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_neq & l, where_neq & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) != value);
+                return (get<TField>(r) != _value);
             }
 
             friend std::string to_string(where_neq const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " != " << to_string(c.value) << ')';
+                ss << '(' << to_string(TField()) << " != " << to_string(c._value) << ')';
                 return ss.str();
             }
         };
 
-        template<typename TDescriptor, int I, typename T> struct where_lt : where_condition<where_lt<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_lt {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_lt() : value() {
+            where_lt()
+            : _value() {
             }
 
-            explicit where_lt(T v) : value(v) {
+            explicit where_lt(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_lt(where_lt const & wlt) : value(wlt.value) {
-            }
+            where_lt(where_lt const &) = default;
             
-            where_lt(where_lt && wlt) : value() {
-                swap(*this, wlt);
+            where_lt(where_lt && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_lt & l, where_lt & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) < value);
+                return (get<TField>(r) < _value);
             }
 
             friend std::string to_string(where_lt const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " < " << to_string(c.value) << ')';
+                ss << '(' << to_string(TField()) << " < " << to_string(c._value) << ')';
                 return ss.str();
             }
         };
 
-        template<typename TDescriptor, int I, typename T> struct where_gt : where_condition<where_gt<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_gt {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_gt() : value() {
+            where_gt()
+            : _value() {
             }
 
-            explicit where_gt(T v) : value(v) {
+            explicit where_gt(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_gt(where_gt const & wgt) : value(wgt.value) {
-            }
+            where_gt(where_gt const &) = default;
             
-            where_gt(where_gt && wgt) : value() {
-                swap(*this, wgt);
+            where_gt(where_gt && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_gt & l, where_gt & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) > value);
+                return (get<TField>(r) > _value);
             }
 
             friend std::string to_string(where_gt const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " > " << to_string(c.value) << ')';
+                ss << '(' << to_string(TField()) << " > " << to_string(c._value) << ')';
                 return ss.str();
             }
         };
 
-        template<typename TDescriptor, int I, typename T> struct where_lte : where_condition<where_lte<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_lte {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_lte() : value() {
+            where_lte()
+            : _value() {
             }
 
-            explicit where_lte(T v) : value(v) {
+            explicit where_lte(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_lte(where_lte const & wlte) : value(wlte.value) {
-            }
+            where_lte(where_lte const &) = default;
             
-            where_lte(where_lte && wlte) : value() {
-                swap(*this, wlte);
+            where_lte(where_lte && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_lte & l, where_lte & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) <= value);
+                return (get<TField>(r) <= _value);
             }
 
             friend std::string to_string(where_lte const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " <= " << to_string(c.value) << ')';
+                ss << '(' << to_string(TField()) << " <= " << to_string(c._value) << ')';
                 return ss.str();
             }
         };
 
-        template<typename TDescriptor, int I, typename T> struct where_gte : where_condition<where_gte<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_gte {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_gte() : value() {
+            where_gte()
+            : _value() {
             }
 
-            explicit where_gte(T v) : value(v) {
+            explicit where_gte(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_gte(where_gte const & wgte) : value(wgte.value) {
-            }
+            where_gte(where_gte const &) = default;
             
-            where_gte(where_gte && wgte) : value() {
-                swap(*this, wgte);
+            where_gte(where_gte && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_gte & l, where_gte & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (fp::get<I > (r) >= value);
+                return (get<TField>(r) >= _value);
             }
 
             friend std::string to_string(where_gte const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " >= " << to_string(c.value) << ')';
+                ss << '(' << to_string(TField()) << " >= " << to_string(c._value) << ')';
                 return ss.str();
             }
         };
 
-        template<typename TDescriptor, int I, typename T> struct where_contains : where_condition<where_contains<TDescriptor, I, T> > {
+        template<typename TField>
+        struct where_contains {
         public:
-
-            enum {
-                index = I
-            };
+            using descriptor_type = DescriptorOf<TField>;
         protected:
-            T value;
+            Invoke<TField> _value;
         public:
-            where_contains() : value() {
+            where_contains()
+            : _value() {
             }
             
-            explicit where_contains(T v) : value(v) {
+            explicit where_contains(Invoke<TField> v)
+            : _value(std::move(v)) {
             }
             
-            where_contains(where_contains const & wc) : value(wc.value) {
-            }
+            where_contains(where_contains const &) = default;
             
-            where_contains(where_contains && wc) : value() {
-                swap(*this, wc);
+            where_contains(where_contains && c)
+            : _value() {
+                swap(*this, c);
             }
             
             friend void swap(where_contains & l, where_contains & r) {
-                std::swap(l.value, r.value);
+                using std::swap;
+                swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (T::npos != fp::get<I > (r).find(value));
+                return (TField::type::npos != get<TField>(r).find(_value));
             }
 
             friend std::string to_string(where_contains const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(field<TDescriptor, I >()) << " LIKE \"%" << c.value << "%\")";
+                ss << '(' << to_string(TField()) << " LIKE \"%" << c._value << "%\")";
                 return ss.str();
             }
         };
 
-        template<typename L, typename R> struct where_or : where_condition<where_or<L, R> > {
+        template<typename L, typename R>
+        struct where_or {
+        public:
+            typedef where_or<L, R> this_type;
         protected:
-            L m_left;
-            R m_right;
+            L _left;
+            R _right;
         public:
 
-            where_or(L l, R r) : m_left(l), m_right(r) {
+            where_or(L l, R r)
+            : _left(std::move(l)), _right(std::move(r)) {
             }
             
-            where_or(where_or const & wor) : m_left(wor.m_left), m_right(wor.m_right) {
-            }
+            where_or(where_or const &) = default;
             
-            where_or(where_or && wor) : m_left(), m_right() {
-                swap(*this, wor);
+            where_or(where_or && c)
+            : _left(), _right() {
+                swap(*this, c);
             }
             
             friend void swap(where_or & l, where_or & r) {
-                std::swap(l.m_left, r.m_left);
-                std::swap(l.m_right, r.m_right);
+                using std::swap;
+                swap(l._left, r._left);
+                swap(l._right, r._right);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (m_left(r) || m_right(r));
+                return (_left(r) || _right(r));
             }
 
             friend std::string to_string(where_or const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(c.m_left) << " OR " << to_string(c.m_right) << ')';
+                ss << '(' << to_string(c._left) << " OR " << to_string(c._right) << ')';
                 return ss.str();
             }
         };
 
-        template<typename L, typename R> struct where_and : where_condition<where_and<L, R> > {
+        template<typename L, typename R>
+        struct where_and {
+        public:
+            typedef where_and<L, R> this_type;
         protected:
-            L m_left;
-            R m_right;
+            L _left;
+            R _right;
         public:
 
-            where_and(L l, R r) : m_left(l), m_right(r) {
+            where_and(L l, R r)
+            : _left(std::move(l)), _right(std::move(r)) {
             }
             
-            where_and(where_and const & wand) : m_left(wand.m_left), m_right(wand.m_right) {
-            }
+            where_and(where_and const &) = default;
             
-            where_and(where_and && wand) : m_left(), m_right() {
-                swap(*this, wand);
+            where_and(where_and && c)
+            : _left(), _right() {
+                swap(*this, c);
             }
             
             friend void swap(where_and & l, where_and & r) {
-                std::swap(l.m_left, r.m_left);
-                std::swap(l.m_right, r.m_right);
+                using std::swap;
+                swap(l._left, r._left);
+                swap(l._right, r._right);
             }
 
             template<typename TRecord>
             bool operator()(TRecord const & r) const {
-                return (m_left(r) && m_right(r));
+                return (_left(r) && _right(r));
             }
 
             friend std::string to_string(where_and const & c) {
                 using std::to_string;
                 std::stringstream ss;
-                ss << '(' << to_string(c.m_left) << " AND " << to_string(c.m_right) << ')';
+                ss << '(' << to_string(c._left) << " AND " << to_string(c._right) << ')';
                 return ss.str();
             }
         };
     }
 
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_eq<TDescriptor, I, typename field<TDescriptor, I>::type> eq(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_eq<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_eq<TField> eq(TField, Invoke<TField> v) {
+        return where_clauses::where_eq<TField> (v);
     }
 
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_neq<TDescriptor, I, typename field<TDescriptor, I>::type> neq(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_neq<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_neq<TField> neq(TField, Invoke<TField> v) {
+        return where_clauses::where_neq<TField> (v);
     }
 
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_lt<TDescriptor, I, typename field<TDescriptor, I>::type> lt(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_lt<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_lt<TField> lt(TField, Invoke<TField> v) {
+        return where_clauses::where_lt<TField> (v);
     }
 
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_gt<TDescriptor, I, typename field<TDescriptor, I>::type> gt(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_gt<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_gt<TField> gt(TField, Invoke<TField> v) {
+        return where_clauses::where_gt<TField> (v);
+    }
+    
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_lte<TField> lte(TField, Invoke<TField> v) {
+        return where_clauses::where_lte<TField> (v);
+    }
+    
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_gte<TField> gte(TField, Invoke<TField> v) {
+        return where_clauses::where_gte<TField> (v);
+    }
+    
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline where_clauses::where_contains<TField> contains(TField, Invoke<TField> v) {
+        return where_clauses::where_contains<TField> (v);
     }
 
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_lte<TDescriptor, I, typename field<TDescriptor, I>::type> lte(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_lte<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
-    }
-
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_gte<TDescriptor, I, typename field<TDescriptor, I>::type> gte(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_gte<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
-    }
-
-    template<typename TDescriptor, int I>
-    inline where_clauses::where_contains<TDescriptor, I, typename field<TDescriptor, I>::type> contains(field<TDescriptor, I>, typename field<TDescriptor, I>::type v) {
-        return where_clauses::where_contains<TDescriptor, I, typename field<TDescriptor, I>::type > (v);
-    }
-
-    template<typename TDescriptor, int I>
-    inline auto operator==(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::eq(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator==(TField f, Invoke<TField> v) -> decltype(fp::eq(f, v)) {
         return fp::eq(f, v);
     }
 
-    template<typename TDescriptor, int I>
-    inline auto operator!=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::neq(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator!=(TField f, Invoke<TField> v) -> decltype(fp::neq(f, v)) {
         return fp::neq(f, v);
     }
 
-    template<typename TDescriptor, int I>
-    inline auto operator<(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::lt(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator<(TField f, Invoke<TField> v) -> decltype(fp::lt(f, v)) {
         return fp::lt(f, v);
     }
 
-    template<typename TDescriptor, int I>
-    inline auto operator>(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::gt(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator>(TField f, Invoke<TField> v) -> decltype(fp::gt(f, v)) {
         return fp::gt(f, v);
     }
 
-    template<typename TDescriptor, int I>
-    inline auto operator<=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::lte(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator<=(TField f, Invoke<TField> v) -> decltype(fp::lte(f, v)) {
         return fp::lte(f, v);
     }
 
-    template<typename TDescriptor, int I>
-    inline auto operator>=(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::gte(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator>=(TField f, Invoke<TField> v) -> decltype(fp::gte(f, v)) {
         return fp::gte(f, v);
     }
 
-    template<typename TDescriptor, int I>
-    inline auto operator%(field<TDescriptor, I> f, typename field<TDescriptor, I>::type v) -> decltype(fp::contains(f, v)) {
+    template<typename TField, EnableIf<is_field<TField>> = _>
+    inline auto operator%(TField f, Invoke<TField> v) -> decltype(fp::contains(f, v)) {
         return fp::contains(f, v);
     }
 }

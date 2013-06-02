@@ -1,7 +1,7 @@
 #ifndef _RANGE_IMPL_HPP
 #define _RANGE_IMPL_HPP
 
-namespace fp {
+/*namespace fp {
     template<int...> struct int_seq;
 
     namespace impl {
@@ -20,12 +20,12 @@ namespace fp {
             typedef int_seq<Min, R...> type;
         };
 
-        template<bool /* = false */, int Min, int Max> struct range_builder_impl : build_range_incr<Min, Max, Max> {
+        template<bool, int Min, int Max> struct range_builder_impl : build_range_incr<Min, Max, Max> {
         };
 
         template<int Min, int Max> struct range_builder_impl < true, Min, Max> : build_range_decr<Min, Max, Max> {
         };
     }
-}
+}*/
 
 #endif

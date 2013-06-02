@@ -7,14 +7,16 @@
 
 #include "impl/range_impl.hpp"
 
-#include <cstddef>              // for int
-
 namespace fp {
+    template<int, int>
+    struct range_builder;
 
-    template<int Min, int Max> struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> {
+    template<int Min, int Max>
+    struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> {
     };
 
-    template<int Min, int Max> typename range_builder<Min, Max>::type make_range() {
+    template<int Min, int Max>
+    typename range_builder<Min, Max>::type make_range() {
         return typename range_builder<Min, Max>::type();
     }
 }

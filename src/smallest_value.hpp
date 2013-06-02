@@ -7,12 +7,12 @@
 
 #include "impl/smallest_value_impl.hpp"
 
-#include <cstddef>              // for int
-
 namespace fp {
-    template<int...> struct smallest_value;
+    template<int...>
+    struct smallest_value;
 
-    template<int H, int... T> struct smallest_value<H, T...> : impl::smallest_value_impl<H, T...>{
+    template<int... Vs>
+    struct smallest_value : impl::smallest_value_impl<Vs...>{
     };
 }
 

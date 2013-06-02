@@ -10,80 +10,90 @@
 #include "where_query.hpp"
 
 #include <algorithm>            // for std::swap
-#include <cstddef>              // for int
 #include <string>               // for std::string, std::to_string
 #include <vector>               // for std::vector
 
 namespace fp {
-    template<typename, typename> struct where_update_query;
+    template<typename, typename>
+    struct where_update_query;
 
-    template<typename TDescriptor, typename... Ms, typename... Cs>
-    struct is_query<where_update_query<update_query<TDescriptor, Ms...>, where_query<TDescriptor, Cs...> > > {
+    template<typename TUpdate, typename TWhere>
+    struct is_query<where_update_query<TUpdate, TWhere> > : All<is_update_query<TUpdate>, is_where_query<TWhere>> { };
+    
+    template<typename TUpdate, typename TWhere>
+    struct is_update_query<where_update_query<TUpdate, TWhere> > : Bool<true> { };
+    
+    template<typename TUpdate, typename TWhere>
+    struct is_where_query<where_update_query<TUpdate, TWhere> > : Bool<true> { };
 
-        enum {
-            value = true
+    template<typename TUpdate, typename TWhere>
+    struct where_update_query {
+    public:
+        template<typename TRecord>
+        struct result_of {
+            using type = Invoke<typename TUpdate::template result_of<TRecord>>;
         };
-    };
-
-    template<typename TDescriptor, typename... Ms, typename... Cs>
-    struct where_update_query<update_query<TDescriptor, Ms...>, where_query<TDescriptor, Cs...> > {
-    public:
-        typedef TDescriptor descriptor_type;
-        typedef typename update_query<TDescriptor, Ms...>::result_type result_type;
     protected:
-        update_query<TDescriptor, Ms...> m_update;
-        where_query<TDescriptor, Cs...> m_where;
+        TUpdate _update;
+        TWhere _where;
     public:
 
-        where_update_query() : m_update(), m_where() {
+        where_update_query()
+        : _update(), _where() {
         }
 
-        where_update_query(update_query<TDescriptor, Ms...> const & u, where_query<TDescriptor, Cs...> const & w) : m_update(u), m_where(w) {
+        where_update_query(TUpdate u, TWhere w)
+        : _update(std::move(u)), _where(std::move(w)) {
         }
 
-        where_update_query(where_update_query const & wsq) : m_update(wsq.m_update), m_where(wsq.m_where) {
+        where_update_query(where_update_query const &) = default;
+
+        where_update_query(where_update_query && qry) noexcept
+        : _update(), _where() {
+            swap(*this, qry);
         }
 
-        where_update_query(where_update_query && wqs) : m_update(), m_where() {
-            swap(*this, wqs);
-        }
-
-        friend void swap(where_update_query & l, where_update_query & r) {
+        friend void swap(where_update_query & l, where_update_query & r) noexcept {
             using std::swap;
-            swap(l.m_update, r.m_update);
-            swap(l.m_where, r.m_where);
+            swap(l._update, r._update);
+            swap(l._where, r._where);
         }
 
-        template<int... Fs>
-        friend bool evaluate(record<TDescriptor, Fs...> const & rec, where_update_query const & q) {
-            return evaluate(rec, q.m_where);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend bool evaluate(TRecord const & rec, where_update_query const & q) {
+            return evaluate(rec, q._where);
         }
 
-        template<int... Fs >
-        friend result_type update(record<TDescriptor, Fs...> & rec, where_update_query const & q) {
-            return update(rec, q.m_update);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend Invoke<result_of<TRecord>> update(TRecord & rec, where_update_query const & q) {
+            return update(rec, q._update);
         }
 
-        template<int... Fs >
-        friend result_type update(std::vector < record<TDescriptor, Fs...> > & recs, where_update_query const & q) {
-            result_type ret = 0;
-            for (record<TDescriptor, Fs...> & cur : recs) {
-                if (evaluate(cur, q.m_where)) {
-                    ret += update(cur, q.m_update);
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend Invoke<result_of<TRecord>> update(std::vector<TRecord> & recs, where_update_query const & q) {
+            typename result_of<TRecord>::type ret = 0;
+            for (TRecord & cur : recs) {
+                if (evaluate(cur, q._where)) {
+                    ret += update(cur, q._update);
                 }
             }
             return ret;
         }
+        
+        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
+        friend Invoke<result_of<TRecord>> query(std::vector<TRecord> & recs, where_update_query const & q) {
+            return update(recs, q);
+        }
 
         friend std::string to_string(where_update_query const & q) {
             using std::to_string;
-            return to_string(q.m_update) + std::string(" ") + to_string(q.m_where);
+            return to_string(q._update) + std::string(" ") + to_string(q._where);
         }
     };
     
-    template<typename TDescriptor, typename... Ms, typename... Cs>
-    inline where_update_query<update_query<TDescriptor, Ms...>, where_query<TDescriptor, Cs...> > operator+(update_query<TDescriptor, Ms...> const & u, where_query<TDescriptor, Cs...> const & w) {
-        return where_update_query<update_query<TDescriptor, Ms...>, where_query<TDescriptor, Cs...> >(u, w);
+    template<typename... Ms, typename... Cs>
+    inline where_update_query<update_query<Ms...>, where_query<Cs...>> operator+(update_query<Ms...> const & u, where_query<Cs...> const & w) {
+        return where_update_query<update_query<Ms...>, where_query<Cs...>>(u, w);
     }
 }
 

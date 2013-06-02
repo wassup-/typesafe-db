@@ -8,31 +8,41 @@
 #include "impl/type_sequence_impl.hpp"
 
 namespace fp {
-    template<typename...> struct type_seq;
-    template<typename...> struct pack_types;
-    template<typename...> struct skip_type;
+    template<typename...>
+    struct type_seq;
+    
+    template<typename...>
+    struct pack_types;
+    
+    template<typename...>
+    struct skip_type;
 
-    template<typename... Ts> struct type_seq {
+    template<typename... Ts>
+    struct type_seq {
 
         enum {
             size = sizeof...(Ts)
         };
 
-        template<typename T> struct extend {
-            typedef type_seq < Ts..., T> type;
+        template<typename T>
+        struct extend {
+            using type = type_seq<Ts..., T>;
         };
 
-        template<template<typename...> class C> struct as {
-            typedef C < Ts...> type;
+        template<template<typename...> class C>
+        struct as {
+            using type = C<Ts...>;
         };
     };
 
-    template<typename... Ts> struct pack_types {
-        typedef type_seq < Ts...> type;
+    template<typename... Ts>
+    struct pack_types {
+        typedef type_seq<Ts...> type;
     };
 
-    template<typename H, typename... T> struct skip_type<H, T...> {
-        typedef type_seq < T...> type;
+    template<typename H, typename... T>
+    struct skip_type<H, T...> {
+        using type = type_seq<T...>;
     };
 };
 

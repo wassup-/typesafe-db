@@ -7,16 +7,19 @@
 
 #include "impl/drop_values_impl.hpp"
 
-#include <cstddef>              // for int
-
 namespace fp {
-    template<int...> struct int_seq;
-    template<int, int...> struct drop_values;
+    template<int...>
+    struct int_seq;
+    
+    template<int, int...>
+    struct drop_values;
 
-    template<int C, int... I> struct drop_values : impl::drop_values_impl<C, (C == sizeof...(I)), int_seq<>, int_seq < I...> > {
+    template<int C, int... I>
+    struct drop_values : impl::drop_values_impl<C, (C == sizeof...(I)), int_seq<>, int_seq < I...> > {
     };
 
-    template<int C, int... I> struct drop_values_or_empty : impl::drop_values_impl<C, (C >= sizeof...(I)), int_seq<>, int_seq < I...> > {
+    template<int C, int... I>
+    struct drop_values_or_empty : impl::drop_values_impl<C, (C >= sizeof...(I)), int_seq<>, int_seq < I...> > {
     };
 }
 

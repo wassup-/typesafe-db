@@ -8,12 +8,12 @@
 #include "impl/is_contained_value_impl.hpp"
 
 namespace fp {
-	template<int...> struct int_seq;
-	template<int, int...> struct is_contained_value;
+    template<int, int...>
+    struct is_contained_value;
 
-	template<int T, int... Ts> struct is_contained_value {
-		enum { value = impl::is_contained_value_impl<T, Ts...>::value };
-	};
+    template<int T, int... Ts>
+    struct is_contained_value : impl::is_contained_value_impl<T, Ts...> {
+    };
 }
 
 #endif

@@ -7,20 +7,18 @@
 
 #include "impl/query_combiner_impl.hpp"
 
-#include <cstddef>              // for int
-
 namespace fp {
-    template<int...> struct int_seq;
-    template<typename, int...> struct select_query;
+    template<typename...>
+    struct select_query;
 
-    template<typename TTable, int... L, int... R>
-    inline typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::normal::type combine(select_query<TTable, L...>, select_query<TTable, R...>) {
-        return typename impl::query_combiner_impl<TTable, int_seq < L...>, int_seq < R...> >::normal::type();
+    template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
+    inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal> combine(select_query<LFields...>, select_query<RFields...>) {
+        return Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal>();
     }
 
-    template<typename TTable, int... L, int... R>
-    inline typename impl::query_combiner_impl<TTable, int_seq<L...>, int_seq<R...> >::unique::type combine_unique(select_query<TTable, L...>, select_query<TTable, R...>) {
-        return typename impl::query_combiner_impl<TTable, int_seq < L...>, int_seq < R...> >::unique::type();
+    template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
+    inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique> combine_unique(select_query<LFields...>, select_query<RFields...>) {
+        return Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique>();
     }
 }
 

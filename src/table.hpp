@@ -6,27 +6,26 @@
 #define _TABLE_HPP
 
 #include "int_sequence.hpp"
-
-#include <cstddef>              // for std::size_t
+#include "type_sequence.hpp"
 
 namespace fp {
-    template<typename...> struct type_seq;
-    template<typename, int...> struct record;
+    template<typename...>
+    struct record;
+    
+    template<typename...>
+    struct table;
 
-    namespace {
-        template<typename, typename> struct make_record;
+    template<typename TDescriptor, int... Indices, typename... TTypes>
+    struct table<field<TDescriptor, Indices, TTypes>...> {
+        typedef type_seq < TTypes...> types;
 
-        template<typename TDescriptor, int... Is> struct make_record<TDescriptor, int_seq<Is...> > {
-            typedef fp::record<TDescriptor, Is...> type;
+        struct record {
+            using type = fp::record<field<TDescriptor, Indices, TTypes>...>;
         };
-    }
-
-    template<typename... Ts> struct table {
-        typedef type_seq < Ts...> types;
-
-        template<typename TDescriptor> struct record {
-            typedef typename make_record<TDescriptor, typename range_builder < 0, sizeof...(Ts)>::type>::type type;
-        };
+        
+        friend std::string to_string(table const &) {
+            return TDescriptor::table::name;
+        }
     };
 }
 

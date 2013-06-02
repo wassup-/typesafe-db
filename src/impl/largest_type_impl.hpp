@@ -3,18 +3,21 @@
 
 namespace fp {
     namespace impl {
-        template<typename...> struct largest_type_impl;
+        template<typename...>
+        struct largest_type_impl;
 
         namespace {
 
-            template<int L, int R> struct _max {
+            template<int L, int R>
+            struct _max {
 
                 enum {
                     value = (L < R) ? R : L
                 };
             };
 
-            template<int L, int R> struct _min {
+            template<int L, int R>
+            struct _min {
 
                 enum {
                     value = (L < R) ? L : R
@@ -22,17 +25,19 @@ namespace fp {
             };
         }
 
-        template<typename H, typename... T> struct largest_type_impl<H, T...> {
+        template<typename H, typename... T>
+        struct largest_type_impl<H, T...> {
 
             enum {
-                value = _max<sizeof (H), largest_type_impl < T...>::size>::value
+                value = _max<sizeof(H), largest_type_impl<T...>::size>::value
             };
         };
 
-        template<typename T> struct largest_type_impl<T> {
+        template<typename T>
+        struct largest_type_impl<T> {
 
             enum {
-                value = sizeof (T)
+                value = sizeof(T)
             };
         };
     }

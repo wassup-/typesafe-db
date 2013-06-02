@@ -5,16 +5,17 @@
 #ifndef _PRIMARY_KEY_HPP
 #define _PRIMARY_KEY_HPP
 
-#include <cstddef>              // for int
-
 namespace fp {
-    template<typename, int> struct field;
-    template<typename> struct primary_key;
+    template<typename, int, typename>
+    struct field;
+    
+    template<typename>
+    struct primary_key;
 
-    template<typename TDescriptor, int Idx> struct primary_key<field<TDescriptor, Idx> > {
-        using field<TDescriptor, Idx>::index;
-        using field<TDescriptor, Idx>::type;
-        using field<TDescriptor, Idx>::name;
+    template<typename TDescriptor, int Idx, typename TType>
+    struct primary_key<field<TDescriptor, Idx, TType> > {
+        using field<TDescriptor, Idx, TType>::index;
+        using field<TDescriptor, Idx, TType>::type;
     };
 }
 

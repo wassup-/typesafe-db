@@ -10,9 +10,9 @@
 #include "type_sequence.hpp"
 
 namespace fp {
-    template<typename...> struct largest_type;
 
-    template<typename... Ts> struct largest_type : impl::largest_type_impl < Ts...> {
+    template<typename... Ts>
+    struct largest_type : impl::largest_type_impl < Ts...> {
     };
 }
 

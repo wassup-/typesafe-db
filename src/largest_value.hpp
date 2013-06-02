@@ -7,12 +7,10 @@
 
 #include "impl/largest_value_impl.hpp"
 
-#include <cstddef>              // for int
-
 namespace fp {
-    template<int...> struct largest_value;
 
-    template<int H, int... T> struct largest_value<H, T...> : impl::largest_value_impl<H, T...> {
+    template<int... Vs>
+    struct largest_value : impl::largest_value_impl<Vs...> {
     };
 }
 

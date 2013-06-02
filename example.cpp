@@ -1,17 +1,16 @@
 #include "src/record.hpp"               // for fp::get
 #include "src/field.hpp"                // for fp::field
-#include "src/mysql_engine.hpp"         // for fp::mysql_engine
+#include "src/mysql/basic_engine.hpp"   // for fp::mysql::basic_engine
 
 #include "src/table.hpp"                // for fp::table
 #include "src/primary_key.hpp"          // for fp::primary_key
+#include "src/ordered_query.hpp"        // for fp::order
 #include "src/select_query.hpp"         // for fp::select
-#include "src/where_query.hpp"          // for fp::evaluate
-#include "src/limit_query.hpp"          // for fp::limit, fp::evaluate
+#include "src/where_query.hpp"          // for fp::where
+#include "src/limit_query.hpp"          // for fp::limit, fp::where
 #include "src/update_query.hpp"         // for fp::update
-#include "src/where_select_query.hpp"   // for fp::query, fp::evaluate, fp::select
-#include "src/where_update_query.hpp"
-#include "src/largest_type.hpp"
-#include "src/impl/drop_values_impl.hpp"   // for fp::query, fp::evaluate, fp::update
+#include "src/where_select_query.hpp"   // for fp::query, fp::where, fp::select
+#include "src/where_update_query.hpp"   // for fp::query, fp::where, fp::update
 
 #include <iostream>                     // for std::cout
 #include <string>                       // for std::string
@@ -19,145 +18,130 @@
 
 namespace geo {
     namespace db {
+        namespace impl {
+
+            CONSTEXPR static char const * city_fields[] = {
+                "id",
+                "alpha",
+                "name",
+                "code",
+                "longitude",
+                "latitude",
+                "fullname",
+            };
+
+            CONSTEXPR static char const * province_fields[] = {
+                "id",
+                "name",
+                "longitude",
+                "latitude",
+            };
+
+            CONSTEXPR static char const * country_fields[] = {
+                "id",
+                "name",
+                "longitude",
+                "latitude",
+            };
+        }
 
         struct city {
-            typedef fp::field < city, 0 > id;
-            typedef fp::field < city, 1 > alpha;
-            typedef fp::field < city, 2 > name;
-            typedef fp::field < city, 3 > code;
-            typedef fp::field < city, 4 > longitude;
-            typedef fp::field < city, 5 > latitude;
+            typedef fp::field<city, 0, int> id;
+            typedef fp::field<city, 1, std::string> alpha;
+            typedef fp::field<city, 2, std::string> name;
+            typedef fp::field<city, 3, std::string> code;
+            typedef fp::field<city, 4, double> longitude;
+            typedef fp::field<city, 5, double> latitude;
 
             struct table {
-                typedef fp::table<int, std::string, std::string, std::string, double, double> type;
-                typedef typename type::types fields;
-                static char const * const name;
+                using type = fp::table<city::id, city::alpha, city::name, city::code, city::longitude, city::latitude>;
+                CONSTEXPR static char const * name = "geo_city";
 
-                typedef fp::primary_key<id> primary_key;
+                using primary_key = fp::primary_key<city::id>;
             };
 
             struct record {
-                typedef typename table::type::record<city>::type type;
-            };
-
-            struct fields {
-                static char const * const names[];
+                using type = typename city::table::type::record::type;
             };
 
             template<int I> struct field {
-                typedef typename fp::nth_type_of_seq<I, typename table::fields>::type type;
-                static char const * const name;
+                CONSTEXPR static char const * name = impl::city_fields[I];
             };
         };
-        char const * const city::table::name = "geo_city";
-        char const * const city::fields::names[] = {
-            "id",
-            "alpha",
-            "name",
-            "code",
-            "longitude",
-            "latitude",
-            "fullname",
-        };
-        template<int I> char const * const city::field<I>::name = city::fields::names[I];
 
         struct province {
-            typedef fp::field < province, 0 > id;
-            typedef fp::field < province, 1 > name;
-            typedef fp::field < province, 2 > longitude;
-            typedef fp::field < province, 3 > latitude;
+            typedef fp::field<province, 0, int> id;
+            typedef fp::field<province, 1, std::string> name;
+            typedef fp::field<province, 2, double> longitude;
+            typedef fp::field<province, 3, double> latitude;
 
             struct table {
-                typedef fp::table<int, std::string, double, double> type;
-                typedef typename type::types fields;
-                static char const * const name;
+                using type = fp::table<province::id, province::name, province::longitude, province::latitude>;
+                CONSTEXPR static char const * name = "geo_province";
 
-                typedef fp::primary_key<id> primary_key;
+                using primary_key = fp::primary_key<province::id>;
             };
 
             struct record {
-                typedef typename table::type::record<province> type;
-            };
-
-            struct fields {
-                static char const * const names[];
+                using type = typename province::table::type::record;
             };
 
             template<int I> struct field {
-                typedef typename fp::nth_type_of_seq<I, typename table::fields>::type type;
-                static char const * const name;
+                CONSTEXPR static char const * name = impl::province_fields[I];
             };
         };
-        char const * const province::table::name = "geo_province";
-        char const * const province::fields::names[] = {
-            "id",
-            "name",
-            "longitude",
-            "latitude",
-        };
-        template<int I> char const * const province::field<I>::name = province::fields::names[I];
 
         struct country {
-            typedef fp::field < country, 0 > id;
-            typedef fp::field < country, 1 > name;
-            typedef fp::field < country, 2 > longitude;
-            typedef fp::field < country, 3 > latitude;
+            typedef fp::field<country, 0, int> id;
+            typedef fp::field<country, 1, std::string> name;
+            typedef fp::field<country, 2, double> longitude;
+            typedef fp::field<country, 3, double> latitude;
 
             struct table {
-                typedef fp::table<int, std::string, double, double> type;
-                typedef typename type::types fields;
-                static char const * const name;
+                using type = fp::table<country::id, country::name, country::longitude, country::latitude>;
+                CONSTEXPR static char const * name = "geo_country";
 
-                typedef fp::primary_key<id> primary_key;
+                using primary_key = fp::primary_key<country::id>;
             };
 
             struct record {
-                typedef typename table::type::record<country> type;
-            };
-
-            struct fields {
-                static char const * const names[];
+                using type = typename country::table::type::record;
             };
 
             template<int I> struct field {
-                typedef typename fp::nth_type_of_seq<I, typename table::fields>::type type;
-                static char const * const name;
+                CONSTEXPR static char const * name = impl::country_fields[I];
             };
         };
-        char const * const country::table::name = "geo_country";
-        char const * const country::fields::names[] = {
-            "id",
-            "name",
-            "longitude",
-            "latitude",
-        };
-        template<int I> char const * const country::field<I>::name = country::fields::names[I];
     }
 }
 
-#define GEO_USER        "test"
-#define GEO_PASSWD      "testpw"
-#define GEO_DB          "shared"
+CONSTEXPR static char const * GEO_USER = "test";
+CONSTEXPR static char const * GEO_PASSWD = "testpw";
+CONSTEXPR static char const * GEO_DB = "shared";
 
-auto sq1 = (fp::select_query<geo::db::city > () + geo::db::city::alpha() + geo::db::city::longitude() + geo::db::city::latitude());
-auto wq1 = (fp::where_query<geo::db::city > () + (geo::db::city::name() % std::string("ken")));
-auto uq1 = (fp::update_query<geo::db::city > () + (geo::db::city::latitude() ^ 0) + (geo::db::city::latitude() ^ geo::db::city::longitude()));
+auto sq1 = fp::select(geo::db::city::alpha(), geo::db::city::latitude(), geo::db::city::longitude());
+auto wq1 = fp::where(fp::contains(geo::db::city::name(), "ken"));
+auto uq1 = fp::update(fp::set(geo::db::city::latitude(), 1), fp::mul(geo::db::city::longitude(), geo::db::city::longitude()));
+auto wuq1 = uq1 + wq1;
 
 int main(int argc, char ** argv) {
-    fp::mysql_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
-    
-    auto lim = fp::limit(sq1 + wq1, 10);
-    auto res = fp::query(engine, lim);
-    
-    std::cout << "Executed query: " << engine.last_query() << std::endl;
-    std::cout << "Results: " << res.size() << std::endl;
+    using fp::get;
+    using fp::to_string;
+
+    fp::mysql::basic_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
+
+    auto qry = fp::limit(fp::order(sq1 + wq1, geo::db::city::alpha(), fp::ascending), 10);
+    auto res = fp::query(engine, qry);
+    std::cout << "[Query]" << std::endl << to_string(qry) << std::endl;
+    std::cout << "[Results]" << std::endl << res.size() << std::endl;
     std::cout << "----------" << std::endl;
-    for (auto const & cur : res) {
-        std::cout << "Alpha: " << fp::get<geo::db::city::alpha > (cur) << std::endl;
-        std::cout << "Longitude: " << fp::get<geo::db::city::longitude > (cur) << std::endl;
-        std::cout << "Latitude: " << fp::get<geo::db::city::latitude > (cur) << std::endl;
+    for (auto && cur : res) {
+        std::cout << "Alpha: " << get<geo::db::city::alpha > (cur) << std::endl;
+        std::cout << "Longitude: " << get<geo::db::city::longitude > (cur) << std::endl;
+        std::cout << "Latitude: " << get<geo::db::city::latitude > (cur) << std::endl;
         std::cout << std::endl;
     }
     std::cout << "----------" << std::endl;
+
     return 0;
 }
