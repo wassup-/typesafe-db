@@ -6,11 +6,13 @@
 #include "src/primary_key.hpp"          // for fp::primary_key
 #include "src/ordered_query.hpp"        // for fp::order
 #include "src/select_query.hpp"         // for fp::select
+#include "src/type_traits.hpp"          // for fp::Invoke
 #include "src/where_query.hpp"          // for fp::where
 #include "src/limit_query.hpp"          // for fp::limit, fp::where
 #include "src/update_query.hpp"         // for fp::update
 #include "src/where_select_query.hpp"   // for fp::query, fp::where, fp::select
-#include "src/where_update_query.hpp"   // for fp::query, fp::where, fp::update
+#include "src/where_update_query.hpp"
+#include "src/is_contained_value.hpp"
 
 #include <iostream>                     // for std::cout
 #include <string>                       // for std::string
@@ -20,6 +22,10 @@ namespace geo {
     namespace db {
         namespace impl {
 
+            CONSTEXPR static char const * city_table = "geo_city";
+            CONSTEXPR static char const * province_table = "geo_province";
+            CONSTEXPR static char const * country_table = "geo_country";
+
             CONSTEXPR static char const * city_fields[] = {
                 "id",
                 "alpha",
@@ -27,7 +33,6 @@ namespace geo {
                 "code",
                 "longitude",
                 "latitude",
-                "fullname",
             };
 
             CONSTEXPR static char const * province_fields[] = {
@@ -54,17 +59,18 @@ namespace geo {
             using latitude = fp::field<city, 5, double>;
 
             struct table {
-                using type = fp::table<city::id, city::alpha, city::name, city::code, city::longitude, city::latitude>;
-                CONSTEXPR static char const * name = "geo_city";
-
                 using primary_key = fp::primary_key<city::id>;
+                using type = fp::table<city::id, city::alpha, city::name, city::code, city::longitude, city::latitude>;
+
+                CONSTEXPR static char const * name = impl::city_table;
             };
 
             struct record {
-                using type = typename city::table::type::record::type;
+                using type = fp::Invoke<typename city::table::type::record>;
             };
 
-            template<int I> struct field {
+            template<int I>
+                    struct field {
                 CONSTEXPR static char const * name = impl::city_fields[I];
             };
         };
@@ -76,17 +82,18 @@ namespace geo {
             using latitude = fp::field<province, 3, double>;
 
             struct table {
-                using type = fp::table<province::id, province::name, province::longitude, province::latitude>;
-                CONSTEXPR static char const * name = "geo_province";
-
                 using primary_key = fp::primary_key<province::id>;
+                using type = fp::table<province::id, province::name, province::longitude, province::latitude>;
+
+                CONSTEXPR static char const * name = impl::province_table;
             };
 
             struct record {
-                using type = typename province::table::type::record;
+                using type = fp::Invoke<typename province::table::type::record>;
             };
 
-            template<int I> struct field {
+            template<int I>
+                    struct field {
                 CONSTEXPR static char const * name = impl::province_fields[I];
             };
         };
@@ -98,17 +105,18 @@ namespace geo {
             using latitude = fp::field<country, 3, double>;
 
             struct table {
+                //using primary_key = fp::primary_key<country::id>;
                 using type = fp::table<country::id, country::name, country::longitude, country::latitude>;
-                CONSTEXPR static char const * name = "geo_country";
 
-                using primary_key = fp::primary_key<country::id>;
+                CONSTEXPR static char const * name = impl::country_table;
             };
 
             struct record {
-                using type = typename country::table::type::record;
+                using type = fp::Invoke<typename country::table::type::record>;
             };
 
-            template<int I> struct field {
+            template<int I>
+                    struct field {
                 CONSTEXPR static char const * name = impl::country_fields[I];
             };
         };
@@ -127,7 +135,11 @@ auto wuq1 = uq1 + wq1;
 int main(int argc, char ** argv) {
     using fp::get;
     using fp::to_string;
-
+    
+    std::cout << "PK for city?: " << fp::has_primary_key<geo::db::city::table>::value << std::endl;
+    std::cout << "PK for province?: " << fp::has_primary_key<geo::db::province::table>::value << std::endl;
+    std::cout << "PK for country?: " << fp::has_primary_key<geo::db::country::table>::value << std::endl;
+    
     fp::mysql::basic_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
 
     auto qry = fp::limit(fp::order(sq1 + wq1, geo::db::city::alpha(), fp::ascending), 10);

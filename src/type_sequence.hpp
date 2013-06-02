@@ -14,9 +14,6 @@ namespace fp {
     template<typename...>
     struct pack_types;
     
-    template<typename...>
-    struct skip_type;
-
     template<typename... Ts>
     struct type_seq {
 
@@ -38,11 +35,6 @@ namespace fp {
     template<typename... Ts>
     struct pack_types {
         typedef type_seq<Ts...> type;
-    };
-
-    template<typename H, typename... T>
-    struct skip_type<H, T...> {
-        using type = type_seq<T...>;
     };
 };
 

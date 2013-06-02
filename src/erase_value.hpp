@@ -15,7 +15,7 @@ namespace fp {
     struct erase_value;
 
     template<int I, int... T>
-    struct erase_value : impl::erase_value_impl<I, int_seq<>, int_seq < T...> > {
+    struct erase_value : impl::erase_value_impl<I, int_seq<>, int_seq<T...>> {
     };
 }
 

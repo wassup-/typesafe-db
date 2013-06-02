@@ -20,8 +20,7 @@ namespace fp {
     struct record;
     
     // This sole purpose of this declaration is to enable ADL
-    template<typename>
-    void get() = delete;
+    template<typename> void get() = delete;
 
     template<typename>
     struct is_record : Bool<false> { };

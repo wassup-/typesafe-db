@@ -11,12 +11,19 @@ namespace fp {
     struct indices {
     };
 
-    template<int N, int... Is>
-    struct build_indices : build_indices<(N - 1), (N - 1), Is...> {
-    };
+    namespace impl {
 
-    template<int... Is>
-    struct build_indices<0, Is...> : indices<Is...> {
+        template<int N, int... Is>
+        struct build_indices : build_indices<(N - 1), (N - 1), Is...> {
+        };
+
+        template<int... Is>
+        struct build_indices < 0, Is...> : indices<Is...> {
+        };
+    }
+
+    template<int N>
+    struct build_indices : impl::build_indices<N> {
     };
 }
 

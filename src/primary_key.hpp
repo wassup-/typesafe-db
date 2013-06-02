@@ -9,14 +9,18 @@ namespace fp {
     template<typename, int, typename>
     struct field;
     
-    template<typename>
-    struct primary_key;
-
-    template<typename TDescriptor, int Idx, typename TType>
-    struct primary_key<field<TDescriptor, Idx, TType> > {
-        using field<TDescriptor, Idx, TType>::index;
-        using field<TDescriptor, Idx, TType>::type;
-    };
+    namespace impl {
+        template<typename> struct primary_key;
+        
+        template<typename TDescriptor, int Idx, typename TType>
+        struct primary_key<field<TDescriptor, Idx, TType> > {
+            using field<TDescriptor, Idx, TType>::index;
+            using field<TDescriptor, Idx, TType>::type;
+        };
+    }
+    
+    template<typename T>
+    struct primary_key : impl::primary_key<T> { };
 }
 
 #endif

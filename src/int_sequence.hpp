@@ -17,9 +17,6 @@ namespace fp {
     template<int...>
     struct skip_value;
     
-    template<int, int...>
-    struct is_contained_int;
-
     template<int... Is> struct int_seq {
 
         enum {
@@ -42,10 +39,6 @@ namespace fp {
 
     template<int Min, int Max>
     struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> {
-    };
-
-    template<int V, int... Vs>
-    struct is_contained_int : impl::is_contained_int_impl<V, Vs...> {
     };
 
     template<int H, int... T>
