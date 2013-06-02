@@ -92,73 +92,73 @@ namespace fp {
     
     template<typename TField>
     inline impl::update_modifiers::modifier<TField, impl::update_modifiers::value_getter<TField>> operator^(TField, typename TField::type v) {
-        typedef impl::update_modifiers::value_getter<TField> getter_type;
+        using getter_type = impl::update_modifiers::value_getter<TField>;
         return impl::update_modifiers::modifier<TField, getter_type>(getter_type(v));
     }
     
     template<typename TLeft, typename TRight, EnableIf<is_field<TLeft>, is_field<TRight>> = _>
     inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_getter<TRight>> operator^(TLeft, TRight) {
-        typedef impl::update_modifiers::field_getter<TRight> getter_type;
+        using getter_type = impl::update_modifiers::field_getter<TRight>;
         return impl::update_modifiers::modifier<TLeft, getter_type>(getter_type());
     }
     
     template<typename TField>
     inline fp::impl::update_modifiers::modifier<TField, fp::impl::update_modifiers::value_getter<TField>> set(TField, typename TField::type v) {
-        typedef fp::impl::update_modifiers::value_getter<TField> getter_type;
+        using getter_type = fp::impl::update_modifiers::value_getter<TField>;
         return fp::impl::update_modifiers::modifier<TField, getter_type>(getter_type(v));
     }
     
     template<typename TLeft, typename TRight, EnableIf<is_field<TLeft>, is_field<TRight>> = _>
     inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_getter<TRight>> set(TLeft, TRight) {
-        typedef fp::impl::update_modifiers::field_getter<TRight> getter_type;
+        using getter_type = fp::impl::update_modifiers::field_getter<TRight>;
         return fp::impl::update_modifiers::modifier<TLeft, getter_type>(getter_type());
     }
     
     template<typename TField>
     inline fp::impl::update_modifiers::modifier<TField, fp::impl::update_modifiers::value_add<TField>> add(TField f, typename TField::type v) {
-        typedef fp::impl::update_modifiers::value_add<TField> getter_type;
+        using getter_type = fp::impl::update_modifiers::value_add<TField>;
         fp::impl::update_modifiers::modifier<TField, getter_type>(getter_type(v));
     }
     
     template<typename TLeft, typename TRight, EnableIf<is_field<TLeft>, is_field<TRight>> = _>
     inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_add<TLeft, TRight>> add(TLeft, TRight) {
-        typedef fp::impl::update_modifiers::field_add<TLeft, TRight> getter_type;
+        using getter_type = fp::impl::update_modifiers::field_add<TLeft, TRight>;
         return fp::impl::update_modifiers::modifier<TLeft, getter_type>(getter_type());
     }
     
     template<typename TField>
     inline fp::impl::update_modifiers::modifier<TField, fp::impl::update_modifiers::value_sub<TField>> sub(TField f, typename TField::type v) {
-        typedef fp::impl::update_modifiers::value_sub<TField> getter_type;
+        using getter_type = fp::impl::update_modifiers::value_sub<TField>;
         fp::impl::update_modifiers::modifier<TField, getter_type>(getter_type(v));
     }
     
     template<typename TLeft, typename TRight, EnableIf<is_field<TLeft>, is_field<TRight>> = _>
     inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_sub<TLeft, TRight>> sub(TLeft, TRight) {
-        typedef fp::impl::update_modifiers::field_sub<TLeft, TRight> getter_type;
+        using getter_type = fp::impl::update_modifiers::field_sub<TLeft, TRight>;
         return fp::impl::update_modifiers::modifier<TLeft, getter_type>(getter_type());
     }
     
     template<typename TField>
     inline fp::impl::update_modifiers::modifier<TField, fp::impl::update_modifiers::value_mul<TField>> mul(TField f, typename TField::type v) {
-        typedef fp::impl::update_modifiers::value_mul<TField> getter_type;
+        using getter_type = fp::impl::update_modifiers::value_mul<TField>;
         fp::impl::update_modifiers::modifier<TField, getter_type>(getter_type(v));
     }
     
     template<typename TLeft, typename TRight, EnableIf<is_field<TLeft>, is_field<TRight>> = _>
     inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_mul<TLeft, TRight>> mul(TLeft, TRight) {
-        typedef fp::impl::update_modifiers::field_mul<TLeft, TRight> getter_type;
+        using getter_type = fp::impl::update_modifiers::field_mul<TLeft, TRight>;
         return fp::impl::update_modifiers::modifier<TLeft, getter_type>(getter_type());
     }
     
     template<typename TField>
     inline fp::impl::update_modifiers::modifier<TField, fp::impl::update_modifiers::value_div<TField>> div(TField f, typename TField::type v) {
-        typedef fp::impl::update_modifiers::value_div<TField> getter_type;
+        using getter_type = fp::impl::update_modifiers::value_div<TField>;
         fp::impl::update_modifiers::modifier<TField, getter_type>(getter_type(v));
     }
     
     template<typename TLeft, typename TRight, EnableIf<is_field<TLeft>, is_field<TRight>> = _>
     inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_div<TLeft, TRight>> div(TLeft, TRight) {
-        typedef fp::impl::update_modifiers::field_div<TLeft, TRight> getter_type;
+        using getter_type = fp::impl::update_modifiers::field_div<TLeft, TRight>;
         return fp::impl::update_modifiers::modifier<TLeft, getter_type>(getter_type());
     }
 }

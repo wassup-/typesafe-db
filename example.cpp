@@ -46,12 +46,12 @@ namespace geo {
         }
 
         struct city {
-            typedef fp::field<city, 0, int> id;
-            typedef fp::field<city, 1, std::string> alpha;
-            typedef fp::field<city, 2, std::string> name;
-            typedef fp::field<city, 3, std::string> code;
-            typedef fp::field<city, 4, double> longitude;
-            typedef fp::field<city, 5, double> latitude;
+            using id = fp::field<city, 0, int>;
+            using alpha = fp::field<city, 1, std::string>;
+            using name = fp::field<city, 2, std::string>;
+            using code = fp::field<city, 3, std::string>;
+            using longitude = fp::field<city, 4, double>;
+            using latitude = fp::field<city, 5, double>;
 
             struct table {
                 using type = fp::table<city::id, city::alpha, city::name, city::code, city::longitude, city::latitude>;
@@ -70,10 +70,10 @@ namespace geo {
         };
 
         struct province {
-            typedef fp::field<province, 0, int> id;
-            typedef fp::field<province, 1, std::string> name;
-            typedef fp::field<province, 2, double> longitude;
-            typedef fp::field<province, 3, double> latitude;
+            using id = fp::field<province, 0, int>;
+            using name = fp::field<province, 1, std::string>;
+            using longitude = fp::field<province, 2, double>;
+            using latitude = fp::field<province, 3, double>;
 
             struct table {
                 using type = fp::table<province::id, province::name, province::longitude, province::latitude>;
@@ -92,10 +92,10 @@ namespace geo {
         };
 
         struct country {
-            typedef fp::field<country, 0, int> id;
-            typedef fp::field<country, 1, std::string> name;
-            typedef fp::field<country, 2, double> longitude;
-            typedef fp::field<country, 3, double> latitude;
+            using id = fp::field<country, 0, int>;
+            using name = fp::field<country, 1, std::string>;
+            using longitude = fp::field<country, 2, double>;
+            using latitude = fp::field<country, 3, double>;
 
             struct table {
                 using type = fp::table<country::id, country::name, country::longitude, country::latitude>;

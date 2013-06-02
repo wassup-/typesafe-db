@@ -93,8 +93,8 @@ namespace fp {
 
     template<typename TDescriptor, typename... TWhere, typename T>
     inline where_query<where_clauses::where_and<where_query<TWhere...>, T> > operator&(where_query<TWhere...> q, T c) {
-        typedef where_clauses::where_and<where_query<TWhere...>, T> clause_type;
-        typedef where_query<clause_type> return_type;
+        using clause_type = where_clauses::where_and<where_query<TWhere...>, T>;
+        using return_type = where_query<clause_type>;
         return return_type(clause_type(q, c));
     }
 }
