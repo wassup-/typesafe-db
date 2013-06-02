@@ -17,6 +17,9 @@ namespace fp {
     template<typename T>
     struct identity { using type = T; };
     
+    template<typename T>
+    using Identity = Invoke<identity<T>>;
+    
     template<bool B, typename...>
     struct dependent_bool_type : std::integral_constant<bool, B> { };
     
@@ -28,9 +31,6 @@ namespace fp {
     
     template<int I>
     using Int = Const<decltype(I), I>;
-    
-    template<typename T>
-    using Identity = Invoke<identity<T>>;
     
     template<typename T>
     using Alias = T;
@@ -156,8 +156,31 @@ namespace fp {
     template<int N, int... T>
     using SkipValues = Invoke<impl::skip_n_values<N, T...>>;
     
-    template<typename>
-    struct result_of;
+    namespace impl {
+        
+        template<typename T>
+        struct result_of {
+            using type = Invoke<T>;
+        };
+        
+        template<typename TRet, typename... TArg>
+        struct result_of<TRet(*)(TArg...) > {
+            using type = TRet;
+        };
+
+        template<typename TClass, typename TRet, typename... TArg>
+        struct result_of<TRet(TClass::*)(TArg...)> {
+            using type = TRet;
+        };
+
+        template<typename Fn, typename... Arg>
+        struct result_of<Fn(Arg...)> {
+            using type = Invoke<std::result_of<Fn(Arg...)>>;
+        };
+    }
+    
+    template<typename T>
+    using ResultOf = Invoke<impl::result_of<T>>;
     
     template<typename, template<typename...> class>
     struct is_specialization_of;

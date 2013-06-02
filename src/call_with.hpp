@@ -2,8 +2,7 @@
 #define CALL_WITH_HPP_
 
 #include "indices.hpp"          // for fp::indices, fp::build_indices
-#include "result_of.hpp"        // for fp::result_of
-#include "type_traits.hpp"      // for Unqualified
+#include "type_traits.hpp"      // for ResultOf, Unqualified
 
 #include <array>                // for std::array
 #include <tuple>                // for std::tuple, std::get
@@ -40,21 +39,22 @@ namespace fp {
         };
 
         template<typename F, typename T, int... Is>
-        auto call_with(F && f, T && tup, indices<Is...>, tuplelike_tag) -> Invoke<result_of<Unqualified<F>>> {
+        auto call_with(F && f, T && tup, indices<Is...>, tuplelike_tag) -> ResultOf<Unqualified<F>> {
             return (std::forward<F>(f))(std::get<Is>(std::forward<T>(tup))...);
         }
 
         template<typename F, typename A, int... Is>
-        auto call_with(F && f, A && arr, indices<Is...>, arraylike_tag) -> Invoke<result_of<Unqualified<F>>> {
+        auto call_with(F && f, A && arr, indices<Is...>, arraylike_tag) -> ResultOf<Unqualified<F>> {
             return (std::forward<F>(f))(std::forward<A>(arr)[Is]...);
         }
     }
 
     template<typename F, typename Cont>
-    inline auto call_with(F && f, Cont && cont) -> Invoke<result_of<Unqualified<F >>> {
+    inline auto call_with(F && f, Cont && cont) -> ResultOf<Unqualified<F>> {
         using unqualified = Unqualified<Cont>;
         using tag = typename detail::call_with_traits<unqualified>::tag;
-        return detail::call_with(std::forward<F>(f), std::forward<Cont>(cont), build_indices<detail::call_with_traits<unqualified>::size>(), tag());
+        using indices = build_indices<detail::call_with_traits<unqualified>::size>;
+        return detail::call_with(std::forward<F>(f), std::forward<Cont>(cont), indices(), tag());
     }
 
     namespace detail {
@@ -96,12 +96,12 @@ namespace fp {
     }
 
     template<typename F, typename Cont>
-    inline auto call_function(F && f, Cont && cont) -> Invoke<result_of<Unqualified<F>>> {
+    inline auto call_function(F && f, Cont && cont) -> ResultOf<Unqualified<F>> {
         return call_with(std::forward<F>(f), std::forward<Cont>(cont));
     }
     
     template<typename F, typename C, typename Cont>
-    inline auto call_function(F && f, C * obj, Cont && cont) -> Invoke<result_of<Unqualified<F>>> {
+    inline auto call_function(F && f, C * obj, Cont && cont) -> ResultOf<Unqualified<F>> {
         return call_with(detail::member_fn_caller<Unqualified<F>>(std::forward<F>(f), obj), std::forward<Cont>(cont));
     }
 }

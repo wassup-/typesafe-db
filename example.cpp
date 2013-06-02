@@ -136,9 +136,9 @@ int main(int argc, char ** argv) {
     using fp::get;
     using fp::to_string;
     
-    std::cout << "PK for city?: " << fp::has_primary_key<geo::db::city::table>::value << std::endl;
-    std::cout << "PK for province?: " << fp::has_primary_key<geo::db::province::table>::value << std::endl;
-    std::cout << "PK for country?: " << fp::has_primary_key<geo::db::country::table>::value << std::endl;
+    std::cout << "city has PK: " << fp::has_primary_key<geo::db::city::table>::value << std::endl;
+    std::cout << "province has PK: " << fp::has_primary_key<geo::db::province::table>::value << std::endl;
+    std::cout << "country has PK: " << fp::has_primary_key<geo::db::country::table>::value << std::endl;
     
     fp::mysql::basic_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
 
