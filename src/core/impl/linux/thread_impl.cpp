@@ -1,5 +1,5 @@
-#include "thread_impl.hpp"
-#include "../../thread.hpp"
+#include "../../../../include/core/impl/linux/thread_impl.hpp"
+#include "../../../../include/core/thread.hpp"
 
 #include <cassert>		// for assert
 #include <pthread.h>            // for pthread_create, pthread_join, pthread_cancel

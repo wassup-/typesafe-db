@@ -1,18 +1,18 @@
-#include "src/record.hpp"               // for fp::get
-#include "src/field.hpp"                // for fp::field
-#include "src/mysql/basic_engine.hpp"   // for fp::mysql::basic_engine
+#include "include/record.hpp"               // for fp::get
+#include "include/field.hpp"                // for fp::field
+#include "include/mysql/basic_engine.hpp"   // for fp::mysql::basic_engine
 
-#include "src/table.hpp"                // for fp::table
-#include "src/primary_key.hpp"          // for fp::primary_key
-#include "src/ordered_query.hpp"        // for fp::order
-#include "src/select_query.hpp"         // for fp::select
-#include "src/type_traits.hpp"          // for fp::Invoke
-#include "src/where_query.hpp"          // for fp::where
-#include "src/limit_query.hpp"          // for fp::limit, fp::where
-#include "src/update_query.hpp"         // for fp::update
-#include "src/where_select_query.hpp"   // for fp::query, fp::where, fp::select
-#include "src/where_update_query.hpp"
-#include "src/is_contained_value.hpp"
+#include "include/table.hpp"                // for fp::table
+#include "include/primary_key.hpp"          // for fp::primary_key
+#include "include/ordered_query.hpp"        // for fp::order
+#include "include/select_query.hpp"         // for fp::select
+#include "include/type_traits.hpp"          // for fp::Invoke
+#include "include/where_query.hpp"          // for fp::where
+#include "include/limit_query.hpp"          // for fp::limit, fp::where
+#include "include/update_query.hpp"         // for fp::update
+#include "include/where_select_query.hpp"   // for fp::query, fp::where, fp::select
+#include "include/where_update_query.hpp"
+#include "include/is_contained_value.hpp"
 
 #include <iostream>                     // for std::cout
 #include <string>                       // for std::string

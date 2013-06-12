@@ -1,5 +1,5 @@
-#include "threadpool.hpp"
-#include "thread.hpp"
+#include "../../include/core/threadpool.hpp"
+#include "../../include/core/thread.hpp"
 
 #include <chrono>       // for std::chrono::*
 #include <iostream>

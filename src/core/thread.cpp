@@ -1,4 +1,4 @@
-#include "thread.hpp"
+#include "../../include/core/thread.hpp"
 
 namespace fp {
 
