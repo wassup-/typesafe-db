@@ -14,13 +14,11 @@ namespace fp {
     namespace detail {
 
         template<typename>
-        struct is_engine : Bool < false > {
-        };
+        struct is_engine : Bool<false> { };
     }
 
     template<typename T>
-    struct is_engine : detail::is_engine<T> {
-    };
+    struct is_engine : detail::is_engine<T> { };
 
     template<typename TEngine, typename TQuery>
     inline auto query(TEngine && eng, TQuery && qry) -> decltype(std::forward<TEngine>(eng).query(std::forward<TQuery>(qry))) {

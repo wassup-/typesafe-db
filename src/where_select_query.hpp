@@ -29,6 +29,7 @@ namespace fp {
     template<typename TSelect, typename TWhere>
     struct where_select_query {
     public:
+        
         template<typename TRecord>
         struct result_of {
             using type = Invoke<typename TSelect::template result_of<TRecord>>;
@@ -58,14 +59,14 @@ namespace fp {
             swap(l._where, r._where);
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend bool evaluate(TRecord const & rec, where_select_query const & q) {
-            return evaluate(rec, q._where);
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend bool evaluate(TRecord && rec, where_select_query const & q) {
+            return evaluate(std::forward<TRecord>(rec), q._where);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> select(TRecord const & rec, where_select_query const & q) {
-            return select(rec, q._select);
+        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord && rec, where_select_query const & q) {
+            return select(std::forward<TRecord>(rec), q._select);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
@@ -85,9 +86,9 @@ namespace fp {
         }
     };
 
-    template<typename TSelect, typename TWhere, EnableIf<is_select_query<TSelect>, is_where_query<TWhere>> = _>
-    inline where_select_query<TSelect, TWhere> operator+(TSelect const & s, TWhere const & w) {
-        return where_select_query<TSelect, TWhere>(s, w);
+    template<typename TSelect, typename TWhere, EnableIf<is_select_query<Unqualified<TSelect>>, is_where_query<Unqualified<TWhere>>> = _>
+    inline where_select_query<Unqualified<TSelect>, Unqualified<TWhere>> operator+(TSelect && s, TWhere && w) {
+        return where_select_query<Unqualified<TSelect>, Unqualified<TWhere>>(std::forward<TSelect>(s), std::forward<TWhere>(w));
     }
 }
 

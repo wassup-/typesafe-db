@@ -29,6 +29,7 @@ namespace fp {
     template<typename TDescriptor, typename... TFields>
     struct insert_query {
     public:
+        
         template<typename TRecord>
         struct result_of {
             using type = Invoke<TRecord::rebind<TFields...>>;

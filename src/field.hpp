@@ -22,7 +22,37 @@ namespace fp {
 
         template<typename>
         struct is_field : Bool<false> { };
+        
+        template<typename>
+        struct unpack_field;
+        
+        template<typename TDescriptor, int Idx, typename TValue>
+        struct unpack_field<field<TDescriptor, Idx, TValue>> {
+            static std::string const tables[];
+            static std::string const fields[];
+        };
+        
+        template<typename TDescriptor, int Idx, typename TValue>
+        std::string const unpack_field<field<TDescriptor, Idx, TValue>>::tables[] = { to_string(Invoke<typename TDescriptor::table>()) };
+        
+        template<typename TDescriptor, int Idx, typename TValue>
+        std::string const unpack_field<field<TDescriptor, Idx, TValue>>::fields[] = { to_string(TDescriptor::template field<Idx>::name) };
+        
+        template<int Idx, typename... TField>
+        struct unpack_field<combined_field<Idx, TField...>> {
+            static std::string const tables[];
+            static std::string const fields[];
+        };
+        
+        template<int Idx, typename... TField>
+        std::string const unpack_field<combined_field<Idx, TField...>>::tables[] = { };
+        
+        template<int Idx, typename... TField>
+        std::string const unpack_field<combined_field<Idx, TField...>>::fields[] = { };
     }
+    
+    template<typename T>
+    struct unpack_field : detail::unpack_field<T> { };
 
     template<typename T>
     struct is_field : detail::is_field<T> { };
@@ -50,6 +80,7 @@ namespace fp {
 
     template<typename TDescriptor, int Index, typename TType>
     struct field_traits<field<TDescriptor, Index, TType> > {
+        
         using descriptor_type = TDescriptor;
         using table_type = Invoke<typename TDescriptor::table>;
         using type = TType;
@@ -60,9 +91,10 @@ namespace fp {
 
     template<typename TDescriptor, int Index, int... Indices, typename... TTypes>
     struct field_traits<combined_field<Index, field<TDescriptor, Indices, TTypes>...>> {
-        using descriptor_type = DescriptorOf<combined_field<Index, field<TDescriptor, Indices, TTypes>...>>;
-        using table_type = Invoke<typename descriptor_type::table>;
-        using type = Invoke<combined_field<Index, field<TDescriptor, Indices, TTypes>...>>;
+        
+        using descriptor_type = FirstTypeOf<DescriptorOf<field<TDescriptor, Indices, TTypes>>...>;
+        using table_type = typename TDescriptor::table::type;
+        using type = std::tuple<TTypes...>;
 
         CONSTEXPR static int index = combined_field<Index, field<TDescriptor, Indices, TTypes>...>::index;
         CONSTEXPR static char const * name = combined_field<Index, field<TDescriptor, Indices, TTypes>...>::name;
@@ -70,24 +102,26 @@ namespace fp {
 
     template<typename TDescriptor, int Index, typename TType>
     struct field {
-        using descriptor_type = DescriptorOf<field_traits<field<TDescriptor, Index, TType>>>;
-        using type = Invoke<field_traits<field<TDescriptor, Index, TType>>>;
+        
+        using descriptor_type = typename field_traits<field<TDescriptor, Index, TType>>::descriptor_type;
+        using type = typename field_traits<field<TDescriptor, Index, TType>>::type;
 
-        CONSTEXPR static int index = field_traits < field<TDescriptor, Index, TType >>::index;
+        CONSTEXPR static int index = field_traits<field<TDescriptor, Index, TType >>::index;
         CONSTEXPR static char const * name = field_traits<field<TDescriptor, Index, TType>>::name;
 
         friend std::string to_string(field) {
-            return to_string(Invoke<typename descriptor_type::table > ()) + std::string(".") + std::string(name);
+            return to_string(Invoke<typename TDescriptor::table>()) + std::string(".") + std::string(name);
         }
     };
 
     template<int Index, typename... TFields>
     struct combined_field {
-        using descriptor_type = FirstTypeOf<DescriptorOf<TFields>...>;
-        using type = std::tuple<Invoke<TFields>...>;
+        
+        using descriptor_type = typename field_traits<combined_field<Index, TFields...>>::descriptor_type;
+        using type = typename field_traits<combined_field<Index, TFields...>>::type;
 
-        CONSTEXPR static int index = field_traits < combined_field<Index, TFields... >> ::index;
-        CONSTEXPR static char const * name = field_traits < combined_field<Index, TFields... >> ::name;
+        CONSTEXPR static int index = field_traits<combined_field<Index, TFields... >>::index;
+        CONSTEXPR static char const * name = field_traits<combined_field<Index, TFields... >>::name;
 
         friend std::string to_string(combined_field) {
             using std::to_string;
@@ -106,7 +140,7 @@ namespace fp {
     namespace detail {
         
         template<int Idx, typename TDescriptor, int... Indices, typename... TTypes>
-        struct is_field<combined_field<Idx, field<TDescriptor, Indices, TTypes>... >> : Bool<true> { };
+        struct is_field<combined_field<Idx, field<TDescriptor, Indices, TTypes>...>> : Bool<true> { };
     }
 
     template<typename... TFields>

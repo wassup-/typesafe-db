@@ -13,12 +13,12 @@ namespace fp {
 
     template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
     inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal> combine(select_query<LFields...>, select_query<RFields...>) {
-        return Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal>();
+        return { };
     }
 
     template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
     inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique> combine_unique(select_query<LFields...>, select_query<RFields...>) {
-        return Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique>();
+        return { };
     }
 }
 

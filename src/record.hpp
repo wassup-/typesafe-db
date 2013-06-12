@@ -8,11 +8,9 @@
 #include "config.hpp"
 #include "field.hpp"            // for fp::field
 #include "int_sequence.hpp"     // for fp::index_of
-#include "type_sequence.hpp"    // for fp::type_seq
-#include "type_traits.hpp"      // for fp::enable_if, fp::enable_if_c
+#include "type_traits.hpp"      // for fp::EnableIf, fp::DisableIf
 
-#include <string>       // for std::string
-#include <tuple>        // for std::tuple, std::tuple_cat, std::get
+#include <tuple>        // for std::tuple, std::get
 
 
 namespace fp {
@@ -39,14 +37,13 @@ namespace fp {
     template<typename... TFields>
     struct record {
     public:
-        static int const SIZE = sizeof...(TFields);
         
         template<typename... TOther>
         struct rebind {
             using type = record<TOther...>;
         };
         
-        template<int Idx>
+        template<std::size_t Idx>
         struct nth_type {
             using type = NthTypeOf<Idx, Invoke<TFields>...>;
         };
@@ -76,18 +73,18 @@ namespace fp {
             swap(l._values, r._values);
         }
 
-        int size() const {
-            return SIZE;
+        constexpr static std::size_t size() {
+            return sizeof...(TFields);
         }
 
-        template<int I>
-        friend NthTypeOf<index_of<I, TFields::index...>::value, Invoke<TFields> &...> get(record & rec) {
-            return std::get<index_of<I, TFields::index...>::value>(rec._values);
+        template<std::size_t Idx>
+        friend Invoke<nth_type<index_of<Idx, TFields::index...>::value>> & get(record & rec) {
+            return std::get<index_of<Idx, TFields::index...>::value>(rec._values);
         }
 
-        template<int I>
-        friend NthTypeOf<index_of<I, TFields::index...>::value, Invoke<TFields> const &...> get(record const & rec) {
-            return std::get<index_of<I, TFields::index...>::value>(rec._values);
+        template<std::size_t Idx>
+        friend Invoke<nth_type<index_of<Idx, TFields::index...>::value>> const & get(record const & rec) {
+            return std::get<index_of<Idx, TFields::index...>::value>(rec._values);
         }
 
         template<typename TField, EnableIf<is_field<TField>> = _>

@@ -29,6 +29,7 @@ namespace fp {
     template<typename TUpdate, typename TWhere>
     struct where_update_query {
     public:
+        
         template<typename TRecord>
         struct result_of {
             using type = Invoke<typename TUpdate::template result_of<TRecord>>;
@@ -59,14 +60,14 @@ namespace fp {
             swap(l._where, r._where);
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend bool evaluate(TRecord const & rec, where_update_query const & q) {
-            return evaluate(rec, q._where);
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend bool evaluate(TRecord && rec, where_update_query const & q) {
+            return evaluate(std::forward<TRecord>(rec), q._where);
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> update(TRecord & rec, where_update_query const & q) {
-            return update(rec, q._update);
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend Invoke<result_of<Unqualified<TRecord>>> update(TRecord && rec, where_update_query const & q) {
+            return update(std::forward<TRecord>(rec), q._update);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>

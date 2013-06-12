@@ -8,38 +8,27 @@
 #include "impl/int_sequence_impl.hpp"
 
 namespace fp {
-    template<int...>
-    struct int_seq;
     
     template<int, int>
     struct range_builder;
     
     template<int...>
     struct skip_value;
-    
-    template<int... Is> struct int_seq {
 
-        enum {
-            size = sizeof...(Is)
-        };
-
-        template<template<int...> class C>
-        struct as {
-            using type = C<Is...>;
-        };
+    template<int V, int... Vs>
+    struct occurences_of : impl::occurences_of_impl<0, V, Vs...> {
     };
 
     template<int V, int... Vs>
-    struct occurences_of : impl::occurences_of_impl < 0, V, Vs...> {
-    };
-
-    template<int V, int... Vs>
-    struct index_of : impl::index_of_impl < 0, V, Vs...> {
+    struct index_of : impl::index_of_impl<0, V, Vs...> {
     };
 
     template<int Min, int Max>
-    struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> {
-    };
+    struct range_builder :      Conditional<
+                                    Bool<(Min <= Max)>,
+                                    impl::build_range_incr<Min, Max>,
+                                    impl::build_range_decr<Min, Max>
+                                > { };
 
     template<int H, int... T>
     struct skip_value<H, T...> {

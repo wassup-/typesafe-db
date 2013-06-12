@@ -27,6 +27,7 @@ namespace fp {
 
     template<typename... TFields> struct select_query {
     public:
+        
         template<typename TRecord>
         struct result_of {
             using type = Invoke<typename TRecord::template rebind<TFields...>>;
@@ -37,9 +38,9 @@ namespace fp {
             using std::swap;
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> select(TRecord const & rec, select_query const & q) {
-            return typename result_of<TRecord>::type(get<TFields>(rec)...);
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord && rec, select_query const & q) {
+            return { get<TFields>(std::forward<TRecord>(rec))... };
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
@@ -61,9 +62,9 @@ namespace fp {
         }
     };
     
-    template<typename... TFields, EnableIf<is_field<TFields>...> = _>
-    inline select_query<TFields...> select(TFields...) {
-        return select_query<TFields...>();
+    template<typename... TFields, EnableIf<is_field<Unqualified<TFields>>...> = _>
+    inline select_query<Unqualified<TFields>...> select(TFields &&...) {
+        return { };
     }
 
     template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>

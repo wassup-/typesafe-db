@@ -60,6 +60,26 @@
 
 #endif
 
+#if defined(__GNUC__)
+    #if defined(__clang)
+        #define FP_COMPILER_CLANG
+    #elif defined(__INTEL_COMPILER)
+        #define FP_COMPILER_INTEL
+    #else
+        #define FP_COMPILER_GCC
+    #endif
+#elif defined(__COMO__)
+    #define FP_COMPILER_COMEAU
+#elif defined(__llvm__)
+    #define FP_COMPILER_LLVM
+#elif defined(__MWERKS__)
+    #define FP_COMPILER_METROWERKS
+#elif defined(_MSC_VER)
+    #define FP_COMPILER_MSVC
+#elif defined(__MINGW32__)
+    #define FP_COMPILER_MINGW
+#endif
+
 ////////////////////////////////////////////////////////////
 // Define a portable debug macro
 ////////////////////////////////////////////////////////////
@@ -82,6 +102,12 @@
 
 #endif
 
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define FP_UNREACHABLE      __builtin_unreachable();
+#else
+#define FP_UNREACHABLE
+#endif
+
 
 ////////////////////////////////////////////////////////////
 // Define helpers to create portable import / export macros for each module
@@ -93,13 +119,6 @@
         #define FP_API_EXPORT   __declspec(dllexport)
         #define FP_API_IMPORT   __declspec(dllimport)
         #define FP_API_LOCAL
-
-        // For Visual C++ compilers, we also need to turn off this annoying C4251 warning
-        #ifdef _MSC_VER
-
-        #pragma warning(disable : 4251)
-
-        #endif
 
     #else // Linux, FreeBSD, Mac OS X
 

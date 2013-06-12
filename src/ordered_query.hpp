@@ -33,6 +33,7 @@ namespace fp {
     template<typename TQuery, typename TField>
     struct ordered_query {
     public:
+        
         template<typename TRecord>
         struct result_of {
             using type = Invoke<typename TQuery::template result_of<TRecord>>;
@@ -92,9 +93,9 @@ namespace fp {
      * @param f field on which to apply absolute ordering
      * @return ordered_query<TQuery, TField>
      */
-    template<typename TQuery, typename TField, EnableIf<is_query<TQuery>, is_field<TField>> = _>
-    inline ordered_query<TQuery, TField> order(TQuery q, TField, ordering_e o = ascending) {
-        return ordered_query<TQuery, TField>(std::move(q), o);
+    template<typename TQuery, typename TField, EnableIf<is_query<Unqualified<TQuery>>, is_field<TField>> = _>
+    inline ordered_query<TQuery, TField> order(TQuery && q, TField, ordering_e o = ascending) {
+        return ordered_query<Unqualified<TQuery>, TField>(std::forward<TQuery>(q), o);
     }
 }
 

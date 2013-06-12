@@ -24,6 +24,7 @@ namespace fp {
     template<typename TQuery>
     struct limit_query {
     public:
+        
         template<typename TRecord>
         struct result_of {
             using type = Invoke<typename TQuery::template result_of<TRecord>>;
@@ -51,14 +52,14 @@ namespace fp {
             swap(l._limit, r._limit);
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend bool evaluate(TRecord const & rec, limit_query const & q) {
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend bool evaluate(TRecord && rec, limit_query const & q) {
             return evaluate(rec, q._query);
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> select(TRecord const & rec, limit_query const & q) {
-            return select(rec, q._query);
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord && rec, limit_query const & q) {
+            return select(std::forward<TRecord>(rec), q._query);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
@@ -81,9 +82,9 @@ namespace fp {
         }
     };
 
-    template<typename TQuery, EnableIf<is_query<TQuery>> = _>
-    inline limit_query<TQuery> limit(TQuery q, int l) {
-        return limit_query<TQuery>(std::move(q), l);
+    template<typename TQuery, EnableIf<is_query<Unqualified<TQuery>>> = _>
+    inline limit_query<Unqualified<TQuery>> limit(TQuery && q, int l) {
+        return limit_query<Unqualified<TQuery>>(std::forward<TQuery>(q), l);
     }
 }
 

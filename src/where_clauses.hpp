@@ -7,15 +7,16 @@
 
 #include "field.hpp"
 #include "lexical_cast.hpp"
+#include "type_traits.hpp"      // for fp::Bool
 
-#include <algorithm>            // for std::swap
 #include <string>               // for std::string, std::to_string
-#include <sstream>              // for std::stringstream
-#include <type_traits>          // for std::true_type, std::false_type
+#include <sstream>              // for std::ostringstream
+#include <utility>              // for std::move, std::swap
 
 namespace fp {
     
      namespace where_clauses {
+         
         template<typename> struct where_eq;
         template<typename> struct where_neq;
         template<typename> struct where_lt;
@@ -29,27 +30,28 @@ namespace fp {
     }
     
     namespace impl {
+        
         template<typename>
-        struct is_where_clause : std::false_type { };
+        struct is_where_clause : Bool<false> { };
 
         template<typename TField>
-        struct is_where_clause<where_clauses::where_eq<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_eq<TField> > : Bool<true> { };
         template<typename TField>
-        struct is_where_clause<where_clauses::where_neq<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_neq<TField> > : Bool<true> { };
         template<typename TField>
-        struct is_where_clause<where_clauses::where_lt<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_lt<TField> > : Bool<true> { };
         template<typename TField>
-        struct is_where_clause<where_clauses::where_gt<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_gt<TField> > : Bool<true> { };
         template<typename TField>
-        struct is_where_clause<where_clauses::where_lte<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_lte<TField> > : Bool<true> { };
         template<typename TField>
-        struct is_where_clause<where_clauses::where_gte<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_gte<TField> > : Bool<true> { };
         template<typename TField>
-        struct is_where_clause<where_clauses::where_contains<TField> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_contains<TField> > : Bool<true> { };
         template<typename TLeft, typename TRight>
-        struct is_where_clause<where_clauses::where_or<TLeft, TRight> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_or<TLeft, TRight> > : Bool<true> { };
         template<typename TLeft, typename TRight>
-        struct is_where_clause<where_clauses::where_and<TLeft, TRight> > : std::true_type { };
+        struct is_where_clause<where_clauses::where_and<TLeft, TRight> > : Bool<true> { };
     }
     
     namespace where_clauses {
@@ -88,7 +90,7 @@ namespace fp {
 
             friend std::string to_string(where_eq const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " = " << to_string(c._value) << ')';
                 return ss.str();
             }
@@ -128,7 +130,7 @@ namespace fp {
 
             friend std::string to_string(where_neq const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " != " << to_string(c._value) << ')';
                 return ss.str();
             }
@@ -168,7 +170,7 @@ namespace fp {
 
             friend std::string to_string(where_lt const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " < " << to_string(c._value) << ')';
                 return ss.str();
             }
@@ -208,7 +210,7 @@ namespace fp {
 
             friend std::string to_string(where_gt const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " > " << to_string(c._value) << ')';
                 return ss.str();
             }
@@ -248,7 +250,7 @@ namespace fp {
 
             friend std::string to_string(where_lte const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " <= " << to_string(c._value) << ')';
                 return ss.str();
             }
@@ -288,7 +290,7 @@ namespace fp {
 
             friend std::string to_string(where_gte const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " >= " << to_string(c._value) << ')';
                 return ss.str();
             }
@@ -328,7 +330,7 @@ namespace fp {
 
             friend std::string to_string(where_contains const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(TField()) << " LIKE \"%" << c._value << "%\")";
                 return ss.str();
             }
@@ -337,7 +339,7 @@ namespace fp {
         template<typename L, typename R>
         struct where_or {
         public:
-            typedef where_or<L, R> this_type;
+            using this_type = where_or<L, R>;
         protected:
             L _left;
             R _right;
@@ -367,7 +369,7 @@ namespace fp {
 
             friend std::string to_string(where_or const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(c._left) << " OR " << to_string(c._right) << ')';
                 return ss.str();
             }
@@ -376,7 +378,7 @@ namespace fp {
         template<typename L, typename R>
         struct where_and {
         public:
-            typedef where_and<L, R> this_type;
+            using this_type = where_and<L, R>;
         protected:
             L _left;
             R _right;
@@ -406,7 +408,7 @@ namespace fp {
 
             friend std::string to_string(where_and const & c) {
                 using std::to_string;
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << '(' << to_string(c._left) << " AND " << to_string(c._right) << ')';
                 return ss.str();
             }

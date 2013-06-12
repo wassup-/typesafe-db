@@ -5,8 +5,6 @@
 #ifndef _TABLE_HPP
 #define _TABLE_HPP
 
-#include "int_sequence.hpp"
-#include "type_sequence.hpp"
 #include "type_traits.hpp"
 
 namespace fp {
@@ -18,10 +16,11 @@ namespace fp {
 
     template<typename TDescriptor, int... Indices, typename... TTypes>
     struct table<field<TDescriptor, Indices, TTypes>...> {
-        typedef type_seq < TTypes...> types;
+        
+        using types = type_seq<TTypes...>;
 
         struct record {
-            using type = fp::record < field<TDescriptor, Indices, TTypes>...>;
+            using type = fp::record<field<TDescriptor, Indices, TTypes>...>;
         };
 
         friend std::string to_string(table const &) {
@@ -52,6 +51,9 @@ namespace fp {
     template<typename TTable>
     struct has_primary_key : Bool<detail::has_primary_key_impl<TTable>::value> {
     };
+    
+    template<typename T>
+    using HasPrimaryKey = has_primary_key<T>;
 }
 
 #endif

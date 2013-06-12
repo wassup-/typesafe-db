@@ -8,8 +8,24 @@
 #include <type_traits>
 
 namespace fp {
-    template<typename...> struct type_seq;
-    template<int...> struct int_seq;
+    
+    template<typename... T>
+    struct type_seq {
+        
+        template<template<typename...> class C>
+        struct as {
+            using type = C<T...>;
+        };
+    };
+    
+    template<typename T, T... V>
+    struct val_seq {
+        
+        template<template<T...> class C>
+        struct as {
+            using type = C<V...>;
+        };
+    };
     
     template<typename T>
     using Invoke = typename T::type;
@@ -38,17 +54,93 @@ namespace fp {
     template<typename T>
     using NotDeducible = Identity<T>;
 
+    template<typename If, typename Then, typename Else>
+    using Conditional = Invoke<std::conditional<If::value, Then, Else>>;
+    
     template<typename T>
-    using RemoveCv = Invoke<std::remove_cv<T>>;
+    using RemoveConst = Invoke<std::remove_const<T>>;
+    
+    template<typename T>
+    using RemoveVolatitle = Invoke<std::remove_volatile<T>>;
 
     template<typename T>
+    using RemoveCv = Invoke<std::remove_cv<T>>;
+    
+    template<typename T>
     using RemoveReference = Invoke<std::remove_reference<T>>;
+    
+    template<typename T>
+    using AddConst = Invoke<std::add_const<T>>;
+    
+    template<typename T>
+    using AddVolatile = Invoke<std::add_volatile<T>>;
+    
+    template<typename T>
+    using AddCv = Invoke<std::add_cv<T>>;
+    
+    template <typename T>
+    using AddLvalueReference = Invoke<std::add_lvalue_reference<T>>;
+
+    template <typename T>
+    using AddRvalueReference = Invoke<std::add_rvalue_reference<T>>;
 
     template<typename T>
     using Unqualified = RemoveCv<RemoveReference<T>>;
     
-    template<typename If, typename Then, typename Else>
-    using Conditional = Invoke<std::conditional<If::value, Then, Else>>;
+    template<typename T>
+    using Decay = Invoke<std::decay<T>>;
+    
+    template <typename... T>
+    using CommonType = Invoke<std::common_type<T...>>;
+
+    template <typename T>
+    using UnderlyingType = Invoke<std::underlying_type<T>>;
+
+    template <typename T>
+    using MakeSigned = Invoke<std::make_signed<T>>;
+
+    template <typename T>
+    using MakeUnsigned = Invoke<std::make_unsigned<T>>;
+
+    template <typename T>
+    using RemoveExtent = Invoke<std::remove_extent<T>>;
+
+    template <typename T>
+    using RemoveAllExtents = Invoke<std::remove_all_extents<T>>;
+
+    template <typename T>
+    using RemovePointer = Invoke<std::remove_pointer<T>>;
+
+    template <typename T>
+    using AddPointer = Invoke<std::add_pointer<T>>;
+    
+    template <typename Source, typename Destination>
+    using WithConstOf = Conditional<std::is_const<Source>, AddConst<Destination>, Destination>;
+
+    template <typename Source, typename Destination>
+    using WithVolatileOf = Conditional<std::is_volatile<Source>, AddVolatile<Destination>, Destination>;
+
+    template <typename Source, typename Destination>
+    using WithCvOf = WithConstOf<Source, WithVolatileOf<Source, Destination>>;
+    
+    template <typename Source, typename Destination>
+    using WithValueCategoryOf =
+        Conditional<std::is_lvalue_reference<Source>,
+            AddLvalueReference<Destination>,
+            Conditional<std::is_rvalue_reference<Source>,
+                AddRvalueReference<Destination>,
+                Destination
+            >
+        >;
+    
+    template <typename Source, typename Destination>
+    using WithQualificationsOf = WithValueCategoryOf<Source, WithCvOf<RemoveReference<Source>, Destination>>;
+
+    template <typename T, typename U>
+    using is_related = std::is_same<Unqualified<T>, Unqualified<U>>;
+    
+    template<typename T>
+    using IsUnqualified = std::is_same<T, Unqualified<T>>;
     
     template<typename T>
     using Not = Bool<!T::value>;
@@ -131,6 +223,7 @@ namespace fp {
     using NthValueOf = Invoke<impl::nth_value_of<I, T...>>;
     
     namespace impl {
+        
         template<int, typename...>
         struct skip_n_types;
         
@@ -140,21 +233,21 @@ namespace fp {
         template<typename... T>
         struct skip_n_types<0, T...> { using type = type_seq<T...>; };
         
-        template<int, int...>
+        template<typename T, int N, T...>
         struct skip_n_values;
         
-        template<int N, int H, int... T>
-        struct skip_n_values<N, H, T...> : skip_n_values<(N - 1), T...> { };
+        template<typename T, int N, T H, T... Tail>
+        struct skip_n_values<T, N, H, Tail...> : skip_n_values<T, (N - 1), Tail...> { };
         
-        template<int... T>
-        struct skip_n_values<0, T...> { using type = int_seq<T...>; };
+        template<typename T, int... Tail>
+        struct skip_n_values<T, 0, Tail...> { using type = val_seq<T, Tail...>; };
     }
     
     template<int N, typename... T>
     using SkipTypes = Invoke<impl::skip_n_types<N, T...>>;
     
     template<int N, int... T>
-    using SkipValues = Invoke<impl::skip_n_values<N, T...>>;
+    using SkipValues = Invoke<impl::skip_n_values<int, N, T...>>;
     
     namespace impl {
         

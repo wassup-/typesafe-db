@@ -53,10 +53,10 @@ namespace fp {
             swap(l._clauses, r._clauses);
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend bool evaluate(TRecord const & rec, where_query const & q) {
+        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
+        friend bool evaluate(TRecord && rec, where_query const & q) {
             bool (*eval_fn)(TRecord const &, TWhere &&...) = &impl::where_query_impl::evaluate;
-            return call_function(eval_fn, q._clauses, rec);
+            return call_function(eval_fn, q._clauses, std::forward<TRecord>(rec));
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
@@ -86,16 +86,9 @@ namespace fp {
         }
     };
     
-    template<typename... TConditions>
-    inline where_query<TConditions...> where(TConditions... c) {
-        return where_query<TConditions...>(std::move(c)...);
-    }
-
-    template<typename TDescriptor, typename... TWhere, typename T>
-    inline where_query<where_clauses::where_and<where_query<TWhere...>, T> > operator&(where_query<TWhere...> q, T c) {
-        using clause_type = where_clauses::where_and<where_query<TWhere...>, T>;
-        using return_type = where_query<clause_type>;
-        return return_type(clause_type(q, c));
+    template<typename... TCondition>
+    inline where_query<Unqualified<TCondition>...> where(TCondition &&... c) {
+        return where_query<Unqualified<TCondition>...>(std::forward<TCondition>(c)...);
     }
 }
 
