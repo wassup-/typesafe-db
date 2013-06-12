@@ -11,9 +11,6 @@ namespace fp {
         swap(*this, mtx);
     }
 
-    mutex::~mutex() {
-    }
-
     void mutex::lock() {
         _impl->lock();
     }

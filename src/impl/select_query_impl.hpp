@@ -9,6 +9,7 @@
 namespace fp {
 
     namespace impl {
+        
         template<typename...>
         struct select_query_impl;
         
@@ -19,6 +20,14 @@ namespace fp {
         struct table_names {
             static unsigned int const size = sizeof...(TDescriptors);
             static std::string const names[];
+        };
+        
+        template<typename>
+        struct extract_table_names;
+        
+        template<typename... TDescriptor, int... Idx, typename... TValue>
+        struct extract_table_names<type_seq<field<TDescriptor, Idx, TValue>...>> {
+            using type = table_names<TDescriptor...>;
         };
         
         template<typename... TDescriptors>
@@ -35,7 +44,7 @@ namespace fp {
 
             static std::string build_select_query() {
                 using std::to_string;
-                typedef typename Invoke<unique_types<DescriptorOf<TFields>...>>::template as<table_names>::type tables;
+                using tables = typename Invoke<unique_types<DescriptorOf<TFields>...>>::template as<table_names>::type;
                 static std::string const field_identifiers[] = { to_string(TFields())... };
                 std::ostringstream ss;
                 ss << "SELECT ";

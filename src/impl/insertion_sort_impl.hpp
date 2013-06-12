@@ -19,10 +19,10 @@ namespace fp {
                 left = first_value_of<L...>::value
             };
 
-            typedef typename skip_values<1, L...>::type left_type;
-            typedef int_seq<R...> right_type;
+            using left_type = typename skip_values<1, L...>::type;
+            using right_type = int_seq<R...>;
 
-            typedef typename insertion_sort<int_seq<S..., left>, left_type, right_type>::type type;
+            using type = typename insertion_sort<int_seq<S..., left>, left_type, right_type>::type;
         };
 
         template<int... S, int... L, int... R>
@@ -32,10 +32,10 @@ namespace fp {
                 right = first_value_of<R...>::value
             };
 
-            typedef int_seq<L...> left_type;
-            typedef typename skip_values<1, R...>::type right_type;
+            using left_type = int_seq<L...>;
+            using right_type = typename skip_values<1, R...>::type;
 
-            typedef typename insertion_sort<int_seq<S..., right>, left_type, right_type>::type type;
+            using type = typename insertion_sort<int_seq<S..., right>, left_type, right_type>::type;
         };
     }
 }

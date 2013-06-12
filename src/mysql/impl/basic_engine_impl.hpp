@@ -6,7 +6,8 @@
 #include <utility>      // for std::forward
 
 namespace fp {
-    template<typename...> struct type_seq;
+    template<typename...>
+    struct type_seq;
     
     namespace mysql {
         namespace impl {
@@ -22,7 +23,7 @@ namespace fp {
 
                 template<typename... TArg>
                 static TRecord make(mysql::basic_row const & r, TArg && ... arg) {
-                    return make_record_impl<(I - 1), TRecord>::make(r, get<(I - 1), typename TRecord::template nth_type<(I - 1)>::type> (r), std::forward<TArg > (arg)...);
+                    return make_record_impl<(I - 1), TRecord>::make(r, get<(I - 1), typename TRecord::template nth_type<(I - 1)>::type>(r), std::forward<TArg>(arg)...);
                 }
             };
 
@@ -39,7 +40,7 @@ namespace fp {
             struct make_record {
 
                 static TRecord make(mysql::basic_row const & r) {
-                    return make_record_impl<TRecord::SIZE, TRecord>::make(r);
+                    return make_record_impl<TRecord::size(), TRecord>::make(r);
                 }
             };
         }

@@ -14,7 +14,7 @@ namespace fp {
 
         template<int... L, int H, int... T>
         struct erase_value_impl<0, int_seq<L...>, int_seq<H, T...>> {
-            typedef int_seq<L..., T...> type;
+            using type = int_seq<L..., T...>;
         };
     }
 }

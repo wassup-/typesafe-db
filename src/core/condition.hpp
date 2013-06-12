@@ -19,7 +19,7 @@ namespace fp {
 
     struct condition : non_copyable {
     public:
-        typedef condition this_type;
+        using this_type = condition;
     protected:
         std::unique_ptr<impl::condition_impl> _impl;
     public:

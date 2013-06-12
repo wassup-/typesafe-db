@@ -17,9 +17,9 @@ namespace fp {
 
         template<typename T, std::size_t R, std::size_t C> struct matrix {
         public:
-            typedef T value_type;
-            typedef matrix<T, R, C> this_type;
-            typedef T row[C];
+            using value_type = T;
+            using this_type = matrix<T, R, C>;
+            using row = T[C];
             const static std::size_t ROWS = R;
             const static std::size_t COLS = C;
         private:

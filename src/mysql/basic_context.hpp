@@ -5,10 +5,12 @@
 #ifndef MYSQL_BASIC_CONTEXT_HPP
 #define MYSQL_BASIC_CONTEXT_HPP
 
+#include "../unique_ptr.hpp"
 #include "../core/non_copyable.hpp"
 
-#include <algorithm>            // for std::swap
 #include <memory>               // for std::unique_ptr
+#include <utility>              // for std::swap
+
 #include <mysql/mysql.h>        // for MYSQL, MYSQL_RES
 
 namespace fp {
@@ -19,8 +21,8 @@ namespace fp {
 
         struct basic_context : non_copyable {
         public:
-            typedef basic_context this_type;
-            typedef ::MYSQL native_handle;
+            using this_type = basic_context;
+            using native_handle = ::MYSQL;
         protected:
             friend struct basic_engine;
             friend struct basic_result;

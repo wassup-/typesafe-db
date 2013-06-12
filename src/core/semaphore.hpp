@@ -18,7 +18,7 @@ namespace fp {
 
     struct semaphore : non_copyable {
     public:
-        typedef semaphore this_type;
+        using this_type = semaphore;
 
         enum mode_e {
             non_shared,

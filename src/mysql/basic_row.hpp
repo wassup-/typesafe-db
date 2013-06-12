@@ -16,8 +16,8 @@ namespace fp {
 
         struct basic_row {
         public:
-            typedef basic_row this_type;
-            typedef std::size_t size_type;
+            using this_type = basic_row;
+            using size_type = std::size_t;
         protected:
             ::MYSQL_ROW _data;
             size_type _fields;
@@ -48,7 +48,7 @@ namespace fp {
 
             template<int I, typename T>
             constexpr friend T get(basic_row const & r) {
-                return lexical_cast<T > (r._data[I]);
+                return lexical_cast<T>(r._data[I]);
             }
         };
     }

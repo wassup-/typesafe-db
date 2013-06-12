@@ -10,22 +10,21 @@
 #include "impl/linux/mutex_impl.hpp"
 #endif
 
-#include <algorithm>    // for std::swap
 #include <chrono>       // for std::chrono::*
 #include <memory>       // for std::unique_ptr
+#include <utility>      // for std::swap
 
 namespace fp {
 
     struct mutex : non_copyable {
     public:
-        typedef mutex this_type;
-        typedef impl::mutex_impl::native_type native_type;
+        using this_type = mutex;
+        using native_type = impl::mutex_impl::native_type;
     protected:
         std::unique_ptr<impl::mutex_impl> _impl;
     public:
         mutex();
         mutex(mutex &&);
-        ~mutex();
 
         friend void swap(mutex & l, mutex & r) {
             using std::swap;
@@ -34,7 +33,9 @@ namespace fp {
 
         void lock();
         bool try_lock();
-        template<typename Rep, typename Period> bool timed_lock(std::chrono::duration<Rep, Period>);
+        
+        template<typename Rep, typename Period>
+        bool timed_lock(std::chrono::duration<Rep, Period>);
 
         void unlock();
 

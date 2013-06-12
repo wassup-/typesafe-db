@@ -17,7 +17,7 @@ namespace fp {
 
         template<int C, int... L, int... R>
         struct drop_values_impl<C, true, int_seq<L...>, int_seq<R...>> {
-            typedef int_seq<L...> type;
+            using type = int_seq<L...>;
         };
     }
 }

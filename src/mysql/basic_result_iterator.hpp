@@ -21,14 +21,14 @@ namespace fp {
         template<typename T>
         struct result_iterator {
         public:
-            typedef result_iterator<T> this_type;
-            typedef typename std::iterator_traits<T> traits_type;
+            using this_type = result_iterator<T>;
+            using traits_type = typename std::iterator_traits<T>;
 
-            typedef typename traits_type::value_type value_type;
-            typedef typename traits_type::reference reference;
-            typedef typename traits_type::pointer pointer;
-            typedef typename traits_type::difference_type difference_type;
-            typedef typename traits_type::iterator_category iterator_category;
+            using value_type = typename traits_type::value_type;
+            using reference = typename traits_type::reference;
+            using pointer = typename traits_type::pointer;
+            using difference_type = typename traits_type::difference_type;
+            using iterator_category = typename traits_type::iterator_category;
         protected:
             impl::result_iterator_impl<T> * _impl;
         public:
@@ -37,7 +37,6 @@ namespace fp {
             }
 
             result_iterator(result_iterator const & it) : _impl(0) {
-
             }
 
             result_iterator(result_iterator && it) : _impl(0) {
@@ -45,7 +44,6 @@ namespace fp {
             }
 
             ~result_iterator() {
-                //delete _impl;
             }
 
             friend void swap(result_iterator & l, result_iterator & r) {

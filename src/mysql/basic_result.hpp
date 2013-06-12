@@ -10,22 +10,22 @@
 #include "basic_result_iterator.hpp"
 #include "../core/non_copyable.hpp"
 
-#include <algorithm>            // for std::swap
 #include <cstddef>              // for std::size_t
 #include <memory>               // for std::unique_ptr
-#include <mysql/mysql.h>        // for MYSQL, MYSQL_RES
+#include <utility>              // for std::swap
+#include <mysql/mysql.h>        // for MYSQL, MYSQL_RES, mysql_fetch_row, mysql_free_result, mysql_num_fields, mysql_num_rows, mysql_use_result
 
 namespace fp {
     namespace mysql {
 
         struct basic_result : non_copyable {
         public:
-            typedef basic_result this_type;
-            typedef std::size_t size_type;
-            typedef result_iterator<basic_row *> iterator;
-            typedef result_iterator<basic_row *> const_iterator;
+            using this_type = basic_result;
+            using size_type = std::size_t;
+            using iterator = result_iterator<basic_row *>;
+            using const_iterator = result_iterator<basic_row *>;
         private:
-            typedef typename ::MYSQL_RES resource_type;
+            using resource_type = ::MYSQL_RES;
         protected:
             std::unique_ptr<resource_type, decltype(&::mysql_free_result)> _res;
         public:

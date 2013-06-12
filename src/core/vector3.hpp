@@ -19,8 +19,8 @@ namespace fp {
 
         template<typename T> class vector3 {
         public:
-            typedef T value_type;
-            typedef vector3<T> this_type;
+            using value_type = T;
+            using this_type = vector3;
         private:
             template<typename> friend class vector2;
             template<typename> friend class vector3;
@@ -321,9 +321,9 @@ namespace fp {
             return vector3<T > (x, y, z);
         }
 
-        typedef vector3<int> vector3i;
-        typedef vector3<float> vector3f;
-        typedef vector3<double> vector3d;
+        using vector3i = vector3<int>;
+        using vector3f = vector3<float>;
+        using vector3d = vector3<double>;
     }
 }
 

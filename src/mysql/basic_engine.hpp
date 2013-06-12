@@ -7,17 +7,18 @@
 
 #include "impl/basic_engine_impl.hpp"
 
-#include "../db_engine.hpp"     // for fp::is_engine
-#include "../is_query.hpp"      // for fp::is_query
+#include "basic_context.hpp"
 #include "basic_result.hpp"
 #include "basic_row.hpp"
-#include "basic_context.hpp"
-#include "../type_traits.hpp"   // for fp::enable_if_c, fp::_not_c
+#include "../db_engine.hpp"     // for fp::is_engine
+#include "../is_query.hpp"      // for fp::is_query
+#include "../type_traits.hpp"   // for fp::EnableIf, fp::DisableIf, fp::Invoke, fp::Unqualified
 
-#include <algorithm>            // for std::swap
 #include <memory>               // for std::shared_ptr
 #include <string>               // for std::string, std::to_string
+#include <utility>              // for std::swap
 #include <vector>               // for std::vector
+
 #include <mysql/mysql.h>        // for MYSQL, MYSQL_RES
 
 namespace fp {
@@ -26,7 +27,7 @@ namespace fp {
 
         struct basic_engine {
         public:
-            typedef record<> default_record_type;
+            using default_record_type = record<>;
         protected:
             std::shared_ptr<basic_context> _context;
         public:
@@ -64,11 +65,18 @@ namespace fp {
                 return ::mysql_errno(_context->handle());
             }
 
-            template<typename TQuery, typename TRecord = default_record_type, EnableIf < is_query<TQuery>, is_record < Invoke<typename TQuery::template result_of < TRecord >> >> = _ >
-            std::vector < Invoke<typename TQuery::template result_of < TRecord >> > query(TQuery const & q) {
+            template<
+                typename TQuery,
+                typename TRecord = default_record_type,
+                EnableIf<
+                        is_query<Unqualified<TQuery>>,
+                        is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
+                > = _
+            >
+            std::vector<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>> query(TQuery && q) {
                 using std::to_string;
-                using record_type = Invoke<typename TQuery::template result_of < TRecord >>;
-                std::string const qry = to_string(q);
+                using record_type = Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>;
+                std::string const qry = to_string(std::forward<TQuery>(q));
                 ::mysql_query(_context->handle(), qry.c_str());
                 std::vector<record_type> ret;
                 mysql::basic_result res(*_context);
@@ -82,10 +90,17 @@ namespace fp {
                 return ret;
             }
 
-            template<typename TQuery, typename TRecord = default_record_type, DisableIf < is_query<TQuery>, is_record < Invoke<typename TQuery::template result_of < TRecord >> >> = _>
-            unsigned long long query(TQuery const & q){
+            template<
+                typename TQuery, 
+                typename TRecord = default_record_type, 
+                DisableIf<
+                    is_query<Unqualified<TQuery>>,
+                    is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
+                > = _
+            >
+            unsigned long long query(TQuery && q){
                 using std::to_string;
-                std::string const qry = to_string(q);
+                std::string const qry = to_string(std::forward<TQuery>(q));
                 if (0 == ::mysql_query(_context->handle(), qry.c_str())) {
                     return ::mysql_affected_rows(_context->handle());
                 } else {
@@ -98,8 +113,7 @@ namespace fp {
     namespace detail {
 
         template<>
-        struct is_engine<mysql::basic_engine> : std::true_type {
-        };
+        struct is_engine<mysql::basic_engine> : Bool<true> { };
     }
 }
 

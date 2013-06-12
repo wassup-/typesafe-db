@@ -25,8 +25,8 @@ namespace fp {
         };
     private:
         static void * task_runner(void *);
-        typedef mutex mutex_t;
-        typedef semaphore semaphore_t;
+        using mutex_t = mutex;
+        using semaphore_t = semaphore;
     protected:
         std::size_t const _size;
         thread ** _threads;
