@@ -1,0 +1,12 @@
+language: cpp
+
+compiler:
+  - clang
+
+services:
+  - mysql
+
+before_script:
+  - mysql -e 'create database myapp_test;'
+
+script: ./configure && make
