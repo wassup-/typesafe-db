@@ -5,9 +5,9 @@
 #ifndef _INT_SEQ_H
 #define _INT_SEQ_H
 
-#include "impl/int_sequence_impl.hpp"
+//#include "impl/int_sequence_impl.hpp"
 
-namespace fp {
+/*namespace fp {
     
     template<int, int>
     struct range_builder;
@@ -39,6 +39,6 @@ namespace fp {
     inline typename range_builder<Min, Max>::type make_range() {
         return typename range_builder<Min, Max>::type();
     }
-};
+};*/
 
 #endif

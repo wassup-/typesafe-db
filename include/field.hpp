@@ -17,6 +17,9 @@ namespace fp {
 
     template<int, typename...>
     struct combined_field;
+    
+    // This sole purpose of this declaration is to enable ADL
+    template<typename> void to_string() = delete;
 
     namespace detail {
 
@@ -74,9 +77,6 @@ namespace fp {
         template<int Index, typename... TFields>
         struct is_field<combined_field<Index, TFields...>> : All<is_field<TFields>...> { };
     }
-
-    template<typename>
-    struct field_traits;
 
     template<typename TDescriptor, int Index, typename TType>
     struct field_traits<field<TDescriptor, Index, TType> > {

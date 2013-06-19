@@ -41,23 +41,18 @@
     #ifndef NOMINMAX
     #define NOMINMAX
     #endif
-
 #elif (defined(linux) || defined(__linux))
     // Linux
     #define FP_SYSTEM_LINUX
-
 #elif (defined(__APPLE__) || defined(MACOSX) || defined(macintosh) || defined(Macintosh))
     // MacOS
     #define FP_SYSTEM_MACOS
-
 #elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__))
     // FreeBSD
     #define FP_SYSTEM_FREEBSD
-
 #else
     // Unsupported system
-    #error This operating system is not supported by typesafe-db library
-
+    #error This operating system is unsupported by typesafe-db
 #endif
 
 #if defined(__GNUC__)
@@ -84,67 +79,60 @@
 // Define a portable debug macro
 ////////////////////////////////////////////////////////////
 #if !defined(NDEBUG)
-
     #define FP_DEBUG
-
 #endif
 
 ////////////////////////////////////////////////////////////
 // Define a portable constexpr macro
 ////////////////////////////////////////////////////////////
-#if (defined(__GXX_EXPERIMENTAL_CXX0X) || (__cplusplus >= 201103L))
-
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || (__cplusplus >= 201103L)
     #define CONSTEXPR constexpr
-
 #else
-
     #define CONSTEXPR
-
 #endif
 
-#if defined(__GNUC__) && __GNUC__ >= 4
-#define FP_UNREACHABLE      __builtin_unreachable();
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+    #define FP_UNREACHABLE      __builtin_unreachable();
 #else
-#define FP_UNREACHABLE
+    #define FP_UNREACHABLE
 #endif
 
+#if defined(FP_COMPILER_GCC)
+    #define FP_DEPRECATED(fn, msg)  fn __attribute__((deprecated(msg)))
+#elif defined(FP_COMPILER_MSVC)
+    #define FP_DEPRECATED(fn, msg)  __declspec(deprecated(msg)) fn
+#else
+    #define FP_DEPRECATED(fn, msg)  fn
+#endif
 
 ////////////////////////////////////////////////////////////
 // Define helpers to create portable import / export macros for each module
 ////////////////////////////////////////////////////////////
 #if !defined(FP_STATIC)
-
     #if defined(FP_SYSTEM_WINDOWS)
         // Windows compilers need specific (and different) keywords for export and import
         #define FP_API_EXPORT   __declspec(dllexport)
         #define FP_API_IMPORT   __declspec(dllimport)
         #define FP_API_LOCAL
-
     #else // Linux, FreeBSD, Mac OS X
-
-        #if __GNUC__ >= 4
+        #if (__GNUC__ >= 4)
             // GCC 4 has special keywords for showing/hiding symbols,
             // the same keyword is used for both importing and exporting
             #define FP_API_EXPORT   __attribute__ ((__visibility__ ("default")))
             #define FP_API_IMPORT   __attribute__ ((__visibility__ ("default")))
             #define FP_API_LOCAL    __attribute__ ((__visibility__ ("hidden")))
-
         #else
             // GCC < 4 has no mechanism to explicitely hide symbols, everything's exported
             #define FP_API_EXPORT
             #define FP_API_IMPORT
             #define FP_API_LOCAL
-
         #endif
-
     #endif
-
 #else
     // Static build doesn't need import/export macros
     #define FP_API_EXPORT
     #define FP_API_IMPORT
     #define FP_API_LOCAL
-
 #endif
 
 
@@ -169,7 +157,7 @@ namespace fp {
     typedef unsigned int uint32;
 
     // 64 bits integer types
-#if defined(_MSC_VER)
+#if defined(FP_COMPILER_MSVC)
     typedef signed __int64 int64;
     typedef unsigned __int64 uin64;
 #else

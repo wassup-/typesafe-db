@@ -40,7 +40,7 @@ namespace fp {
 
         template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
         friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord && rec, select_query const & q) {
-            return { get<TFields>(std::forward<TRecord>(rec))... };
+            return { std::get<TFields>(std::forward<TRecord>(rec))... };
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>

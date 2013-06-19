@@ -55,7 +55,7 @@ namespace fp {
         }
 
         friend std::string to_string(select_query const & q) {
-            return impl::insert_query_impl < TFields...>::build_insert_query();
+            return impl::insert_query_impl<TFields...>::build_insert_query();
         }
     };
 }

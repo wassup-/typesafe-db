@@ -170,6 +170,7 @@ namespace fp {
         template<typename...> struct last_type_of;
         template<int, typename...> struct nth_type_of;
         
+        
         template<typename H, typename... T>
         struct first_type_of<H, T...> { using type = H; };
 
@@ -198,6 +199,7 @@ namespace fp {
         template<int...> struct first_value_of;
         template<int...> struct last_value_of;
         template<int, int...> struct nth_value_of;
+        template<int, int, int...> struct index_of;
         
         template<int H, int... T>
         struct first_value_of<H, T...> { enum { value = H }; };
@@ -211,6 +213,11 @@ namespace fp {
         struct nth_value_of<I, H, T...> : nth_value_of<(I - 1), T...> { };
         template<int H, int... T>
         struct nth_value_of<0, H, T...> { enum { value = H }; };
+        
+        template<int N, int V, int H, int... T>
+        struct index_of<N, V, H, T...> : index_of<(N + 1), V, T...> { };
+        template<int N, int V, int... T>
+        struct index_of<N, V, V, T...> { enum { value = N }; };
     }
     
     template<int... T>
@@ -221,6 +228,9 @@ namespace fp {
     
     template<int I, int... T>
     using NthValueOf = Invoke<impl::nth_value_of<I, T...>>;
+    
+    template<int V, int... Vs>
+    struct index_of : impl::index_of<0, V, Vs...> { };
     
     namespace impl {
         

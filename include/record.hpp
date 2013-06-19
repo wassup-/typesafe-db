@@ -51,11 +51,11 @@ namespace fp {
         std::tuple<Invoke<TFields>...> _values;
     public:
 
-        record()
+        constexpr record()
         : _values() {
         }
 
-        record(Invoke<TFields>... fs)
+        constexpr record(Invoke<TFields>... fs)
         : _values(std::move(fs)...) {
         }
 
@@ -68,7 +68,7 @@ namespace fp {
             swap(*this, rec);
         }
 
-        friend void swap(record & l, record & r) {
+        friend void swap(record & l, record & r) noexcept {
             using std::swap;
             swap(l._values, r._values);
         }

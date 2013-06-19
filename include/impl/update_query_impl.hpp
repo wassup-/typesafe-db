@@ -409,7 +409,7 @@ namespace fp {
 
                 template<typename... Fs>
                 void operator()(fp::record<Fs...> & rec) const {
-                    get<TField> (rec) = _value(rec);
+                    get<TField>(rec) = _value(rec);
                 }
 
                 friend std::string to_string(modifier const & m) {
