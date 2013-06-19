@@ -42,4 +42,4 @@ $(OBJECTS):
 	$(CXX) $(CXXFLAGS) $(call SOURCE,$@) -o $@
 
 clean:
-	rm -rf $(BINDIR)/
+	rm -rf $(BINDIR)
