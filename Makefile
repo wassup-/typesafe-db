@@ -6,9 +6,9 @@ NM 		= nm
 AS 		= as
 
 # Compiler flags
-LDFLAGS		= -lpthread -lmysql_client
+LDFLAGS		= -lpthread -lmysqlclient
 CCFLAGS		= -c -std=c++0x -Wall -O3
-CXXFLAGS 	= -c -std=c++0x -Wall -O3
+CXXFLAGS 	= -c -std=c++11 -Wall -O3
 
 # Directories
 BINDIR 		= bin/
