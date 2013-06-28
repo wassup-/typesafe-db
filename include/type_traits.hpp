@@ -90,40 +90,40 @@ namespace fp {
     template<typename T>
     using Decay = Invoke<std::decay<T>>;
     
-    template <typename... T>
+    template<typename... T>
     using CommonType = Invoke<std::common_type<T...>>;
 
-    template <typename T>
-    using UnderlyingType = Invoke<std::underlying_type<T>>;
+    /*template<typename T>
+    using UnderlyingType = Invoke<std::underlying_type<T>>;*/
 
     template <typename T>
     using MakeSigned = Invoke<std::make_signed<T>>;
 
-    template <typename T>
+    template<typename T>
     using MakeUnsigned = Invoke<std::make_unsigned<T>>;
 
-    template <typename T>
+    template<typename T>
     using RemoveExtent = Invoke<std::remove_extent<T>>;
 
-    template <typename T>
+    template<typename T>
     using RemoveAllExtents = Invoke<std::remove_all_extents<T>>;
 
-    template <typename T>
+    template<typename T>
     using RemovePointer = Invoke<std::remove_pointer<T>>;
 
-    template <typename T>
+    template<typename T>
     using AddPointer = Invoke<std::add_pointer<T>>;
     
-    template <typename Source, typename Destination>
+    template<typename Source, typename Destination>
     using WithConstOf = Conditional<std::is_const<Source>, AddConst<Destination>, Destination>;
 
-    template <typename Source, typename Destination>
+    template<typename Source, typename Destination>
     using WithVolatileOf = Conditional<std::is_volatile<Source>, AddVolatile<Destination>, Destination>;
 
-    template <typename Source, typename Destination>
+    template<typename Source, typename Destination>
     using WithCvOf = WithConstOf<Source, WithVolatileOf<Source, Destination>>;
     
-    template <typename Source, typename Destination>
+    template<typename Source, typename Destination>
     using WithValueCategoryOf =
         Conditional<std::is_lvalue_reference<Source>,
             AddLvalueReference<Destination>,
@@ -133,10 +133,10 @@ namespace fp {
             >
         >;
     
-    template <typename Source, typename Destination>
+    template<typename Source, typename Destination>
     using WithQualificationsOf = WithValueCategoryOf<Source, WithCvOf<RemoveReference<Source>, Destination>>;
 
-    template <typename T, typename U>
+    template<typename T, typename U>
     using is_related = std::is_same<Unqualified<T>, Unqualified<U>>;
     
     template<typename T>
