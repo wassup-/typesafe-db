@@ -7,8 +7,8 @@
 
 #include "../lexical_cast.hpp"
 
-#include <algorithm>            // for std::swap
 #include <cstddef>              // for std::size_t
+#include <utility>              // for std::swap
 #include <mysql/mysql.h>        // for MYSQL_ROW
 
 namespace fp {
@@ -23,31 +23,33 @@ namespace fp {
             size_type _fields;
         public:
 
-            constexpr basic_row() noexcept : _data(nullptr), _fields(0) {
-            }
+            CONSTEXPR basic_row() noexcept
+            : _data(nullptr), _fields(0)
+            { }
 
-            constexpr explicit basic_row(::MYSQL_ROW d, size_type fields) noexcept : _data(d), _fields(fields) {
-            }
+            CONSTEXPR explicit basic_row(::MYSQL_ROW d, size_type fields) noexcept
+            : _data(d), _fields(fields)
+            { }
 
             friend void swap(basic_row & l, basic_row & r) noexcept {
                 using std::swap;
                 swap(l._data, r._data);
             }
 
-            constexpr size_type cols() const {
+            CONSTEXPR size_type cols() const {
                 return _fields;
             }
 
-            constexpr char const * operator [](int i) const {
+            CONSTEXPR char const * operator [](int i) const {
                 return _data[i];
             }
 
-            constexpr explicit operator bool() const {
+            CONSTEXPR explicit operator bool() const {
                 return (nullptr != _data);
             }
 
             template<int I, typename T>
-            constexpr friend T get(basic_row const & r) {
+            CONSTEXPR friend T get(basic_row const & r) {
                 return lexical_cast<T>(r._data[I]);
             }
         };

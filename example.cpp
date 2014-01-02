@@ -22,11 +22,11 @@ namespace geo {
     namespace db {
         namespace impl {
 
-            CONSTEXPR static char const * city_table = "geo_city";
-            CONSTEXPR static char const * province_table = "geo_province";
-            CONSTEXPR static char const * country_table = "geo_country";
+            constexpr static const char city_table[] = "geo_city";
+            constexpr static const char province_table[] = "geo_province";
+            constexpr static const char country_table[] = "geo_country";
 
-            CONSTEXPR static char const * city_fields[] = {
+            constexpr static const char* city_fields[] = {
                 "id",
                 "alpha",
                 "name",
@@ -35,14 +35,14 @@ namespace geo {
                 "latitude",
             };
 
-            CONSTEXPR static char const * province_fields[] = {
+            constexpr static const char* province_fields[] = {
                 "id",
                 "name",
                 "longitude",
                 "latitude",
             };
 
-            CONSTEXPR static char const * country_fields[] = {
+            constexpr static const char* country_fields[] = {
                 "id",
                 "name",
                 "longitude",
@@ -62,7 +62,7 @@ namespace geo {
                 using primary_key = fp::primary_key<city::id>;
                 using type = fp::table<city::id, city::alpha, city::name, city::code, city::longitude, city::latitude>;
 
-                CONSTEXPR static char const * name = impl::city_table;
+                constexpr static const char* name = impl::city_table;
             };
 
             struct record {
@@ -71,7 +71,7 @@ namespace geo {
 
             template<int I>
             struct field {
-                CONSTEXPR static char const * name = impl::city_fields[I];
+                constexpr static const char* name = impl::city_fields[I];
             };
         };
 
@@ -85,7 +85,7 @@ namespace geo {
                 using primary_key = fp::primary_key<province::id>;
                 using type = fp::table<province::id, province::name, province::longitude, province::latitude>;
 
-                CONSTEXPR static char const * name = impl::province_table;
+                constexpr static const char* name = impl::province_table;
             };
 
             struct record {
@@ -94,7 +94,7 @@ namespace geo {
 
             template<int I>
             struct field {
-                CONSTEXPR static char const * name = impl::province_fields[I];
+                constexpr static const char* name = impl::province_fields[I];
             };
         };
 
@@ -105,10 +105,10 @@ namespace geo {
             using latitude = fp::field<country, 3, double>;
 
             struct table {
-                //using primary_key = fp::primary_key<country::id>;
+                using primary_key = fp::primary_key<country::id>;
                 using type = fp::table<country::id, country::name, country::longitude, country::latitude>;
 
-                CONSTEXPR static char const * name = impl::country_table;
+                constexpr static const char* name = impl::country_table;
             };
 
             struct record {
@@ -117,24 +117,33 @@ namespace geo {
 
             template<int I>
             struct field {
-                CONSTEXPR static char const * name = impl::country_fields[I];
+                constexpr static const char* name = impl::country_fields[I];
             };
         };
     }
 }
 
-CONSTEXPR static char const * GEO_USER = "test";
-CONSTEXPR static char const * GEO_PASSWD = "testpw";
-CONSTEXPR static char const * GEO_DB = "shared";
+constexpr static const char* GEO_USER = "root";
+constexpr static const char* GEO_PASSWD = "l0git3X";
+constexpr static const char* GEO_DB = "shared";
 
-auto sq1 = fp::select(geo::db::city::alpha(), geo::db::city::latitude(), geo::db::city::longitude());
-auto wq1 = fp::where(fp::contains(geo::db::city::name(), "ken"));
-auto uq1 = fp::update(fp::set(geo::db::city::latitude(), 1), fp::mul(geo::db::city::longitude(), geo::db::city::longitude()));
+auto sq1 = fp::select(
+    geo::db::city::alpha(),
+    geo::db::city::latitude(),
+    geo::db::city::longitude()
+);
+auto wq1 = fp::where(
+    fp::contains(geo::db::city::name(), "ken")
+);
+auto uq1 = fp::update(
+    fp::set(geo::db::city::latitude(), 1),
+    fp::mul(geo::db::city::longitude(), geo::db::city::longitude())
+);
 auto wuq1 = uq1 + wq1;
 
 int main(int argc, char ** argv) {
-    using fp::get;
-    using fp::to_string;
+    using std::get;
+    using std::to_string;
     
     fp::mysql::basic_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
 
@@ -143,10 +152,10 @@ int main(int argc, char ** argv) {
     std::cout << "[Query]" << std::endl << to_string(qry) << std::endl;
     std::cout << "[Results]" << std::endl << res.size() << std::endl;
     std::cout << "----------" << std::endl;
-    for (auto && cur : res) {
-        std::cout << "Alpha: " << get<geo::db::city::alpha > (cur) << std::endl;
-        std::cout << "Longitude: " << get<geo::db::city::longitude > (cur) << std::endl;
-        std::cout << "Latitude: " << get<geo::db::city::latitude > (cur) << std::endl;
+    for (const auto& cur : res) {
+        std::cout << "Alpha: " << get<geo::db::city::alpha>(cur) << std::endl;
+        std::cout << "Longitude: " << get<geo::db::city::longitude>(cur) << std::endl;
+        std::cout << "Latitude: " << get<geo::db::city::latitude>(cur) << std::endl;
         std::cout << std::endl;
     }
     std::cout << "----------" << std::endl;

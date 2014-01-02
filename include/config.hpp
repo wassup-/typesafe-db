@@ -93,8 +93,12 @@
 
 #if defined(__GNUC__) && (__GNUC__ >= 4)
     #define FP_UNREACHABLE      __builtin_unreachable();
+    #define FP_LIKELY(x)        __builtin_expect(!!(x), 1)
+    #define FP_UNLIKELY(x)      __builtin_expect(!!(x), 0)
 #else
     #define FP_UNREACHABLE
+    #define FP_LIKELY(x)        (x)
+    #define FP_UNLIKELY(x)      (x)
 #endif
 
 #if defined(FP_COMPILER_GCC)

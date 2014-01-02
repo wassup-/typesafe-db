@@ -9,6 +9,7 @@
 
 #include "is_query.hpp"
 #include "record.hpp"
+#include "stringutil.hpp"       // for stringutils::concatenate
 #include "type_traits.hpp"      // for EnableIf
 
 #include <algorithm>            // for std::swap, std::sort
@@ -16,6 +17,7 @@
 #include <utility>              // for std::forward
 
 namespace fp {
+    
     template<typename, typename>
     struct ordered_query;
 
@@ -43,44 +45,44 @@ namespace fp {
         ordering_e _order;
     public:
 
-        ordered_query() : _query() {
-        }
+        ordered_query() = default;
 
-        ordered_query(TQuery q, ordering_e o) : _query(std::move(q)), _order(o) {
-        }
+        ordered_query(TQuery q, ordering_e o)
+        : _query(std::move(q)), _order(o)
+        { }
 
-        ordered_query(ordered_query const &) = default;
+        ordered_query(const ordered_query&) = default;
 
-        ordered_query(ordered_query && q) noexcept : _query(), _order(ascending) {
-            swap(*this, q);
-        }
+        ordered_query(ordered_query&& q) noexcept
+        : _query(), _order(ascending)
+        { swap(*this, q); }
 
-        friend void swap(ordered_query & l, ordered_query & r) noexcept {
+        friend void swap(ordered_query& l, ordered_query& r) noexcept {
             using std::swap;
             swap(l._query, r._query);
             swap(l._order, r._order);
         }
 
-        friend std::string to_string(ordered_query const & q) {
+        friend std::string to_string(const ordered_query& q) {
             using std::to_string;
             std::string ordering;
-            if (Not<is_ordered_query<TQuery>>::value) {
-                ordering = " ORDER BY " + to_string(TField()) + " " + impl::ordered_query_impl::ORDERINGS[q._order];
+            if(Not<is_ordered_query<TQuery>>::value) {
+                ordering = stringutils::concatenate(" ORDER BY ", to_string(TField()), " ", impl::ordered_query_impl::ORDERINGS[q._order]);
             } else {
-                ordering = ", " + to_string(TField()) + " " + impl::ordered_query_impl::ORDERINGS[q._order];
+                ordering = stringutils::concatenate(", ", to_string(TField()), " ", impl::ordered_query_impl::ORDERINGS[q._order]);
             }
-            return to_string(q._query) + ordering;
+            return stringutils::concatenate(to_string(q._query), ordering);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord> const & recs, ordered_query const & q) {
+        friend std::vector<Invoke<result_of<TRecord>>> query(const std::vector<TRecord>& recs, const ordered_query& q) {
             std::vector<Invoke<result_of<TRecord>>> ret = query(recs, q._query);
             switch(q._order){
                 case ascending:
-                    std::sort(ret.begin(), ret.end(), impl::ordered_query_impl::ascending_sorter<Invoke<result_of<TRecord>>, TField > ());
+                    std::sort(ret.begin(), ret.end(), impl::ordered_query_impl::ascending_sorter<Invoke<result_of<TRecord>>, TField>());
                     break;
                 case descending:
-                    std::sort(ret.begin(), ret.end(), impl::ordered_query_impl::descending_sorter<Invoke<result_of<TRecord>>, TField > ());
+                    std::sort(ret.begin(), ret.end(), impl::ordered_query_impl::descending_sorter<Invoke<result_of<TRecord>>, TField>());
                     break;
             }
             return ret;
@@ -94,8 +96,8 @@ namespace fp {
      * @return ordered_query<TQuery, TField>
      */
     template<typename TQuery, typename TField, EnableIf<is_query<Unqualified<TQuery>>, is_field<TField>> = _>
-    inline ordered_query<TQuery, TField> order(TQuery && q, TField, ordering_e o = ascending) {
-        return ordered_query<Unqualified<TQuery>, TField>(std::forward<TQuery>(q), o);
+    CONSTEXPR inline ordered_query<Unqualified<TQuery>, TField> order(TQuery&& q, TField, ordering_e o = ordering_e::ascending) {
+        return { std::forward<TQuery>(q), o };
     }
 }
 

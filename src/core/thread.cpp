@@ -2,7 +2,7 @@
 
 namespace fp {
 
-    thread::thread(thread && th)
+    thread::thread(thread&& th)
     : _impl(nullptr), _fn(nullptr) {
         swap(*this, th);
     }

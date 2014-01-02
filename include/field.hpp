@@ -5,6 +5,7 @@
 #ifndef _FIELD_HPP
 #define _FIELD_HPP
 
+#include "stringutil.hpp"       // for stringutils::concatenate
 #include "type_traits.hpp"      // for fp::Bool, fp::result_of, fp::indexed
 
 #include <sstream>              // for std::ostringstream
@@ -86,7 +87,7 @@ namespace fp {
         using type = TType;
 
         CONSTEXPR static int index = Index;
-        CONSTEXPR static char const * name = TDescriptor::template field<Index>::name;
+        CONSTEXPR static const char* name = TDescriptor::template field<Index>::name;
     };
 
     template<typename TDescriptor, int Index, int... Indices, typename... TTypes>
@@ -97,7 +98,7 @@ namespace fp {
         using type = std::tuple<TTypes...>;
 
         CONSTEXPR static int index = combined_field<Index, field<TDescriptor, Indices, TTypes>...>::index;
-        CONSTEXPR static char const * name = combined_field<Index, field<TDescriptor, Indices, TTypes>...>::name;
+        CONSTEXPR static const char* name = combined_field<Index, field<TDescriptor, Indices, TTypes>...>::name;
     };
 
     template<typename TDescriptor, int Index, typename TType>
@@ -107,10 +108,14 @@ namespace fp {
         using type = typename field_traits<field<TDescriptor, Index, TType>>::type;
 
         CONSTEXPR static int index = field_traits<field<TDescriptor, Index, TType >>::index;
-        CONSTEXPR static char const * name = field_traits<field<TDescriptor, Index, TType>>::name;
+        CONSTEXPR static const char* name = field_traits<field<TDescriptor, Index, TType>>::name;
 
         friend std::string to_string(field) {
-            return to_string(Invoke<typename TDescriptor::table>()) + std::string(".") + std::string(name);
+            return stringutils::concatenate(
+                to_string(Invoke<typename TDescriptor::table>()),
+                ".",
+                std::string(name)
+            );
         }
     };
 
@@ -121,19 +126,16 @@ namespace fp {
         using type = typename field_traits<combined_field<Index, TFields...>>::type;
 
         CONSTEXPR static int index = field_traits<combined_field<Index, TFields... >>::index;
-        CONSTEXPR static char const * name = field_traits<combined_field<Index, TFields... >>::name;
+        CONSTEXPR static const char* name = field_traits<combined_field<Index, TFields... >>::name;
 
         friend std::string to_string(combined_field) {
             using std::to_string;
-            static std::string const names[] = { to_string(TFields())... };
-            std::ostringstream ss;
-            ss << '(';
-            ss << names[0];
-            for (std::size_t i = 1; i < sizeof...(TFields); ++i) {
-                ss << ", " << names[i];
-            }
-            ss << ") AS " << name;
-            return ss.str();
+            return stringutils::concatenate(
+                "(",
+                stringutils::implode(", ", to_string(TFields())...),
+                ") AS ",
+                std::string(name)
+            );
         }
     };
 
@@ -147,8 +149,8 @@ namespace fp {
     struct are_related_fields : All<is_field<TFields>..., is_same<DescriptorOf<TFields>...>> { };
 
     template<int Index, typename... TFields, EnableIf<is_field<TFields>...> = _>
-    inline combined_field<Index, TFields...> combine(TFields...){
-        return combined_field<Index, TFields...>();
+    CONSTEXPR inline combined_field<Index, TFields...> combine(TFields...){
+        return { };
     }
 }
 

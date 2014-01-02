@@ -12,8 +12,7 @@
 namespace fp {
 
     template<typename... Ts>
-    struct largest_type : impl::largest_type_impl < Ts...> {
-    };
+    struct largest_type : impl::largest_type_impl<Ts...> { };
 }
 
 #endif

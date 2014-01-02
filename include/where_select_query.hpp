@@ -7,6 +7,7 @@
 
 #include "is_query.hpp"
 #include "select_query.hpp"
+#include "stringutil.hpp"       // for stringutils::concatenate
 #include "where_query.hpp"
 
 #include <algorithm>            // for std::swap
@@ -38,41 +39,38 @@ namespace fp {
         TSelect _select;
         TWhere _where;
     public:
-        where_select_query()
-        : _select(), _where() {
-        }
+        where_select_query() = default;
 
         where_select_query(TSelect s, TWhere w)
-        : _select(std::move(s)), _where(std::move(w)) {
-        }
+        : _select(std::move(s)), _where(std::move(w))
+        { }
 
-        where_select_query(where_select_query const &) = default;
+        where_select_query(const where_select_query&) = default;
 
-        where_select_query(where_select_query && qry) noexcept
-        : _select(), _where() {
-            swap(*this, qry);
-        }
+        where_select_query(where_select_query&& qry) noexcept
+        : _select(), _where()
+        { swap(*this, qry); }
 
-        friend void swap(where_select_query & l, where_select_query & r) noexcept {
+        friend void swap(where_select_query& l, where_select_query& r) noexcept {
             using std::swap;
             swap(l._select, r._select);
             swap(l._where, r._where);
         }
 
         template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
-        friend bool evaluate(TRecord && rec, where_select_query const & q) {
+        friend bool evaluate(TRecord&& rec, const where_select_query& q) {
             return evaluate(std::forward<TRecord>(rec), q._where);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord && rec, where_select_query const & q) {
+        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord&& rec, const where_select_query& q) {
             return select(std::forward<TRecord>(rec), q._select);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord> const & recs, where_select_query const & q) {
+        friend std::vector<Invoke<result_of<TRecord>>> query(const std::vector<TRecord>& recs, const where_select_query& q) {
             std::vector<Invoke<result_of<TRecord>>> ret;
-            for (TRecord const & cur : recs) {
+            for(const TRecord& cur : recs) {
                 if (evaluate(cur, q._where)) {
                     ret.push_back(select(cur, q._select));
                 }
@@ -80,15 +78,15 @@ namespace fp {
             return ret;
         }
 
-        friend std::string to_string(where_select_query const & q) {
+        friend std::string to_string(const where_select_query& q) {
             using std::to_string;
-            return to_string(q._select) + std::string(" ") + to_string(q._where);
+            return stringutils::concatenate(to_string(q._select), " ", to_string(q._where));
         }
     };
 
     template<typename TSelect, typename TWhere, EnableIf<is_select_query<Unqualified<TSelect>>, is_where_query<Unqualified<TWhere>>> = _>
-    inline where_select_query<Unqualified<TSelect>, Unqualified<TWhere>> operator+(TSelect && s, TWhere && w) {
-        return where_select_query<Unqualified<TSelect>, Unqualified<TWhere>>(std::forward<TSelect>(s), std::forward<TWhere>(w));
+    CONSTEXPR inline where_select_query<Unqualified<TSelect>, Unqualified<TWhere>> operator+(TSelect&& s, TWhere&& w) {
+        return { std::forward<TSelect>(s), std::forward<TWhere>(w) };
     }
 }
 

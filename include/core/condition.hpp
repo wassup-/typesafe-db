@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef CONDITION_HPP
 #define CONDITION_HPP
 
@@ -23,17 +27,19 @@ namespace fp {
     protected:
         std::unique_ptr<impl::condition_impl> _impl;
     public:
-        condition(mutex &);
-        condition(condition &&);
+        condition(mutex&);
+        condition(condition&&);
         ~condition();
 
-        friend void swap(condition & l, condition & r) {
+        friend void swap(condition& l, condition& r) {
             using std::swap;
             swap(l._impl, r._impl);
         }
 
         void wait();
-        template<typename Rep, typename Period> bool timed_wait(std::chrono::duration<Rep, Period>);
+        
+        template<typename Rep, typename Period>
+        bool timed_wait(std::chrono::duration<Rep, Period>);
 
         void post();
         void post_all();

@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef _LEXICAL_CAST_IMPL_HPP
 #define _LEXICAL_CAST_IMPL_HPP
 
@@ -11,7 +15,7 @@ namespace fp {
         template<typename In, typename Out>
         struct lexical_cast_impl {
 
-            static Out cast(In const & v) {
+            static Out cast(const In& v) {
                 Out ret;
                 std::stringstream ss;
                 ss << v;
@@ -23,29 +27,29 @@ namespace fp {
         template<typename T>
         struct lexical_cast_impl<T, T> {
 
-            static T const & cast(T const & v) {
+            static T const & cast(const T& v) {
                 return v;
             }
         };
 
         template<>
-        struct lexical_cast_impl<std::string, char const *> {
+        struct lexical_cast_impl<std::string, const char*> {
 
-            static char const * cast(std::string const & v) {
+            static const char* cast(const std::string& v) {
                 return v.c_str();
             }
         };
 
         template<>
-        struct lexical_cast_impl<char const *, std::string> {
+        struct lexical_cast_impl<const char*, std::string> {
 
-            static std::string cast(char const * v) {
+            static std::string cast(const char* v) {
                 return std::string(v);
             }
         };
 
         template<typename In>
-        struct lexical_cast_impl<In, char const *>;
+        struct lexical_cast_impl<In, const char*>;
 
         template<typename In>
         struct lexical_cast_impl<In, char *>;

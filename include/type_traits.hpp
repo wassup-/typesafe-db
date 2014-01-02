@@ -10,7 +10,7 @@
 namespace fp {
     
     template<typename... T>
-    struct type_seq {
+    struct type_sequence {
         
         template<template<typename...> class C>
         struct as {
@@ -19,7 +19,7 @@ namespace fp {
     };
     
     template<typename T, T... V>
-    struct val_seq {
+    struct integer_sequence {
         
         template<template<T...> class C>
         struct as {
@@ -241,7 +241,7 @@ namespace fp {
         struct skip_n_types<N, H, T...> : skip_n_types<(N - 1), T...> { };
         
         template<typename... T>
-        struct skip_n_types<0, T...> { using type = type_seq<T...>; };
+        struct skip_n_types<0, T...> { using type = type_sequence<T...>; };
         
         template<typename T, int N, T...>
         struct skip_n_values;
@@ -250,7 +250,7 @@ namespace fp {
         struct skip_n_values<T, N, H, Tail...> : skip_n_values<T, (N - 1), Tail...> { };
         
         template<typename T, int... Tail>
-        struct skip_n_values<T, 0, Tail...> { using type = val_seq<T, Tail...>; };
+        struct skip_n_values<T, 0, Tail...> { using type = integer_sequence<T, Tail...>; };
     }
     
     template<int N, typename... T>

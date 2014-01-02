@@ -7,13 +7,13 @@
 
 #include "config.hpp"
 #include "field.hpp"            // for fp::field
-#include "int_sequence.hpp"     // for fp::index_of
 #include "type_traits.hpp"      // for fp::EnableIf, fp::DisableIf
 
 #include <tuple>        // for std::tuple, std::get
 
 
 namespace fp {
+    
     template<typename...>
     struct record;
     
@@ -51,45 +51,45 @@ namespace fp {
         std::tuple<Invoke<TFields>...> _values;
     public:
 
-        constexpr record() = default;
+        CONSTEXPR record() = default;
 
-        record(record const &) = default;
+        record(const record&) = default;
 
-        record(record && rec) = default;
+        record(record&& rec) = default;
 
-        constexpr record(Invoke<TFields>... fs)
+        CONSTEXPR record(Invoke<TFields>... fs)
         : _values(std::move(fs)...) {
         }
 
-        record & operator=(record const &) = default;
-        record & operator=(record &&) = default;
+        record& operator=(const record&) = default;
+        record& operator=(record&&) = default;
 
-        friend void swap(record & l, record & r) noexcept {
+        friend void swap(record& l, record& r) noexcept {
             using std::swap;
             swap(l._values, r._values);
         }
 
-        constexpr static std::size_t size() {
+        CONSTEXPR static std::size_t size() {
             return sizeof...(TFields);
         }
 
         template<std::size_t Idx>
-        friend Invoke<nth_type<index_of<Idx, TFields::index...>::value>> & get(record & rec) {
+        friend Invoke<nth_type<index_of<Idx, TFields::index...>::value>>& get(record& rec) {
             return std::get<index_of<Idx, TFields::index...>::value>(rec._values);
         }
 
         template<std::size_t Idx>
-        friend Invoke<nth_type<index_of<Idx, TFields::index...>::value>> const & get(record const & rec) {
+        friend const Invoke<nth_type<index_of<Idx, TFields::index...>::value>>& get(const record& rec) {
             return std::get<index_of<Idx, TFields::index...>::value>(rec._values);
         }
 
         template<typename TField, EnableIf<is_field<TField>> = _>
-        friend Invoke<TField> & get(record & rec) {
+        friend Invoke<TField>& get(record& rec) {
             return get<TField::index>(rec);
         }
 
         template<typename TField, EnableIf<is_field<TField>> = _>
-        friend Invoke<TField> const & get(record const & rec) {
+        friend const Invoke<TField>& get(const record& rec) {
             return get<TField::index>(rec);
         }
     };

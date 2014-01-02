@@ -6,15 +6,18 @@
 #define _UNIQUE_TYPES_HPP
 
 #include "is_contained_type.hpp"
+ #include "type_traits.hpp"
 
 namespace fp {
+
     template<typename...>
-    struct type_seq;
+    struct type_sequence;
     
     template<typename...>
     struct unique_types;
 
     namespace impl {
+        
         template<typename, typename>
         struct unique_types_impl;
         
@@ -22,30 +25,24 @@ namespace fp {
         struct unique_types_helper;
 
         template<typename... TLeft, typename H, typename... T>
-        struct unique_types_impl<type_seq<TLeft...>, type_seq<H, T...> > {
-            using type = Invoke<unique_types_helper<is_contained_type<H, TLeft...>::value, type_seq<TLeft...>, type_seq<H, T...>>>;
-        };
+        struct unique_types_impl<type_sequence<TLeft...>, type_sequence<H, T...> >
+        : identity<Invoke<unique_types_helper<is_contained_type<H, TLeft...>::value, type_sequence<TLeft...>, type_sequence<H, T...>>>> { };
 
         template<typename... TLeft>
-        struct unique_types_impl<type_seq<TLeft...>, type_seq<> > {
-            using type = type_seq<TLeft...>;
-        };
+        struct unique_types_impl<type_sequence<TLeft...>, type_sequence<> >
+        : identity<type_sequence<TLeft...> > { };
 
         template<typename... TLeft, typename TRightHead, typename... TRightTail>
-        struct unique_types_helper<false, type_seq<TLeft...>, type_seq<TRightHead, TRightTail...>> {
-            using type = Invoke<unique_types_impl<type_seq<TLeft..., TRightHead>, type_seq<TRightTail...>>>;
-        };
+        struct unique_types_helper<false, type_sequence<TLeft...>, type_sequence<TRightHead, TRightTail...>>
+        : identity<Invoke<unique_types_impl<type_sequence<TLeft..., TRightHead>, type_sequence<TRightTail...>>>> { };
 
         template<typename... TLeft, typename TRightHead, typename... TRightTail>
-        struct unique_types_helper<true, type_seq<TLeft...>, type_seq<TRightHead, TRightTail...>> {
-            using type = Invoke<unique_types_impl<type_seq<TLeft...>, type_seq<TRightTail...>>>;
-        };
+        struct unique_types_helper<true, type_sequence<TLeft...>, type_sequence<TRightHead, TRightTail...>>
+        : identity<Invoke<unique_types_impl<type_sequence<TLeft...>, type_sequence<TRightTail...>>>> { };
     }
 
     template<typename H, typename... T>
-    struct unique_types<H, T...> {
-        using type = Invoke<impl::unique_types_impl<type_seq<H>, type_seq<T...>>>;
-    };
+    struct unique_types<H, T...> : impl::unique_types_impl<type_sequence<H>, type_sequence<T...>> { };
 }
 
 #endif

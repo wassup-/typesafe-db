@@ -13,7 +13,8 @@ namespace fp {
 
         namespace impl {
 
-            template<typename> struct result_iterator_impl;
+            template<typename>
+            struct result_iterator_impl;
         }
 
         struct basic_result;
@@ -33,18 +34,20 @@ namespace fp {
             impl::result_iterator_impl<T> * _impl;
         public:
 
-            result_iterator(basic_result & res) : _impl(0) {
-            }
+            result_iterator(basic_result & res)
+            : _impl(0)
+            { }
 
-            result_iterator(result_iterator const & it) : _impl(0) {
-            }
+            result_iterator(result_iterator const & it)
+            : _impl(0)
+            { }
 
-            result_iterator(result_iterator && it) : _impl(0) {
-                swap(*this, it);
-            }
+            result_iterator(result_iterator && it)
+            : _impl(0)
+            { swap(*this, it); }
 
-            ~result_iterator() {
-            }
+            ~result_iterator()
+            { }
 
             friend void swap(result_iterator & l, result_iterator & r) {
                 using std::swap;

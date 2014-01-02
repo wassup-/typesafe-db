@@ -8,18 +8,13 @@
 #include "type_traits.hpp"
 
 namespace fp {
-    template<int...>
-    struct int_seq;
-    
-    template<typename...>
-    struct type_seq;
     
     template<typename, typename>
     struct extract_types;
 
-    template<int... I, typename... T>
-    struct extract_types<int_seq<I...>, type_seq<T...> > {
-        using type = type_seq<NthTypeOf<I, T...>>;
+    template<typename T, T... I, typename... Ts>
+    struct extract_types<integer_sequence<T, I...>, type_sequence<Ts...> > {
+        using type = type_sequence<NthTypeOf<I, Ts...>...>;
     };
 }
 

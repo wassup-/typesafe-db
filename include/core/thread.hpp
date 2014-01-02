@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef SYSTEM_THREAD_HPP
 #define SYSTEM_THREAD_HPP
 
@@ -27,17 +31,23 @@ namespace fp {
 
         void run();
     public:
-        template<typename Fn > thread(Fn);
-        template<typename Fn, typename... Arg > thread(Fn, Arg && ...);
+        template<typename Fn >
+        thread(Fn);
 
-        template<typename C > thread(void(C::*)(), C *);
-        template<typename C, typename... Arg > thread(void(C::*)(Arg...), C *, Arg...);
+        template<typename Fn, typename... Arg>
+        thread(Fn, Arg&& ...);
 
-        thread(thread &&);
+        template<typename C>
+        thread(void(C::*)(), C *);
+
+        template<typename C, typename... Arg>
+        thread(void(C::*)(Arg...), C *, Arg...);
+
+        thread(thread&&);
 
         ~thread();
 
-        friend void swap(thread & l, thread & r) {
+        friend void swap(thread& l, thread& r) {
             using std::swap;
             swap(l._impl, r._impl);
             swap(l._fn, r._fn);
@@ -55,18 +65,18 @@ namespace fp {
     namespace this_thread {
 
         template<typename Clock, typename Duration>
-        inline void sleep_until(std::chrono::time_point<Clock, Duration> const & t) {
+        inline void sleep_until(std::chrono::time_point<Clock, Duration> const& t) {
             sleep_for(t - Clock::now());
         }
 
         template<typename Rep, typename Period>
-        inline void sleep_for(std::chrono::duration<Rep, Period> const & t) {
+        inline void sleep_for(std::chrono::duration<Rep, Period> const& t) {
             std::chrono::seconds const secs = std::chrono::duration_cast<std::chrono::seconds > (t);
             std::chrono::nanoseconds const nsecs = std::chrono::duration_cast<std::chrono::nanoseconds > (t - secs);
             timespec ts = {secs.count(), nsecs.count()};
             while ((ts.tv_sec + ts.tv_nsec) > 0) {
                 timespec remaining = {0, 0};
-                if (0 != ::nanosleep(&ts, &remaining)) {
+                if (0 != ::nanosleep(&ts,&remaining)) {
                     break;
                 }
                 ts.tv_sec = remaining.tv_sec;

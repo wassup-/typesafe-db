@@ -32,13 +32,15 @@ namespace fp {
             std::shared_ptr<basic_context> _context;
         public:
 
-            basic_engine(char const * host, char const * name, char const * pass) : _context(basic_context::create()) {
+            basic_engine(char const * host, char const * name, char const * pass)
+            : _context(basic_context::create()) {
                 if (_context) {
                     ::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0);
                 }
             }
 
-            basic_engine(char const * host, char const * name, char const * pass, char const * db) : _context(basic_context::create()) {
+            basic_engine(char const * host, char const * name, char const * pass, char const * db)
+            : _context(basic_context::create()) {
                 if (_context) {
                     if (::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0)) {
                         if (db) {
@@ -80,7 +82,7 @@ namespace fp {
                 ::mysql_query(_context->handle(), qry.c_str());
                 std::vector<record_type> ret;
                 mysql::basic_result res(*_context);
-                if (res) {
+                if(res) {
                     ret.reserve(res.rows());
                     mysql::basic_row row;
                     while ((row = res.fetch_row())) {

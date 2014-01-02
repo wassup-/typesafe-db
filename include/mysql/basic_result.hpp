@@ -30,12 +30,13 @@ namespace fp {
             std::unique_ptr<resource_type, decltype(&::mysql_free_result)> _res;
         public:
 
-            basic_result(basic_context & ctx) : _res(::mysql_use_result(ctx.handle()), &::mysql_free_result) {
-            }
+            basic_result(basic_context & ctx)
+            : _res(::mysql_use_result(ctx.handle()), &::mysql_free_result)
+            { }
 
-            basic_result(basic_result && res) : _res(nullptr, &::mysql_free_result) {
-                swap(*this, res);
-            }
+            basic_result(basic_result && res)
+            : _res(nullptr, &::mysql_free_result)
+            { swap(*this, res); }
 
             friend void swap(basic_result & l, basic_result & r) {
                 using std::swap;

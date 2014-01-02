@@ -1,9 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef _SELECT_QUERY_IMPL_HPP
 #define _SELECT_QUERY_IMPL_HPP
 
+#include "../config.hpp"
+#include "../field.hpp"
+#include "../stringutil.hpp"
 #include "../unique_types.hpp"
 
-#include <sstream>      // for std::ostringstream
 #include <string>       // for std::string, std::to_string
 
 namespace fp {
@@ -22,20 +28,6 @@ namespace fp {
             static std::string const names[];
         };
         
-        template<typename>
-        struct extract_table_names;
-        
-        template<typename... TDescriptor, int... Idx, typename... TValue>
-        struct extract_table_names<type_seq<field<TDescriptor, Idx, TValue>...>> {
-            using type = table_names<TDescriptor...>;
-        };
-        
-        template<typename... TDescriptors>
-        static std::string (*get_table_names())[sizeof...(TDescriptors)] {
-            static std::string names[] = { to_string(typename TDescriptors::table::type())... };
-            return names;
-        }
-
         template<typename... TDescriptors>
         std::string const table_names<TDescriptors...>::names[] = { to_string(typename TDescriptors::table::type())... };
 
@@ -45,19 +37,12 @@ namespace fp {
             static std::string build_select_query() {
                 using std::to_string;
                 using tables = typename Invoke<unique_types<DescriptorOf<TFields>...>>::template as<table_names>::type;
-                static std::string const field_identifiers[] = { to_string(TFields())... };
-                std::ostringstream ss;
-                ss << "SELECT ";
-                ss << field_identifiers[0];
-                for (unsigned int i = 1; i < (sizeof (field_identifiers) / sizeof (std::string)); ++i) {
-                    ss << ", " << field_identifiers[i];
-                }
-                ss << " FROM ";
-                ss << tables::names[0];
-                for (unsigned int i = 1; i < tables::size; ++i) {
-                    ss << ", " << tables::names[i];
-                }
-                return ss.str();
+                return stringutils::concatenate(
+                    "SELECT ",
+                    stringutils::implode(", ", to_string(TFields())...),
+                    " FROM ",
+                    stringutils::implode(", ", tables::names)
+                );
             }
         };
     }

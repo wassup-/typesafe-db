@@ -1,39 +1,28 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef _IS_CONTAINED_VALUE_IMPL_HPP
 #define _IS_CONTAINED_VALUE_IMPL_HPP
 
-namespace fp {
-    namespace impl {
-        template<int, int...>
-        struct is_contained_value_impl;
+#include "../type_traits.hpp"
 
-        template<int I, int H, int... T>
-        struct is_contained_value_impl<I, H, T...> : is_contained_value_impl<I, T...> {
-        };
+namespace fp { namespace impl {
+    
+    template<typename T, T, T...>
+    struct is_contained_value_impl;
 
-        template<int I, int... T>
-        struct is_contained_value_impl<I, I, T...> {
+    template<typename T, T I, T H, T... R>
+    struct is_contained_value_impl<T, I, H, R...> : is_contained_value_impl<T, I, R...> { };
 
-            enum {
-                value = true
-            };
-        };
+    template<typename T, T I, T... R>
+    struct is_contained_value_impl<T, I, I, R...> : std::true_type { };
 
-        template<int I, int H>
-        struct is_contained_value_impl<I, H> {
+    template<typename T, T I, T H>
+    struct is_contained_value_impl<T, I, H> : std::false_type { };
 
-            enum {
-                value = false
-            };
-        };
-
-        template<int I>
-        struct is_contained_value_impl<I, I> {
-
-            enum {
-                value = true
-            };
-        };
-    }
-}
+    template<typename T, T I>
+    struct is_contained_value_impl<T, I, I> : std::true_type { };
+} }
 
 #endif

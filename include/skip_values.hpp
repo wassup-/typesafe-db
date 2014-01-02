@@ -8,16 +8,15 @@
 #include "impl/skip_values_impl.hpp"
 
 namespace fp {
+	
     template<int, int...>
     struct skip_values;
 
     template<int C, int... I>
-    struct skip_values : impl::skip_values_helper<C, false, I...> {
-    };
+    struct skip_values : impl::skip_values_helper<C, false, I...> { };
 
     template<int C, int... I>
-    struct skip_values_or_empty : impl::skip_values_impl<C, (C >= sizeof...(I)), I...> {
-    };
+    struct skip_values_or_empty : impl::skip_values_impl<C, (C >= sizeof...(I)), I...> { };
 }
 
 #endif

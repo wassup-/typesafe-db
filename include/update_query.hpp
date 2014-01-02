@@ -17,6 +17,7 @@
 #include <vector>               // for std::vector
 
 namespace fp {
+    
     template<typename...>
     struct update_query;
 
@@ -34,60 +35,55 @@ namespace fp {
             using type = unsigned long long;
         };
     protected:
-        std::tuple<TUpdate...> _updates;
+        std::tuple<TUpdate...> updates_;
     public:
-        update_query()
-        : _updates() {
-        }
+        update_query() = default;
 
         update_query(TUpdate... updates)
-        : _updates(std::move(updates)...) {
-        }
+        : updates_(std::move(updates)...)
+        { }
 
-        update_query(update_query const & qry)
-        : _updates(qry._updates) {
-        }
+        update_query(const update_query& qry) = default;
 
-        update_query(update_query && qry) noexcept
-        : _updates() {
-            swap(*this, qry);
-        }
+        update_query(update_query&& qry) noexcept
+        : updates_()
+        { swap(*this, qry); }
 
-        friend void swap(update_query & l, update_query & r) noexcept {
+        friend void swap(update_query& l, update_query& r) noexcept {
             using std::swap;
-            swap(l._updates, r._updates);
+            swap(l.updates_, r.updates_);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<Unqualified<TRecord>>> update(TRecord && rec, update_query const & q) {
-            impl::update_applier<TUpdate...> eval = call_constructor<impl::update_applier<TUpdate...>>(q._updates);
+        friend Invoke<result_of<Unqualified<TRecord>>> update(TRecord&& rec, const update_query& q) {
+            impl::update_applier<TUpdate...> eval = call_constructor<impl::update_applier<TUpdate...>>(q.updates_);
             eval(std::forward<TRecord>(rec));
             return 1;
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> update(std::vector<TRecord> & recs, update_query const & q) {
+        friend Invoke<result_of<TRecord>> update(std::vector<TRecord>& recs, const update_query& q) {
             Invoke<result_of<TRecord>> ret = 0;
-            for (TRecord & cur : recs) {
+            for (TRecord& cur : recs) {
                 ret += update(cur, q);
             }
             return ret;
         }
 
-        friend std::string to_string(update_query const & q) {
+        friend std::string to_string(const update_query& q) {
             std::string(*build_fn)(TUpdate...) = &impl::update_query_impl::build_update_query<TUpdate...>;
-            return call_function(build_fn, q._updates);
+            return call_function(build_fn, q.updates_);
         }
         
         template<typename T, EnableIf<impl::is_update_modifier<T>> = _>
-        friend update_query<TUpdate..., T> operator+(update_query const & q, T c) {
-            return call_constructor<update_query<TUpdate..., T>>(std::tuple_cat(q._updates, std::tuple<T>(c)));
+        friend update_query<TUpdate..., T> operator+(const update_query& q, T c) {
+            return call_constructor<update_query<TUpdate..., T>>(std::tuple_cat(q.updates_, std::tuple<T>(c)));
         }
     };
     
     template<typename... TUpdate>
-    update_query<Unqualified<TUpdate>...> update(TUpdate &&... u) {
-        return update_query<Unqualified<TUpdate>...>(std::forward<TUpdate>(u)...);
+    CONSTEXPR inline update_query<Unqualified<TUpdate>...> update(TUpdate&&... u) {
+        return { std::forward<TUpdate>(u)... };
     }
     
     template<typename TField>

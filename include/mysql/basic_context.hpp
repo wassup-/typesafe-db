@@ -29,9 +29,9 @@ namespace fp {
 
             std::unique_ptr<native_handle, decltype(&::mysql_close) > _context;
 
-            explicit basic_context(native_handle * const ctx) : _context(ctx, &::mysql_close) {
-
-            }
+            explicit basic_context(native_handle * const ctx)
+            : _context(ctx, &::mysql_close)
+            { }
 
             inline native_handle * handle() const {
                 return _context.get();
@@ -45,14 +45,15 @@ namespace fp {
             }
         public:
 
-            basic_context() : _context(::mysql_init(nullptr), &::mysql_close) {
-            }
+            basic_context()
+            : _context(::mysql_init(nullptr), &::mysql_close)
+            { }
 
-            basic_context(basic_context && ctx) : _context(nullptr, &::mysql_close) {
-                swap(*this, ctx);
-            }
+            basic_context(basic_context&& ctx)
+            : _context(nullptr, &::mysql_close)
+            { swap(*this, ctx); }
 
-            friend void swap(basic_context & l, basic_context & r) {
+            friend void swap(basic_context& l, basic_context& r) {
                 using std::swap;
                 swap(l._context, r._context);
             }

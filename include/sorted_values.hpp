@@ -8,15 +8,12 @@
 #include "impl/sorted_values_impl.hpp"
 
 namespace fp {
-    template<int...>
-    struct int_seq;
+	
+    template<typename T, T...>
+    struct integer_sequence;
     
-    template<int...>
-    struct sorted_values;
-
-    template<int... Vs>
-    struct sorted_values : impl::sorted_values_impl < int_seq<>, int_seq < Vs...>, int_seq<> > {
-    };
+    template<typename T, T... Vs>
+    struct sorted_values : impl::sorted_values_impl<integer_sequence<T>, integer_sequence<T, Vs...>, integer_sequence<T> > { };
 }
 
 #endif

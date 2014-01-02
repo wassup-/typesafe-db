@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 template<typename TType>
 struct has_member {
 protected:
@@ -12,10 +16,10 @@ protected:
 
 	template<typename T, T> struct Helper { };
 	template<typename U>
-	static no deduce(U *, Helper<void(BaseMixin::*)(), &U::operator()> * = 0);
+	static no deduce(U*, Helper<void(BaseMixin::*)(), &U::operator()>* = 0);
 	static yes deduce(...);
 public:
-	constexpr static bool result = (sizeof(yes) == sizeof(deduce(static_cast<Base *>(nullptr))));
+	constexpr static bool result = (sizeof(yes) == sizeof(deduce(static_cast<Base*>(nullptr))));
 };
 
 namespace detail {
@@ -23,18 +27,18 @@ namespace detail {
 	struct void_exp_result { };
 
 	template<typename TType, typename U>
-	U const & operator,(U const &, void_exp_result<TType>);
+	const U& operator,(const U&, void_exp_result<TType>);
 
 	template<typename TType, typename U>
-	U & operator,(U &, void_expr_result<TType>);
+	U& operator,(U&, void_exp_result<TType>);
 
 	template<typename TSrc, typename TDst>
 	struct clone_constness {
 		using type = TDst;
 	};
 	template<typename TSrc, typename TDst>
-	struct clone_constness<TSrc const, TDst> {
-		using type = TDst const;
+	struct clone_constness<const TSrc, TDst> {
+		using type = const TDst;
 	};
 }
 

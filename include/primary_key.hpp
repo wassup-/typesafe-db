@@ -10,7 +10,9 @@ namespace fp {
     struct field;
     
     namespace impl {
-        template<typename> struct primary_key;
+        
+        template<typename>
+        struct primary_key;
         
         template<typename TDescriptor, int Idx, typename TType>
         struct primary_key<field<TDescriptor, Idx, TType> > {

@@ -8,16 +8,17 @@
 #include "impl/query_combiner_impl.hpp"
 
 namespace fp {
+    
     template<typename...>
     struct select_query;
 
     template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
-    inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal> combine(select_query<LFields...>, select_query<RFields...>) {
+    CONSTEXPR inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal> combine(const select_query<LFields...>&, const select_query<RFields...>&) {
         return { };
     }
 
     template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
-    inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique> combine_unique(select_query<LFields...>, select_query<RFields...>) {
+    CONSTEXPR inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique> combine_unique(const select_query<LFields...>&, const select_query<RFields...>&) {
         return { };
     }
 }

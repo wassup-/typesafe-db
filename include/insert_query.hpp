@@ -11,12 +11,14 @@
 #include "is_query.hpp"
 #include "query_combiner.hpp"
 #include "record.hpp"
+#include "stringutil.hpp"       // for stringutils::concatenate
 #include "type_traits.hpp"
 
-#include <string>       // for std::string, std::to_string
-#include <vector>       // for std::vector
+#include <string>               // for std::string, std::to_string
+#include <vector>               // for std::vector
 
 namespace fp {
+    
     template<typename, typename...>
     struct insert_query;
 
@@ -36,25 +38,25 @@ namespace fp {
         };
     public:
 
-        friend void swap(insert_query & l, insert_query & r) {
+        friend void swap(insert_query& l, insert_query& r) noexcept {
             using std::swap;
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> insert(std::vector<TRecord> & recs, insert_query const & q) {
-            std::vector<typename result_of<TRecord>::type> ret;
-            for (TRecord const & cur : recs) {
+        friend std::vector<Invoke<result_of<TRecord>>> insert(std::vector<TRecord>& recs, const insert_query& q) {
+            std::vector<Invoke<result_of<TRecord>>> ret;
+            for(const TRecord& cur : recs) {
                 ret.push_back(select(cur, q));
             }
             return ret;
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord> & recs, insert_query const & q) {
+        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord>& recs, const insert_query& q) {
             return insert(recs, q);
         }
 
-        friend std::string to_string(select_query const & q) {
+        friend std::string to_string(const select_query& q) {
             return impl::insert_query_impl<TFields...>::build_insert_query();
         }
     };

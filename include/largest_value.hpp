@@ -9,9 +9,8 @@
 
 namespace fp {
 
-    template<int... Vs>
-    struct largest_value : impl::largest_value_impl<Vs...> {
-    };
+    template<typename T, T... Vs>
+    struct largest_value : impl::largest_value_impl<T, Vs...> { };
 }
 
 #endif

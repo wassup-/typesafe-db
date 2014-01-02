@@ -1,23 +1,22 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef _SMALLEST_VALUE_IMPL_HPP
 #define _SMALLEST_VALUE_IMPL_HPP
 
-namespace fp {
-    namespace impl {
-        template<int, int...>
-        struct smallest_value_impl;
+#include <type_traits>
 
-        template<int S, int H, int... T>
-        struct smallest_value_impl<S, H, T...> : smallest_value_impl<(S <= H) ? S : H, T...> {
-        };
+namespace fp { namespace impl {
+    
+    template<typename T, T, T...>
+    struct smallest_value_impl;
 
-        template<int H>
-        struct smallest_value_impl<H> {
+    template<typename T, T S, T H, T... R>
+    struct smallest_value_impl<T, S, H, R...> : smallest_value_impl<T, (S <= H) ? S : H, R...> { };
 
-            enum {
-                value = H
-            };
-        };
-    }
-}
+    template<typename T, T H>
+    struct smallest_value_impl<T, H> : std::integral_constant<T, H> { };
+} }
 
 #endif

@@ -17,7 +17,7 @@ void threadpool::push(void(C::*fn)(), C * obj) {
 }
 
 template<typename Fn, typename... Arg>
-void threadpool::push(Fn fn, Arg && ... arg) {
+void threadpool::push(Fn fn, Arg&& ... arg) {
     {
         lock_guard<mutex_t> lg(_mutex);
         _tasks.push_back(new impl::functor_with_args<Fn, typename std::remove_reference<Arg>::type...>(fn, std::forward<Arg > (arg)...));

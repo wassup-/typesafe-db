@@ -7,6 +7,7 @@
 
 #include "field.hpp"
 #include "lexical_cast.hpp"
+#include "stringutil.hpp"       // for stringutils::concatenate
 #include "type_traits.hpp"      // for fp::Bool
 
 #include <string>               // for std::string, std::to_string
@@ -63,36 +64,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_eq()
-            : _value() {
-            }
+            where_eq() = default;
 
             explicit where_eq(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_eq(where_eq const &) = default;
+            where_eq(const where_eq&) = default;
             
-            where_eq(where_eq && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_eq(where_eq&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_eq & l, where_eq & r) {
+            friend void swap(where_eq& l, where_eq& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (get<TField>(r) == _value);
             }
 
-            friend std::string to_string(where_eq const & c) {
+            friend std::string to_string(const where_eq& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " = " << to_string(c._value) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " = ", to_string(c._value), ")");
             }
         };
 
@@ -103,36 +99,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_neq()
-            : _value() {
-            }
+            where_neq() = default;
 
             explicit where_neq(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_neq(where_neq const &) = default;
+            where_neq(const where_neq&) = default;
             
-            where_neq(where_neq && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_neq(where_neq&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_neq & l, where_neq & r) {
+            friend void swap(where_neq& l, where_neq& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (get<TField>(r) != _value);
             }
 
-            friend std::string to_string(where_neq const & c) {
+            friend std::string to_string(const where_neq& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " != " << to_string(c._value) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " != ", to_string(c._value), ")");
             }
         };
 
@@ -143,36 +134,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_lt()
-            : _value() {
-            }
+            where_lt() = default;
 
             explicit where_lt(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_lt(where_lt const &) = default;
+            where_lt(const where_lt&) = default;
             
-            where_lt(where_lt && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_lt(where_lt&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_lt & l, where_lt & r) {
+            friend void swap(where_lt& l, where_lt& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (get<TField>(r) < _value);
             }
 
-            friend std::string to_string(where_lt const & c) {
+            friend std::string to_string(const where_lt& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " < " << to_string(c._value) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " < ", to_string(c._value), ")");
             }
         };
 
@@ -183,36 +169,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_gt()
-            : _value() {
-            }
+            where_gt() = default;
 
             explicit where_gt(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_gt(where_gt const &) = default;
+            where_gt(const where_gt&) = default;
             
-            where_gt(where_gt && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_gt(where_gt&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_gt & l, where_gt & r) {
+            friend void swap(where_gt& l, where_gt& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (get<TField>(r) > _value);
             }
 
-            friend std::string to_string(where_gt const & c) {
+            friend std::string to_string(const where_gt& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " > " << to_string(c._value) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " > ", to_string(c._value), ")");
             }
         };
 
@@ -223,36 +204,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_lte()
-            : _value() {
-            }
+            where_lte() = default;
 
             explicit where_lte(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_lte(where_lte const &) = default;
+            where_lte(const where_lte&) = default;
             
-            where_lte(where_lte && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_lte(where_lte&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_lte & l, where_lte & r) {
+            friend void swap(where_lte& l, where_lte& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (get<TField>(r) <= _value);
             }
 
-            friend std::string to_string(where_lte const & c) {
+            friend std::string to_string(const where_lte& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " <= " << to_string(c._value) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " <= ", to_string(c._value), ")");
             }
         };
 
@@ -263,36 +239,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_gte()
-            : _value() {
-            }
+            where_gte() = default;
 
             explicit where_gte(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_gte(where_gte const &) = default;
+            where_gte(const where_gte&) = default;
             
-            where_gte(where_gte && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_gte(where_gte&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_gte & l, where_gte & r) {
+            friend void swap(where_gte& l, where_gte& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (get<TField>(r) >= _value);
             }
 
-            friend std::string to_string(where_gte const & c) {
+            friend std::string to_string(const where_gte& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " >= " << to_string(c._value) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " >= ", to_string(c._value), ")");
             }
         };
 
@@ -303,36 +274,31 @@ namespace fp {
         protected:
             Invoke<TField> _value;
         public:
-            where_contains()
-            : _value() {
-            }
+            where_contains() = default;
             
             explicit where_contains(Invoke<TField> v)
-            : _value(std::move(v)) {
-            }
+            : _value(std::move(v))
+            { }
             
-            where_contains(where_contains const &) = default;
+            where_contains(const where_contains&) = default;
             
-            where_contains(where_contains && c)
-            : _value() {
-                swap(*this, c);
-            }
+            where_contains(where_contains&& c)
+            : _value()
+            { swap(*this, c); }
             
-            friend void swap(where_contains & l, where_contains & r) {
+            friend void swap(where_contains& l, where_contains& r) {
                 using std::swap;
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (TField::type::npos != get<TField>(r).find(_value));
             }
 
-            friend std::string to_string(where_contains const & c) {
+            friend std::string to_string(const where_contains& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(TField()) << " LIKE \"%" << c._value << "%\")";
-                return ss.str();
+                return stringutils::concatenate("(", to_string(TField()), " LIKE \"%", c._value, "%\")");
             }
         };
 
@@ -346,32 +312,29 @@ namespace fp {
         public:
 
             where_or(L l, R r)
-            : _left(std::move(l)), _right(std::move(r)) {
-            }
+            : _left(std::move(l)), _right(std::move(r))
+            { }
             
-            where_or(where_or const &) = default;
+            where_or(const where_or&) = default;
             
-            where_or(where_or && c)
-            : _left(), _right() {
-                swap(*this, c);
-            }
+            where_or(where_or&& c)
+            : _left(), _right()
+            { swap(*this, c); }
             
-            friend void swap(where_or & l, where_or & r) {
+            friend void swap(where_or& l, where_or& r) {
                 using std::swap;
                 swap(l._left, r._left);
                 swap(l._right, r._right);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (_left(r) || _right(r));
             }
 
-            friend std::string to_string(where_or const & c) {
+            friend std::string to_string(const where_or& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(c._left) << " OR " << to_string(c._right) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(c._left), " OR ", to_string(c._right), ")");
             }
         };
 
@@ -385,69 +348,66 @@ namespace fp {
         public:
 
             where_and(L l, R r)
-            : _left(std::move(l)), _right(std::move(r)) {
-            }
+            : _left(std::move(l)), _right(std::move(r))
+            { }
             
-            where_and(where_and const &) = default;
+            where_and(const where_and&) = default;
             
-            where_and(where_and && c)
-            : _left(), _right() {
-                swap(*this, c);
-            }
+            where_and(where_and&& c)
+            : _left(), _right()
+            { swap(*this, c); }
             
-            friend void swap(where_and & l, where_and & r) {
+            friend void swap(where_and& l, where_and& r) {
                 using std::swap;
                 swap(l._left, r._left);
                 swap(l._right, r._right);
             }
 
             template<typename TRecord>
-            bool operator()(TRecord const & r) const {
+            bool operator()(const TRecord& r) const {
                 return (_left(r) && _right(r));
             }
 
-            friend std::string to_string(where_and const & c) {
+            friend std::string to_string(const where_and& c) {
                 using std::to_string;
-                std::ostringstream ss;
-                ss << '(' << to_string(c._left) << " AND " << to_string(c._right) << ')';
-                return ss.str();
+                return stringutils::concatenate("(", to_string(c._left), " AND ", to_string(c._right), ")");
             }
         };
     }
 
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_eq<TField> eq(TField, Invoke<TField> v) {
-        return where_clauses::where_eq<TField> (v);
+        return where_clauses::where_eq<TField>(v);
     }
 
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_neq<TField> neq(TField, Invoke<TField> v) {
-        return where_clauses::where_neq<TField> (v);
+        return where_clauses::where_neq<TField>(v);
     }
 
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_lt<TField> lt(TField, Invoke<TField> v) {
-        return where_clauses::where_lt<TField> (v);
+        return where_clauses::where_lt<TField>(v);
     }
 
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_gt<TField> gt(TField, Invoke<TField> v) {
-        return where_clauses::where_gt<TField> (v);
+        return where_clauses::where_gt<TField>(v);
     }
     
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_lte<TField> lte(TField, Invoke<TField> v) {
-        return where_clauses::where_lte<TField> (v);
+        return where_clauses::where_lte<TField>(v);
     }
     
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_gte<TField> gte(TField, Invoke<TField> v) {
-        return where_clauses::where_gte<TField> (v);
+        return where_clauses::where_gte<TField>(v);
     }
     
     template<typename TField, EnableIf<is_field<TField>> = _>
     inline where_clauses::where_contains<TField> contains(TField, Invoke<TField> v) {
-        return where_clauses::where_contains<TField> (v);
+        return where_clauses::where_contains<TField>(v);
     }
 
     template<typename TField, EnableIf<is_field<TField>> = _>

@@ -13,32 +13,32 @@ namespace fp {
     namespace impl {
 
         template<typename TContainer, typename TValue>
-        typename TContainer::iterator erase_impl(TContainer & cont, TValue const & val, vectorlike_tag) {
+        typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, vectorlike_tag) {
             return cont.erase(std::remove(cont.begin(), cont.end(), val), cont.end());
         }
 
         template<typename TContainer, typename TValue>
-        typename TContainer::iterator erase_impl(TContainer & cont, TValue const & val, listlike_tag) {
+        typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, listlike_tag) {
             return cont.remove(val);
         }
 
         template<typename TContainer, typename TValue>
-        typename TContainer::iterator erase_impl(TContainer & cont, TValue const & val, associative_tag) {
+        typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, associative_tag) {
             return cont.erase(val);
         }
 
         template<typename TContainer, typename TPred>
-        typename TContainer::iterator erase_if_impl(TContainer & cont, TPred pred, vectorlike_tag) {
+        typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, vectorlike_tag) {
             return cont.erase(std::remove_if(cont.begin(), cont.end(), pred), cont.end());
         }
 
         template<typename TContainer, typename TPred>
-        typename TContainer::iterator erase_if_impl(TContainer & cont, TPred pred, listlike_tag) {
+        typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, listlike_tag) {
             return cont.remove_if(pred);
         }
 
         template<typename TContainer, typename TPred>
-        typename TContainer::iterator erase_if_impl(TContainer & cont, TPred pred, associative_tag) {
+        typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, associative_tag) {
             auto ret = cont.end();
             for (auto it = cont.begin(); it != cont.end(); /* */) {
                 if (pred(*it)) {
@@ -52,13 +52,15 @@ namespace fp {
     }
 
     template<typename TContainer, typename TValue>
-    typename TContainer::iterator erase(TContainer & cont, TValue const & val) {
-        return impl::erase_impl(cont, val, typename container_traits<TContainer>::category());
+    typename TContainer::iterator erase(TContainer& cont, const TValue& val) {
+        typedef typename container_traits<TContainer>::category tag;
+        return impl::erase_impl(cont, val, tag());
     }
 
     template<typename TContainer, typename TPred>
-    typename TContainer::iterator erase_if(TContainer & cont, TPred pred) {
-        return impl::erase_if_impl(cont, pred, typename container_traits<TContainer>::category());
+    typename TContainer::iterator erase_if(TContainer& cont, TPred pred) {
+        typedef typename container_traits<TContainer>::category tag;
+        return impl::erase_if_impl(cont, pred, tag());
     }
 }
 

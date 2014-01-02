@@ -8,12 +8,9 @@
 #include "impl/smallest_value_impl.hpp"
 
 namespace fp {
-    template<int...>
-    struct smallest_value;
-
-    template<int... Vs>
-    struct smallest_value : impl::smallest_value_impl<Vs...>{
-    };
+	
+    template<typename T, T... Vs>
+    struct smallest_value : impl::smallest_value_impl<T, Vs...> { };
 }
 
 #endif

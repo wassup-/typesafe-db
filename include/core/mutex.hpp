@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef MUTEX_HPP
 #define MUTEX_HPP
 
@@ -24,9 +28,9 @@ namespace fp {
         std::unique_ptr<impl::mutex_impl> _impl;
     public:
         mutex();
-        mutex(mutex &&);
+        mutex(mutex&&);
 
-        friend void swap(mutex & l, mutex & r) {
+        friend void swap(mutex& l, mutex& r) {
             using std::swap;
             swap(l._impl, r._impl);
         }
@@ -39,7 +43,7 @@ namespace fp {
 
         void unlock();
 
-        native_type & handle() {
+        native_type& handle() {
             return _impl->handle();
         }
     };

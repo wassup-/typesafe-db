@@ -6,6 +6,7 @@
 #define _WHERE_UPDATE_QUERY_HPP
 
 #include "is_query.hpp"
+#include "stringutil.hpp"       // for stringutils::concatenate
 #include "update_query.hpp"
 #include "where_query.hpp"
 
@@ -14,6 +15,7 @@
 #include <vector>               // for std::vector
 
 namespace fp {
+    
     template<typename, typename>
     struct where_update_query;
 
@@ -35,66 +37,63 @@ namespace fp {
             using type = Invoke<typename TUpdate::template result_of<TRecord>>;
         };
     protected:
-        TUpdate _update;
-        TWhere _where;
+        TUpdate update_;
+        TWhere where_;
     public:
 
-        where_update_query()
-        : _update(), _where() {
-        }
+        where_update_query() = default;
 
         where_update_query(TUpdate u, TWhere w)
-        : _update(std::move(u)), _where(std::move(w)) {
-        }
+        : update_(std::move(u)), where_(std::move(w))
+        { }
 
-        where_update_query(where_update_query const &) = default;
+        where_update_query(const where_update_query&) = default;
 
-        where_update_query(where_update_query && qry) noexcept
-        : _update(), _where() {
-            swap(*this, qry);
-        }
+        where_update_query(where_update_query&& qry) noexcept
+        : update_(), where_()
+        { swap(*this, qry); }
 
-        friend void swap(where_update_query & l, where_update_query & r) noexcept {
+        friend void swap(where_update_query& l, where_update_query& r) noexcept {
             using std::swap;
-            swap(l._update, r._update);
-            swap(l._where, r._where);
+            swap(l.update_, r.update_);
+            swap(l.where_, r.where_);
         }
 
         template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
-        friend bool evaluate(TRecord && rec, where_update_query const & q) {
-            return evaluate(std::forward<TRecord>(rec), q._where);
+        friend bool evaluate(TRecord&& rec, const where_update_query& q) {
+            return evaluate(std::forward<TRecord>(rec), q.where_);
         }
 
         template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
-        friend Invoke<result_of<Unqualified<TRecord>>> update(TRecord && rec, where_update_query const & q) {
-            return update(std::forward<TRecord>(rec), q._update);
+        friend Invoke<result_of<Unqualified<TRecord>>> update(TRecord&& rec, const where_update_query& q) {
+            return update(std::forward<TRecord>(rec), q.update_);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> update(std::vector<TRecord> & recs, where_update_query const & q) {
+        friend Invoke<result_of<TRecord>> update(std::vector<TRecord>& recs, const where_update_query& q) {
             typename result_of<TRecord>::type ret = 0;
-            for (TRecord & cur : recs) {
-                if (evaluate(cur, q._where)) {
-                    ret += update(cur, q._update);
+            for(TRecord& cur : recs) {
+                if(evaluate(cur, q.where_)) {
+                    ret += update(cur, q.update_);
                 }
             }
             return ret;
         }
         
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend Invoke<result_of<TRecord>> query(std::vector<TRecord> & recs, where_update_query const & q) {
+        friend Invoke<result_of<TRecord>> query(std::vector<TRecord>& recs, const where_update_query& q) {
             return update(recs, q);
         }
 
-        friend std::string to_string(where_update_query const & q) {
+        friend std::string to_string(const where_update_query& q) {
             using std::to_string;
-            return to_string(q._update) + std::string(" ") + to_string(q._where);
+            return stringutils::concatenate(to_string(q.update_), " ", to_string(q.where_));
         }
     };
     
-    template<typename... Ms, typename... Cs>
-    inline where_update_query<update_query<Ms...>, where_query<Cs...>> operator+(update_query<Ms...> const & u, where_query<Cs...> const & w) {
-        return where_update_query<update_query<Ms...>, where_query<Cs...>>(u, w);
+    template<typename TUpdate, typename TWhere, EnableIf<is_update_query<Unqualified<TUpdate>>, is_where_query<Unqualified<TWhere>>> = _>
+    CONSTEXPR inline where_update_query<Unqualified<TUpdate>, Unqualified<TWhere>> operator+(TUpdate&& u, TWhere&& w) {
+        return { std::forward<TUpdate>(u), std::forward<TWhere>(w) };
     }
 }
 

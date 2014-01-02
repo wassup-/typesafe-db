@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef _QUERY_COMBINER_IMPL_HPP
 #define _QUERY_COMBINER_IMPL_HPP
 
@@ -15,7 +19,7 @@ namespace fp {
         struct make_select_query;
 
         template<typename... TFields>
-        struct make_select_query<type_seq<TFields...> > {
+        struct make_select_query<type_sequence<TFields...> > {
             using type = select_query<TFields...>;
         };
 

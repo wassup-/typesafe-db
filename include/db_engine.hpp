@@ -21,7 +21,7 @@ namespace fp {
     struct is_engine : detail::is_engine<T> { };
 
     template<typename TEngine, typename TQuery>
-    inline auto query(TEngine && eng, TQuery && qry)
+    inline auto query(TEngine&& eng, TQuery&& qry)
     -> decltype(std::forward<TEngine>(eng).query(std::forward<TQuery>(qry))) {
         static_assert(is_engine<Unqualified<TEngine>>::value, "TEngine is not an engine");
         return std::forward<TEngine>(eng).query(std::forward<TQuery>(qry));

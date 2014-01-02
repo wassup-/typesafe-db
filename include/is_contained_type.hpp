@@ -8,12 +8,9 @@
 #include "impl/is_contained_type_impl.hpp"
 
 namespace fp {
-    template<typename, typename...>
-    struct is_contained_type;
 
     template<typename T, typename... Ts>
-    struct is_contained_type : impl::is_contained_type_impl<T, Ts...> {
-    };
+    struct is_contained_type : impl::is_contained_type_impl<T, Ts...> { };
 }
 
 #endif

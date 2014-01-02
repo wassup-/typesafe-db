@@ -23,12 +23,11 @@ namespace std {
 
 namespace fp {
 
-    template<typename> struct container_traits;
+    template<typename>
+    struct container_traits;
 
     struct vectorlike_tag { };
-
     struct listlike_tag { };
-
     struct associative_tag { };
 
     template<typename T, typename A>

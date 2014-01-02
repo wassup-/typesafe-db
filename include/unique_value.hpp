@@ -6,6 +6,7 @@
 #define _UNIQUE_VALUE_HPP
 
 namespace fp {
+    
     template<typename, int, typename>
     struct field;
     

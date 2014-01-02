@@ -5,13 +5,15 @@
 #ifndef _LIMIT_QUERY_HPP
 #define _LIMIT_QUERY_HPP
 
-#include "is_query.hpp"
+#include "is_query.hpp"         // for fp::is_query
+#include "stringutil.hpp"       // for stringutils::concatenate
 
-#include <algorithm>    // for std::swap
-#include <string>       // for std::string, std::to_string
-#include <utility>      // for std::forward
+#include <algorithm>            // for std::swap
+#include <string>               // for std::string, std::to_string
+#include <utility>              // for std::forward
 
 namespace fp {
+
     template<typename>
     struct limit_query;
 
@@ -34,38 +36,38 @@ namespace fp {
         int _limit;
     public:
 
-        limit_query() {
-        }
+        limit_query() = default;
 
-        limit_query(TQuery q, int l) : _query(std::move(q)), _limit(l) {
-        }
+        limit_query(TQuery q, int l)
+        : _query(std::move(q)), _limit(l)
+        { }
 
-        limit_query(limit_query const &) = default;
+        limit_query(const limit_query&) = default;
 
-        limit_query(limit_query && q) noexcept : _query(), _limit() {
-            swap(*this, q);
-        }
+        limit_query(limit_query&& q) noexcept
+        : _query(), _limit(0)
+        { swap(*this, q); }
 
-        friend void swap(limit_query & l, limit_query & r) noexcept {
+        friend void swap(limit_query& l, limit_query& r) noexcept {
             using std::swap;
             swap(l._query, r._query);
             swap(l._limit, r._limit);
         }
 
         template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
-        friend bool evaluate(TRecord && rec, limit_query const & q) {
+        friend bool evaluate(TRecord&& rec, const limit_query& q) {
             return evaluate(rec, q._query);
         }
 
         template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
-        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord && rec, limit_query const & q) {
+        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord&& rec, const limit_query& q) {
             return select(std::forward<TRecord>(rec), q._query);
         }
 
         template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord> const & recs, limit_query const & q) {
+        friend std::vector<Invoke<result_of<TRecord>>> query(const std::vector<TRecord>& recs, const limit_query& q) {
             std::vector<Invoke<result_of<TRecord>>> ret(q._limit);
-            for (TRecord const & cur : recs) {
+            for (const TRecord& cur : recs) {
                 if (evaluate(cur, q._query)) {
                     ret.push_back(select(cur, q._query));
                     if (ret.size() == q._limit) {
@@ -76,15 +78,15 @@ namespace fp {
             return ret;
         }
 
-        friend std::string to_string(limit_query const & q) {
+        friend std::string to_string(const limit_query& q) {
             using std::to_string;
-            return to_string(q._query) + std::string(" LIMIT ") + to_string(q._limit);
+            return stringutils::concatenate(to_string(q._query), " LIMIT ", to_string(q._limit));
         }
     };
 
     template<typename TQuery, EnableIf<is_query<Unqualified<TQuery>>> = _>
-    inline limit_query<Unqualified<TQuery>> limit(TQuery && q, int l) {
-        return limit_query<Unqualified<TQuery>>(std::forward<TQuery>(q), l);
+    CONSTEXPR inline limit_query<Unqualified<TQuery>> limit(TQuery&& q, int l) {
+        return { std::forward<TQuery>(q), l };
     }
 }
 

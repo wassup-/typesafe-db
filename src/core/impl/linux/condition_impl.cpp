@@ -3,7 +3,7 @@
 namespace fp {
     namespace impl {
 
-        condition_impl::condition_impl(pthread_mutex_t & mtx) : m_handle(), m_mutex(mtx) {
+        condition_impl::condition_impl(pthread_mutex_t& mtx) : m_handle(), m_mutex(mtx) {
             pthread_cond_init(&m_handle, 0);
         }
 

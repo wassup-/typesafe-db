@@ -8,12 +8,9 @@
 #include "impl/is_contained_value_impl.hpp"
 
 namespace fp {
-    template<int, int...>
-    struct is_contained_value;
-
-    template<int T, int... Ts>
-    struct is_contained_value : impl::is_contained_value_impl<T, Ts...> {
-    };
+	
+    template<typename T, T V, T... Vs>
+    struct is_contained_value : impl::is_contained_value_impl<T, V, Vs...> { };
 }
 
 #endif

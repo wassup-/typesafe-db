@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef THREADPOOL_HPP
 #define THREADPOOL_HPP
 
@@ -24,12 +28,12 @@ namespace fp {
             finish
         };
     private:
-        static void * task_runner(void *);
+        static void* task_runner(void*);
         using mutex_t = mutex;
         using semaphore_t = semaphore;
     protected:
         std::size_t const _size;
-        thread ** _threads;
+        thread** _threads;
         mode_e _mode;
         volatile bool _run;
         volatile bool _finish;
@@ -43,9 +47,9 @@ namespace fp {
         ~threadpool();
 
         template<typename Fn> void push(Fn);
-        template<typename C> void push(void(C::*)(), C *);
-        template<typename Fn, typename... Arg> void push(Fn, Arg && ...);
-        template<typename C, typename... Arg> void push(void(C::*)(Arg...), C *, Arg...);
+        template<typename C> void push(void(C::*)(), C*);
+        template<typename Fn, typename... Arg> void push(Fn, Arg&& ...);
+        template<typename C, typename... Arg> void push(void(C::*)(Arg...), C*, Arg...);
 
         mode_e mode() const;
         void set_mode(mode_e);

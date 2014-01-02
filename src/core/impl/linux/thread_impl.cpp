@@ -2,7 +2,7 @@
 #include "../../../../include/core/thread.hpp"
 
 #include <cassert>		// for assert
-#include <pthread.h>            // for pthread_create, pthread_join, pthread_cancel
+#include <pthread.h>    // for pthread_create, pthread_join, pthread_cancel
 #include <utility>		// for std::move
 
 namespace fp {
@@ -15,17 +15,17 @@ namespace fp {
             }
         }
 
-        void * thread_impl::run(void * arg) {
-            fp::thread * th = static_cast<fp::thread *> (arg);
+        void * thread_impl::run(void* arg) {
+            fp::thread* th = static_cast<fp::thread*> (arg);
             th->run();
             return nullptr;
         }
 
-        thread_impl::thread_impl(fp::thread * th) : m_handle() {
+        thread_impl::thread_impl(fp::thread* th) : m_handle() {
             pthreadcheck(pthread_create(&m_handle, nullptr, &thread_impl::run, th));
         }
 
-        thread_impl::thread_impl(thread_impl && impl) : m_handle(std::move(impl.m_handle)) {
+        thread_impl::thread_impl(thread_impl&& impl) : m_handle(std::move(impl.m_handle)) {
         }
 
         void thread_impl::wait() {
