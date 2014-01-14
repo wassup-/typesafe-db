@@ -27,10 +27,11 @@ namespace fp {
 
             template<typename Rep, typename Period>
             bool timed_wait(std::chrono::duration<Rep, Period> t) {
-                unsigned long long const tm = std::chrono::duration_cast<std::chrono::microseconds>(t).count();
                 timespec ts;
-                ts.tv_sec = (tm / 1000000000);
-                ts.tv_nsec = (tm % 1000000000);
+                const auto secs = std::chrono::duration_cast<std::chrono::seconds>(t);
+                const auto nsecs = std::chrono::duration_cast<std::chrono::nanoseconds>(t - secs);
+                ts.tv_sec = secs.count();
+                ts.tv_nsec = nsecs.count();
                 return (sem_timedwait(&m_handle, &ts) == 0);
             }
 

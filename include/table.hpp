@@ -7,46 +7,52 @@
 
 #include "type_traits.hpp"
 
-namespace fp {
-    
-    template<typename...>
-    struct record;
+#include <string>
 
-    template<typename...>
+namespace fp {
+
+    template<typename /* Descriptor */, const char* /* Name */>
     struct table;
 
-    template<typename TDescriptor, int... Indices, typename... TTypes>
-    struct table<field<TDescriptor, Indices, TTypes>...> {
-        
-        using types = type_sequence<TTypes...>;
+    template<typename>
+    struct is_table : Bool<false> { };
+    
+    template<typename Descriptor, const char* Name>
+    struct is_table<table<Descriptor, Name>> : Bool<true> { };
 
-        struct record {
-            using type = fp::record<field<TDescriptor, Indices, TTypes>...>;
-        };
-
-        friend std::string to_string(const table&) {
-            return TDescriptor::table::name;
+    template<typename Descriptor, const char* Name>
+    struct table {
+    public:
+        using this_type = table;
+        using descriptor_type = Descriptor;
+    public:
+        constexpr const char* name() const noexcept {
+            return Name;
+        }
+    public:
+        friend std::string to_string(const table& t) {
+            return t.name();
         }
     };
 
     namespace detail {
 
-        template<typename TTable>
+        template<typename Descriptor>
         struct has_primary_key_impl {
 
             struct yes {  char _; };
             struct no { yes _[2]; };
 
-            template<typename T> static yes test(typename T::primary_key *);
+            template<typename T> static yes test(decltype(&Descriptor::primary_key));
             template<typename T> static no test(...);
 
-            CONSTEXPR static bool value = (sizeof(yes) == (sizeof(test<TTable>(0))));
+            constexpr static bool value = (sizeof(yes) == (sizeof(test<Descriptor>(0))));
         };
     }
 
-    template<typename TTable>
-    struct has_primary_key : Bool<detail::has_primary_key_impl<TTable>::value> { };
-    
+    template<typename Table>
+    struct has_primary_key : Bool<detail::has_primary_key_impl<typename Table::descriptor_type>::value> { };
+
     template<typename T>
     using HasPrimaryKey = has_primary_key<T>;
 }

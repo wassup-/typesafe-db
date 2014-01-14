@@ -9,98 +9,87 @@
 
 #include <tuple>                        // for std::tuple
 
-namespace fp {
-    namespace impl {
+namespace fp { namespace impl {
 
-        struct func_impl {
+    template<typename Fn>
+    struct functor {
+    protected:
+        Fn m_fn;
+    public:
 
-            virtual ~func_impl() = default;
+        functor(Fn fn)
+        : m_fn(fn)
+        { }
 
-            virtual void run() = 0;
+        void run() const {
+            (*m_fn)();
+        }
 
-            virtual func_impl * clone() const = 0;
-        };
+        friend void run(const functor& fn) {
+            fn.run();
+        }
+    };
 
-        template<typename Fn>
-        struct functor : func_impl {
-        protected:
-            Fn m_fn;
-        public:
+    template<typename Fn, typename... Arg>
+    struct functor_with_args {
+    protected:
+        Fn m_fn;
+        std::tuple<Arg...> m_arg;
+    public:
 
-            functor(Fn fn)
-            : m_fn(fn)
-            { }
+        functor_with_args(Fn fn, Arg... arg)
+        : m_fn(fn), m_arg(arg...)
+        { }
 
-            void run() {
-                (*m_fn)();
-            }
+        void run() const {
+            call_function(m_fn, m_arg);
+        }
 
-            functor * clone() const {
-                return new functor(*this);
-            }
-        };
+        friend void run(const functor_with_args& fn) {
+            fn.run();
+        }
+    };
 
-        template<typename Fn, typename... Arg>
-        struct functor_with_args : func_impl {
-        protected:
-            Fn m_fn;
-            std::tuple<Arg...> m_arg;
-        public:
+    template<typename C>
+    struct member_functor {
+    protected:
+        void(C::*m_fn)();
+        C* m_obj;
+    public:
 
-            functor_with_args(Fn fn, Arg... arg)
-            : m_fn(fn), m_arg(arg...)
-            { }
+        member_functor(void(C::*fn)(), C* obj)
+        : m_fn(fn), m_obj(obj)
+        { }
 
-            void run() {
-                call_function(m_fn, m_arg);
-            }
+        void run() const {
+            (m_obj->*m_fn)();
+        }
 
-            functor_with_args * clone() const {
-                return new functor_with_args(*this);
-            }
-        };
+        friend void run(const member_functor& fn) {
+            fn.run();
+        }
+    };
 
-        template<typename C>
-        struct member_functor : func_impl {
-        protected:
-            void(C::*m_fn)();
-            C * m_obj;
-        public:
+    template<typename C, typename... Arg>
+    struct member_functor_with_args {
+    protected:
+        void(C::*m_fn)(Arg...);
+        C* m_obj;
+        std::tuple<Arg...> m_arg;
+    public:
 
-            member_functor(void(C::*fn)(), C * obj)
-            : m_fn(fn), m_obj(obj)
-            { }
+        member_functor_with_args(void(C::*fn)(Arg...), C* obj, Arg... arg)
+        : m_fn(fn), m_obj(obj), m_arg(arg...)
+        { }
 
-            void run() {
-                (m_obj->*m_fn)();
-            }
+        void run() const {
+            call_function(m_fn, m_obj, m_arg);
+        }
 
-            member_functor * clone() const {
-                return new member_functor(*this);
-            }
-        };
-
-        template<typename C, typename... Arg>
-        struct member_functor_with_args : func_impl {
-        protected:
-            void(C::*m_fn)(Arg...);
-            C * m_obj;
-            std::tuple<Arg...> m_arg;
-        public:
-
-            member_functor_with_args(void(C::*fn)(Arg...), C * obj, Arg... arg)
-            : m_fn(fn), m_obj(obj), m_arg(arg...)
-            { }
-
-            void run() {
-                call_function(m_fn, m_obj, m_arg);
-            }
-
-            member_functor_with_args * clone() const {
-                return new member_functor_with_args(*this);
-            }
-        };
-    }
-}
+        friend void run(const member_functor_with_args& fn) {
+            fn.run();
+        }
+    };
+} }
 
 #endif

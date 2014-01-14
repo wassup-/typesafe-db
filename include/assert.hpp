@@ -7,7 +7,7 @@
 
 #include "config.hpp"
 
-#include <iostream>
+#include <iostream>     // for std::cerr
 
 #if defined(assert)
 #undef assert
@@ -25,9 +25,9 @@ namespace fp {
         halt_, continue_,
     };
 
-    assert_method_e assert_method = assert_method_e::halt_;
+    static assert_method_e assert_method = assert_method_e::halt_;
 
-    void assert(const char* cond, const char* msg, const char* file, int line, const char* fn) {
+    static void assert(const char* cond, const char* msg, const char* file, int line, const char* fn) {
         std::cerr << file << ":" << line << " in " << fn << " :\n\tAssert " << cond << " failed: " << msg << std::endl;
         if (assert_method_e::halt_ == assert_method) {
             exit(0);

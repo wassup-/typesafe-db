@@ -12,13 +12,13 @@ namespace fp {
     template<typename...>
     struct select_query;
 
-    template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
-    CONSTEXPR inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::normal> combine(const select_query<LFields...>&, const select_query<RFields...>&) {
+    template<typename... LColumns, typename... RColumns, EnableIf<is_column<LColumns>..., is_column<RColumns>...> = _>
+    constexpr inline Invoke<typename impl::query_combiner_impl<LColumns..., RColumns...>::normal> combine(const select_query<LColumns...>&, const select_query<RColumns...>&) {
         return { };
     }
 
-    template<typename... LFields, typename... RFields, EnableIf<is_field<LFields>..., is_field<RFields>...> = _>
-    CONSTEXPR inline Invoke<typename impl::query_combiner_impl<LFields..., RFields...>::unique> combine_unique(const select_query<LFields...>&, const select_query<RFields...>&) {
+    template<typename... LColumns, typename... RColumns, EnableIf<is_column<LColumns>..., is_column<RColumns>...> = _>
+    constexpr inline Invoke<typename impl::query_combiner_impl<LColumns..., RColumns...>::unique> combine_unique(const select_query<LColumns...>&, const select_query<RColumns...>&) {
         return { };
     }
 }

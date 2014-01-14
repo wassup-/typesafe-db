@@ -6,93 +6,103 @@
 #define _RECORD_HPP
 
 #include "config.hpp"
-#include "field.hpp"            // for fp::field
+#include "column.hpp"           // for fp::column
 #include "type_traits.hpp"      // for fp::EnableIf, fp::DisableIf
 
-#include <tuple>        // for std::tuple, std::get
-
+#include <stdexcept>
 
 namespace fp {
-    
-    template<typename...>
+
+    template<typename... /* Columns */>
     struct record;
-    
-    // This sole purpose of this declaration is to enable ADL
-    template<typename> void get() = delete;
 
     template<typename>
     struct is_record : Bool<false> { };
-    
-    template<typename... TFields>
-    struct is_record<record<TFields...> > : All<is_field<TFields>...> { };
-    
-    template<>
-    struct record<> {
-        template<typename... TOther>
-        struct rebind {
-            using type = record<TOther...>;
-        };
-    };
+    template<typename... TColumns>
+    struct is_record<record<TColumns...> > : All<is_column<TColumns>...> { };
 
-    template<typename... TFields>
+    template<typename... Columns>
     struct record {
     public:
-        
+        using this_type = record;
+
         template<typename... TOther>
-        struct rebind {
-            using type = record<TOther...>;
-        };
-        
+        struct rebind : identity<record<TOther...>> { };
+
         template<std::size_t Idx>
-        struct nth_type {
-            using type = NthTypeOf<Idx, Invoke<TFields>...>;
-        };
-    protected:
-        std::tuple<Invoke<TFields>...> _values;
+        struct nth_type : identity<NthTypeOf<Idx, Columns...>> { };
+
     public:
+        record(typename Columns::value_type... x)
+        : values_(x...)
+        { }
 
-        CONSTEXPR record() = default;
-
-        record(const record&) = default;
-
-        record(record&& rec) = default;
-
-        CONSTEXPR record(Invoke<TFields>... fs)
-        : _values(std::move(fs)...) {
+        constexpr static std::size_t size() {
+            return sizeof...(Columns);
         }
 
-        record& operator=(const record&) = default;
-        record& operator=(record&&) = default;
+        template<std::size_t Idx>
+        typename Invoke<nth_type<Idx>>::value_type& get() {
+            return std::get<Idx>(values_);
+        }
 
+        template<std::size_t Idx>
+        const typename Invoke<nth_type<Idx>>::value_type& get() const {
+            return std::get<Idx>(values_);
+        }
+
+    public:
         friend void swap(record& l, record& r) noexcept {
             using std::swap;
-            swap(l._values, r._values);
-        }
-
-        CONSTEXPR static std::size_t size() {
-            return sizeof...(TFields);
+            swap(l.values_, r.values_);
         }
 
         template<std::size_t Idx>
-        friend Invoke<nth_type<index_of<Idx, TFields::index...>::value>>& get(record& rec) {
-            return std::get<index_of<Idx, TFields::index...>::value>(rec._values);
+        friend typename Invoke<nth_type<Idx>>::value_type& get(record& r) {
+            return r.template get<Idx>();
         }
 
         template<std::size_t Idx>
-        friend const Invoke<nth_type<index_of<Idx, TFields::index...>::value>>& get(const record& rec) {
-            return std::get<index_of<Idx, TFields::index...>::value>(rec._values);
+        friend const typename Invoke<nth_type<Idx>>::value_type& get(const record& r) {
+            return r.template get<Idx>();
         }
-
-        template<typename TField, EnableIf<is_field<TField>> = _>
-        friend Invoke<TField>& get(record& rec) {
-            return get<TField::index>(rec);
-        }
-
-        template<typename TField, EnableIf<is_field<TField>> = _>
-        friend const Invoke<TField>& get(const record& rec) {
-            return get<TField::index>(rec);
-        }
+        
+    private:
+        std::tuple<typename Columns::value_type...> values_;
     };
+
+    template<typename... Column>
+    constexpr inline record<Column...> make_record(typename Column::value_type... value) {
+        return { value... };
+    }
+
+    namespace detail {
+
+        template<typename Ret, typename Record, std::size_t Idx>
+        inline Ret get(const Record& rec, Index<Idx>) {
+            return rec.template get<Idx>();
+        }
+
+        template<typename Value, typename Record, std::size_t Idx>
+        inline void set(Record& rec, const Value& x, Index<Idx>) {
+            rec.template get<Idx>() = x;
+        }
+    }
+
+    template<typename... Columns, typename Column>
+    inline const typename Column::value_type& get(const record<Columns...>& r, const Column& col) {
+        return detail::get<const typename Column::value_type&>(r, IndexOfType<Column, Columns...>{});
+    }
+
+    template<typename... Columns, typename... Column, EnableIf<Bool<(sizeof...(Column) > 1)>> = _>
+    inline std::tuple<const typename Column::value_type&...> get(const record<Columns...>& r, const Column&... col) {
+        return std::tie(get(r, col)...);
+    }
+
+    template<typename... Columns, typename Column>
+    inline void set(record<Columns...>& r, const Column& col, const typename Column::value_type& x) {
+        return detail::set(r, x, IndexOfType<Column, Columns...>{});
+    }
 }
 
 #endif

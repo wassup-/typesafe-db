@@ -19,20 +19,13 @@ namespace fp {
         struct make_select_query;
 
         template<typename... TFields>
-        struct make_select_query<type_sequence<TFields...> > {
-            using type = select_query<TFields...>;
-        };
+        struct make_select_query<type_sequence<TFields...> > : identity<select_query<TFields...>> { };
 
         template<typename... TFields>
         struct query_combiner_impl {
 
-            struct normal {
-                using type = select_query<TFields...>;
-            };
-
-            struct unique {
-                using type = Invoke<make_select_query<Invoke<unique_types<TFields...>>>>;
-            };
+            struct normal : identity<select_query<TFields...>> { };
+            struct unique : identity<Invoke<make_select_query<Invoke<unique_types<TFields...>>>>> { };
         };
     }
 }

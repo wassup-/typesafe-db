@@ -5,15 +5,13 @@
 #ifndef _UPDATE_QUERY_IMPL_HPP
 #define _UPDATE_QUERY_IMPL_HPP
 
-#include "../record.hpp"
+#include "../column.hpp"
 #include "../stringutil.hpp"
 
-#include <iostream>     // for std::ostream
 #include <string>       // for std::string, std::to_string
 
-#define FP_RETURNS(x) -> decltype(x) { return x; }
-
 namespace fp { namespace impl {
+
     struct update_query_impl;
     
     namespace update_modifiers {
@@ -25,13 +23,13 @@ namespace fp { namespace impl {
     template<typename>
     struct is_update_modifier : std::false_type { };
 
-    template<typename TField, typename TGetter>
-    struct is_update_modifier<update_modifiers::modifier<TField, TGetter>> : is_field<TField> { };
+    template<typename TColumn, typename TGetter>
+    struct is_update_modifier<update_modifiers::modifier<TColumn, TGetter>> : is_column<TColumn> { };
 
     struct update_query_impl {
 
         template<typename TDescriptor, typename... TUpdate>
-        static std::string build_update_query(TUpdate... modifiers) {
+        static std::string build_update_query(const TUpdate&... modifiers) {
             using std::to_string;
             return stringutils::concatenate(
                 "UPDATE ",
@@ -56,10 +54,10 @@ namespace fp { namespace impl {
         : head_(h), tail_(t...)
         { }
 
-        template<typename... Fs>
-        void operator()(fp::record<Fs...>& rec) const {
-            head_(rec);
-            tail_(rec);
+        template<typename TMapping, typename TRecord>
+        void operator()(const TMapping& mapping, TRecord& rec) const {
+            head_(mapping, rec);
+            tail_(mapping, rec);
         }
     };
 
@@ -73,285 +71,282 @@ namespace fp { namespace impl {
         : head_(h)
         { }
 
-        template<typename... Fs>
-        void operator()(fp::record<Fs...>& rec) const {
-            head_(rec);
-        }
+        template<typename TMapping, typename TRecord>
+        void operator()(const TMapping& mapping, TRecord& rec) const
+        { head_(mapping, rec); }
     };
 
     namespace update_modifiers {
 
-        template<typename TField>
+        template<typename TColumn>
         struct field_getter {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         public:
 
-            template<typename... Fs>
-            Invoke<TField> operator()(const fp::record<Fs...>& rec) const {
-                return get<TField>(rec);
-            }
+            field_getter(TColumn col)
+            : column_(col)
+            { }
+
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
+            { return get(mapping, rec, column_); }
 
             friend std::string to_string(const field_getter&) {
                 using std::to_string;
-                return to_string(TField());
+                return to_string(TColumn());
             }
+        private:
+            TColumn column_;
         };
         
         template<typename TLeft, typename TRight>
         struct field_add {
         public:
             using descriptor_type = DescriptorOf<TRight>;
-            using type = Invoke<TRight>;
-        protected:
-            type value_;
+            using value_type = typename TRight::value_type;
         public:
 
-            field_add() = default;
-
-            field_add(type v)
-            : value_(v)
+            constexpr field_add(TLeft l, TRight r)
+            : left_(l), right_(r)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TLeft>(rec) + get<TRight>(rec))
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const {
+                return get(mapping, rec, left_) + get(mapping, rec, right_);
+            }
 
             friend std::string to_string(const field_add& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TLeft()), " + ", to_string(TRight()));
+                return stringutils::concatenate(to_string(g.left_), " + ", to_string(g.right_));
             }
+        private:
+            TLeft left_;
+            TRight right_;
         };
         
         template<typename TLeft, typename TRight>
         struct field_sub {
         public:
             using descriptor_type = DescriptorOf<TRight>;
-            using type = Invoke<TRight>;
-        protected:
-            type value_;
+            using value_type = typename TRight::value_type;
         public:
 
-            field_sub() = default;
-
-            field_sub(type v)
-            : value_(v)
+            constexpr field_sub(TLeft l, TRight r)
+            : left_(l), right_(r)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TLeft>(rec) - get<TRight>(rec))
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const {
+                return get(mapping, rec, left_) - get(mapping, rec, right_);
+            }
 
             friend std::string to_string(const field_sub& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TLeft()), " - ", to_string(TRight()));
+                return stringutils::concatenate(to_string(g.left_), " - ", to_string(g.right_));
             }
+        private:
+            TLeft left_;
+            TRight right_;
         };
         
         template<typename TLeft, typename TRight>
         struct field_mul {
         public:
             using descriptor_type = DescriptorOf<TRight>;
-            using type = Invoke<TRight>;
-        protected:
-            type value_;
+            using value_type = typename TRight::value_type;
         public:
 
-            field_mul() = default;
-
-            field_mul(type v)
-            : value_(v)
+            constexpr field_mul(TLeft l, TRight r)
+            : left_(l), right_(r)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TLeft>(rec) * get<TRight>(rec))
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const {
+                return get(mapping, rec, left_) * get(mapping, rec, right_);
+            }
 
             friend std::string to_string(const field_mul& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TLeft()), " * ", to_string(TRight()));
+                return stringutils::concatenate(to_string(g.left_), " * ", to_string(g.right_));
             }
+        private:
+            TLeft left_;
+            TRight right_;
         };
         
         template<typename TLeft, typename TRight>
         struct field_div {
         public:
             using descriptor_type = DescriptorOf<TRight>;
-            using type = Invoke<TRight>;
-        protected:
-            type value_;
+            using value_type = typename TRight::value_type;
         public:
 
-            field_div() = default;
-
-            field_div(type v)
-            : value_(v)
+            constexpr field_div(TLeft l, TRight r)
+            : left_(l), right_(r)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TLeft>(rec) / get<TRight>(rec))
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const {
+                return get(mapping, rec, left_) / get(mapping, rec, right_);
+            }
 
             friend std::string to_string(const field_div& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TLeft()), " / ", to_string(TRight()));
+                return stringutils::concatenate(to_string(g.left_), " / ", to_string(g.right_));
             }
+        private:
+            TLeft left_;
+            TRight right_;
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct value_getter {
         public:
-            using descriptor_type = DescriptorOf<TField>;
-            using type = Invoke<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         protected:
-            type value_;
+            TColumn column_;
+            value_type _value;
         public:
 
-            value_getter() = default;
-
-            value_getter(type v)
-            : value_(v)
+            constexpr value_getter(TColumn c, value_type v)
+            : column_(c), _value(v)
             { }
 
-            template<typename... Fs >
-            const type& operator()(const fp::record<Fs...>& rec) const {
-                return value_;
+            template<typename TMapping, typename TRecord>
+            constexpr const value_type& operator()(const TMapping& mapping, const TRecord& rec) const {
+                return _value;
             }
 
             friend std::string to_string(const value_getter& g) {
                 using std::to_string;
-                return to_string(g.value_);
+                return to_string(g._value);
             }
         };
         
-        template<typename TField>
+        template<typename TColumn>
         struct value_add {
         public:
-            using descriptor_type = DescriptorOf<TField>;
-            using type = Invoke<TField>;
-        protected:
-            type value_;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         public:
 
-            value_add() = default;
-
-            value_add(type v)
-            : value_(v)
+            constexpr value_add(TColumn c, value_type v)
+            : column_(c), _value(v)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TField>(rec) + value_)
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
+            { return get(mapping, rec, column_) + _value; }
 
             friend std::string to_string(const value_add& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TField()), " + ", to_string(g.value_));
+                return stringutils::concatenate(to_string(g.column_), " + ", to_string(g._value));
             }
+        private:
+            TColumn column_;
+            value_type _value;
         };
         
-        template<typename TField>
+        template<typename TColumn>
         struct value_sub {
         public:
-            using descriptor_type = DescriptorOf<TField>;
-            using type = Invoke<TField>;
-        protected:
-            type value_;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         public:
 
-            value_sub() = default;
-
-            value_sub(type v)
-            : value_(v)
+            constexpr value_sub(TColumn c, value_type v)
+            : column_(c), _value(v)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TField>(rec) - value_)
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
+            { return get(mapping, rec, column_) - _value; }
 
             friend std::string to_string(const value_sub& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TField()), " - ", to_string(g.value_));
+                return stringutils::concatenate(to_string(g.column_), " - ", to_string(g._value));
             }
+        private:
+            TColumn column_;
+            value_type _value;
         };
         
-        template<typename TField>
+        template<typename TColumn>
         struct value_mul {
         public:
-            using descriptor_type = DescriptorOf<TField>;
-            using type = Invoke<TField>;
-        protected:
-            type value_;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         public:
 
-            value_mul() = default;
-
-            value_mul(type v)
-            : value_(v)
+            constexpr value_mul(TColumn c, value_type v)
+            : column_(c), _value(v)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TField>(rec) * value_)
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
+            { return get(mapping, rec, column_) * _value; }
 
             friend std::string to_string(const value_mul& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TField()), " * ", to_string(g.value_));
+                return stringutils::concatenate(to_string(g.column_), " * ", to_string(g._value));
             }
+        private:
+            TColumn column_;
+            value_type _value;
         };
         
-        template<typename TField>
+        template<typename TColumn>
         struct value_div {
         public:
-            using descriptor_type = DescriptorOf<TField>;
-            using type = Invoke<TField>;
-        protected:
-            type value_;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         public:
 
-            value_div() = default;
-
-            value_div(type v)
-            : value_(v)
+            constexpr value_div(TColumn c, value_type v)
+            : column_(c), _value(v)
             { }
 
-            template<typename... Fs >
-            auto operator()(const fp::record<Fs...>& rec) const
-            FP_RETURNS(get<TField>(rec) / value_)
+            template<typename TMapping, typename TRecord>
+            constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
+            { return get(mapping, rec, column_) / _value; }
 
             friend std::string to_string(const value_div& g) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TField()), " / ", to_string(g.value_));
+                return stringutils::concatenate(to_string(g.column_), " / ", to_string(g._value));
             }
+        private:
+            TColumn column_;
+            value_type _value;
         };
 
-        template<typename TField, typename TValue>
+        template<typename TColumn, typename TModifier>
         struct modifier {
         public:
-            using descriptor_type = DescriptorOf<TField>;
-            using type = Invoke<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
+            using value_type = typename TColumn::value_type;
         protected:
-            TValue value_;
+            TColumn column_;
+            TModifier _self;
         public:
 
-            modifier() = default;
-
-            modifier(TValue v)
-            : value_(v)
+            constexpr modifier(TColumn c, TModifier m)
+            : column_(c), _self(m)
             { }
 
-            template<typename... Fs>
-            void operator()(fp::record<Fs...>& rec) const {
-                get<TField>(rec) = value_(rec);
+            template<typename TMapping, typename TRecord>
+            void operator()(const TMapping& mapping, TRecord& rec) const {
+                set(mapping, rec, column_, _self(mapping, rec));
             }
 
             friend std::string to_string(const modifier& m) {
                 using std::to_string;
-                return stringutils::concatenate(to_string(TField()), " = (", to_string(m.value_), ")");
+                return stringutils::concatenate(to_string(m.column_), " = (", to_string(m._self), ")");
             }
         };
     }
 } }
-
-#undef FP_RETURNS
 
 #endif

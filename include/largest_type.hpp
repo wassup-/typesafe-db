@@ -7,8 +7,6 @@
 
 #include "impl/largest_type_impl.hpp"
 
-#include "type_sequence.hpp"
-
 namespace fp {
 
     template<typename... Ts>

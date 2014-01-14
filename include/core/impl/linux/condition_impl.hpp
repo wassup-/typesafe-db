@@ -16,10 +16,10 @@ namespace fp {
         struct condition_impl {
         protected:
             pthread_cond_t m_handle;
-            pthread_mutex_t & m_mutex;
+            pthread_mutex_t& m_mutex;
         public:
 
-            condition_impl(pthread_mutex_t &);
+            condition_impl(pthread_mutex_t&);
             ~condition_impl();
 
             void wait();

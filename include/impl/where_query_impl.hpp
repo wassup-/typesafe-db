@@ -5,10 +5,13 @@
 #ifndef _WHERE_QUERY_IMPL_HPP
 #define _WHERE_QUERY_IMPL_HPP
 
+#include "../forward.hpp"
+#include "../record.hpp"
+
 #include <iostream>     // for std::ostream
 #include <sstream>      // for std::ostringstream
 #include <string>       // for std::string, std::to_string
-#include <utility>      // for std::forward
+#include <utility>      // for fix::forward
 
 namespace fp { namespace impl {
 
@@ -25,7 +28,7 @@ namespace fp { namespace impl {
     public:
 
         clause_evaluator(H h, T&&... t)
-        : head_(h), tail_(std::forward<T>(t)...)
+        : head_(h), tail_(fix::forward<T>(t)...)
         { }
 
         template<typename... Fs>
@@ -53,8 +56,8 @@ namespace fp { namespace impl {
     struct where_query_impl {
             
         template<typename... Fs, typename... TWhere>
-        static bool evaluate(const record<Fs...>& r, TWhere&&... c) {
-            return clause_evaluator<TWhere...>{std::forward<TWhere>(c)...}(r);
+        static bool evaluate(const record<Fs...>& r, const TWhere&... c) {
+            return clause_evaluator<TWhere...>{ c... }(r);
         }
             
         template<typename... Ts >

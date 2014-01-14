@@ -5,55 +5,55 @@
 #ifndef _MYSQL_BASIC_ROW_HPP
 #define _MYSQL_BASIC_ROW_HPP
 
+#include "../assert.hpp"
 #include "../lexical_cast.hpp"
 
 #include <cstddef>              // for std::size_t
 #include <utility>              // for std::swap
 #include <mysql/mysql.h>        // for MYSQL_ROW
 
-namespace fp {
-    namespace mysql {
+namespace fp { namespace mysql {
 
-        struct basic_row {
-        public:
-            using this_type = basic_row;
-            using size_type = std::size_t;
-        protected:
-            ::MYSQL_ROW _data;
-            size_type _fields;
-        public:
+    struct basic_row {
+    public:
+        using this_type = basic_row;
+        using size_type = std::size_t;
+    protected:
+        ::MYSQL_ROW _data;
+        size_type _fields;
+    public:
 
-            CONSTEXPR basic_row() noexcept
-            : _data(nullptr), _fields(0)
-            { }
+        constexpr basic_row() noexcept
+        : _data(nullptr), _fields(0)
+        { }
 
-            CONSTEXPR explicit basic_row(::MYSQL_ROW d, size_type fields) noexcept
-            : _data(d), _fields(fields)
-            { }
+        constexpr basic_row(::MYSQL_ROW d, size_type fields) noexcept
+        : _data(d), _fields(fields)
+        { }
 
-            friend void swap(basic_row & l, basic_row & r) noexcept {
-                using std::swap;
-                swap(l._data, r._data);
-            }
+        friend void swap(basic_row& l, basic_row& r) noexcept {
+            using std::swap;
+            swap(l._data, r._data);
+            swap(l._fields, r._fields);
+        }
 
-            CONSTEXPR size_type cols() const {
-                return _fields;
-            }
+        constexpr size_type cols() const {
+            return _fields;
+        }
 
-            CONSTEXPR char const * operator [](int i) const {
-                return _data[i];
-            }
+        constexpr const char* operator[](int i) const {
+            return _data[i];
+        }
 
-            CONSTEXPR explicit operator bool() const {
-                return (nullptr != _data);
-            }
+        constexpr explicit operator bool() const {
+            return (nullptr != _data);
+        }
 
-            template<int I, typename T>
-            CONSTEXPR friend T get(basic_row const & r) {
-                return lexical_cast<T>(r._data[I]);
-            }
-        };
-    }
-}
+        template<int I, typename T>
+        constexpr T get() const {
+            return lexical_cast<T>(_data[I]);
+        }
+    };
+} }
 
 #endif

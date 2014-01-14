@@ -5,13 +5,11 @@
 #ifndef _SORTED_VALUES_HPP
 #define _SORTED_VALUES_HPP
 
+#include "type_traits.hpp"
 #include "impl/sorted_values_impl.hpp"
 
 namespace fp {
 	
-    template<typename T, T...>
-    struct integer_sequence;
-    
     template<typename T, T... Vs>
     struct sorted_values : impl::sorted_values_impl<integer_sequence<T>, integer_sequence<T, Vs...>, integer_sequence<T> > { };
 }

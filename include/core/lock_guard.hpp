@@ -24,6 +24,11 @@ namespace fp {
             _lock.unlock();
         }
     };
+
+    template<typename Lock>
+    lock_guard<Lock> lock(Lock& l) {
+        return { l };
+    }
 }
 
 #endif

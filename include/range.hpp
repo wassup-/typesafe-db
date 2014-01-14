@@ -13,11 +13,10 @@ namespace fp {
     struct range_builder;
 
     template<int Min, int Max>
-    struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> {
-    };
+    struct range_builder : impl::range_builder_impl < (Min <= Max), Min, Max> { };
 
     template<int Min, int Max>
-    CONSTEXPR typename range_builder<Min, Max>::type make_range() {
+    constexpr typename range_builder<Min, Max>::type make_range() {
         return { };
     }
 }

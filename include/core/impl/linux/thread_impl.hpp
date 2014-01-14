@@ -8,21 +8,21 @@
 #include <pthread.h>            // for pthread_t
 
 namespace fp {
-    struct thread;
+
+    class thread;
 
     namespace impl {
 
         struct thread_impl {
-        protected:
-            pthread_t m_handle;
-
-            static void * run(void *);
         public:
-            thread_impl(fp::thread *);
-            thread_impl(thread_impl &&);
+            thread_impl(fp::thread*);
 
             void wait();
             void terminate();
+        private:
+            pthread_t m_handle;
+
+            static void* run(void*);
         };
     }
 }

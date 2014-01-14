@@ -5,61 +5,82 @@
 #ifndef _INSERT_QUERY_HPP
 #define _INSERT_QUERY_HPP
 
-#include "impl/insert_query_impl.hpp"
-
 #include "field.hpp"
 #include "is_query.hpp"
-#include "query_combiner.hpp"
 #include "record.hpp"
 #include "stringutil.hpp"       // for stringutils::concatenate
 #include "type_traits.hpp"
 
+#include <stdexcept>
 #include <string>               // for std::string, std::to_string
 #include <vector>               // for std::vector
 
 namespace fp {
     
-    template<typename, typename...>
+    template<typename...>
     struct insert_query;
 
-    template<typename TDescriptor, typename... TFields>
-    struct is_query<insert_query<TDescriptor, TFields...> > : All<is_field<TFields>...> { };
+    template<typename... TColumns>
+    struct is_query<insert_query<TColumns...> > : All<is_column<TColumns>...> { };
 
-    template<typename TDescriptor, typename... TFields>
-    struct is_insert_query<insert_query<TDescriptor, TFields...> > : Bool<true> { };
+    template<typename... TColumns>
+    struct is_insert_query<insert_query<TColumns...> > : Bool<true> { };
 
-    template<typename TDescriptor, typename... TFields>
+    template<typename... TColumns>
     struct insert_query {
     public:
         
         template<typename TRecord>
-        struct result_of {
-            using type = Invoke<TRecord::rebind<TFields...>>;
-        };
+        struct result_of : identity<Invoke<typename TRecord::template rebind<TColumns...>>> { };
     public:
 
         friend void swap(insert_query& l, insert_query& r) noexcept {
             using std::swap;
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> insert(std::vector<TRecord>& recs, const insert_query& q) {
-            std::vector<Invoke<result_of<TRecord>>> ret;
+        template<
+            typename TContainer,
+            typename TRecord = typename TContainer::value_type,
+            EnableIf<
+                    is_record<TRecord>
+            > = _
+        >
+        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type insert(TContainer& recs, const insert_query& q) {
+            using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
+            TReturnContainer ret;
+            ret.reserve(recs.size());
             for(const TRecord& cur : recs) {
-                ret.push_back(select(cur, q));
+                ret.push_back({ fp::get(cur, TColumns())... });
             }
             return ret;
         }
 
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> query(std::vector<TRecord>& recs, const insert_query& q) {
+        template<
+            typename TContainer,
+            typename TRecord = typename TContainer::value_type,
+            EnableIf<
+                    is_record<TRecord>
+            > = _
+        >
+        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(TContainer& recs, const insert_query& q) {
             return insert(recs, q);
         }
 
-        friend std::string to_string(const select_query& q) {
-            return impl::insert_query_impl<TFields...>::build_insert_query();
+        friend std::string to_string(const insert_query& q) {
+            //return impl::insert_query_impl<TColumns...>::build_insert_query();
+            throw std::runtime_error("Not implemented yet");
         }
     };
+
+    template<
+        typename... TColumns,
+        EnableIf<
+            is_column<TColumns>...
+        > = _
+    >
+    insert_query<TColumns...> insert(TColumns... c) {
+        return { c... };
+    }
 }
 
 #endif

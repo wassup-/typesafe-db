@@ -1,11 +1,7 @@
 #include "../../include/core/thread.hpp"
+#include "../../include/unique_ptr.hpp"
 
 namespace fp {
-
-    thread::thread(thread&& th)
-    : _impl(nullptr), _fn(nullptr) {
-        swap(*this, th);
-    }
 
     thread::~thread() {
         if (_impl) {
@@ -35,6 +31,7 @@ namespace fp {
     }
 
     void thread::run() {
-        _fn->run();
+        using fp::run;
+        run(_self);
     }
 }

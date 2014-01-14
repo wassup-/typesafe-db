@@ -5,55 +5,62 @@
 #ifndef _LEXICAL_CAST_IMPL_HPP
 #define _LEXICAL_CAST_IMPL_HPP
 
+#include "../stringutil.hpp"
+
 #include <sstream>      // for std::stringstream
+#include <string>
 
-namespace fp {
-    namespace impl {
-        template<typename, typename>
-        struct lexical_cast_impl;
+namespace fp { namespace impl {
 
-        template<typename In, typename Out>
-        struct lexical_cast_impl {
-
-            static Out cast(const In& v) {
-                Out ret;
-                std::stringstream ss;
-                ss << v;
-                ss >> ret;
-                return ret;
-            }
-        };
-
-        template<typename T>
-        struct lexical_cast_impl<T, T> {
-
-            static T const & cast(const T& v) {
-                return v;
-            }
-        };
-
-        template<>
-        struct lexical_cast_impl<std::string, const char*> {
-
-            static const char* cast(const std::string& v) {
-                return v.c_str();
-            }
-        };
-
-        template<>
-        struct lexical_cast_impl<const char*, std::string> {
-
-            static std::string cast(const char* v) {
-                return std::string(v);
-            }
-        };
-
-        template<typename In>
-        struct lexical_cast_impl<In, const char*>;
-
-        template<typename In>
-        struct lexical_cast_impl<In, char *>;
+    template<typename Char, std::size_t N>
+    typename std::enable_if<stringutils::is_char_type<Char>::value, std::basic_string<Char>>::type to_string(const Char(&s)[N]) {
+        return { &s[0], N };
     }
-}
+
+    template<typename Char>
+    typename std::enable_if<stringutils::is_char_type<Char>::value, std::basic_string<Char>>::type to_string(const Char* s) {
+        return { s };
+    }
+
+    template<typename, typename>
+    struct lexical_cast_impl;
+
+    template<typename In, typename Out>
+    struct lexical_cast_impl {
+
+        static Out cast(const In& v) {
+            Out ret;
+            std::stringstream ss;
+            ss << v;
+            ss >> ret;
+            return ret;
+        }
+    };
+
+    template<typename T>
+    struct lexical_cast_impl<T, T> {
+
+        static const T& cast(const T& v) {
+            return v;
+        }
+    };
+
+    template<>
+    struct lexical_cast_impl<std::string, const char*> {
+
+        static const char* cast(const std::string& v) {
+            return v.c_str();
+        }
+    };
+
+    template<typename In>
+    struct lexical_cast_impl<In, std::string> {
+
+        static std::string cast(const In& v) {
+            using std::to_string;
+            return to_string(v);
+        }
+    };
+} }
 
 #endif

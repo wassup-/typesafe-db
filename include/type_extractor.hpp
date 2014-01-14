@@ -13,9 +13,8 @@ namespace fp {
     struct extract_types;
 
     template<typename T, T... I, typename... Ts>
-    struct extract_types<integer_sequence<T, I...>, type_sequence<Ts...> > {
-        using type = type_sequence<NthTypeOf<I, Ts...>...>;
-    };
+    struct extract_types<integer_sequence<T, I...>, type_sequence<Ts...>>
+    : identity<type_sequence<NthTypeOf<I, Ts...>...>> { };
 }
 
 #endif

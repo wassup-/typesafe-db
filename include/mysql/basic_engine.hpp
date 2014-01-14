@@ -1,6 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.*/
 
 #ifndef MYSQL_BASIC_ENGINE_HPP
 #define MYSQL_BASIC_ENGINE_HPP
@@ -11,9 +11,13 @@
 #include "basic_result.hpp"
 #include "basic_row.hpp"
 #include "../db_engine.hpp"     // for fp::is_engine
+#include "../forward.hpp"       // for fix::forward
 #include "../is_query.hpp"      // for fp::is_query
+#include "../record.hpp"
 #include "../type_traits.hpp"   // for fp::EnableIf, fp::DisableIf, fp::Invoke, fp::Unqualified
 
+#include <algorithm>
+#include <iterator>             // for std::back_inserter
 #include <memory>               // for std::shared_ptr
 #include <string>               // for std::string, std::to_string
 #include <utility>              // for std::swap
@@ -25,21 +29,21 @@ namespace fp {
 
     namespace mysql {
 
-        struct basic_engine {
+        class basic_engine {
         public:
             using default_record_type = record<>;
         protected:
             std::shared_ptr<basic_context> _context;
         public:
 
-            basic_engine(char const * host, char const * name, char const * pass)
+            basic_engine(const char* host, const char* name, const char* pass)
             : _context(basic_context::create()) {
                 if (_context) {
                     ::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0);
                 }
             }
 
-            basic_engine(char const * host, char const * name, char const * pass, char const * db)
+            basic_engine(const char* host, const char* name, const char* pass, const char* db)
             : _context(basic_context::create()) {
                 if (_context) {
                     if (::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0)) {
@@ -50,11 +54,11 @@ namespace fp {
                 }
             }
 
-            basic_engine(basic_engine const &) = default;
+            basic_engine(const basic_engine&) = default;
 
-            basic_engine(basic_engine &&) = default;
+            basic_engine(basic_engine&&) = default;
 
-            friend void swap(basic_engine & l, basic_engine & r) {
+            friend void swap(basic_engine& l, basic_engine& r) {
                 using std::swap;
                 swap(l._context, r._context);
             }
@@ -69,27 +73,32 @@ namespace fp {
 
             template<
                 typename TQuery,
-                typename TRecord = default_record_type,
+                typename TRecord = Invoke<typename Unqualified<TQuery>::template result_of<default_record_type>>,
+                typename Container = std::vector<TRecord>,
                 EnableIf<
                         is_query<Unqualified<TQuery>>,
-                        is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
+                        is_record<TRecord>
                 > = _
             >
-            std::vector<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>> query(TQuery && q) {
-                using std::to_string;
-                using record_type = Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>;
-                std::string const qry = to_string(std::forward<TQuery>(q));
+            Container query(TQuery&& q) {
+                using std::to_string; using std::begin; using std::end;
+                const std::string qry = to_string(fix::forward<TQuery>(q));
                 ::mysql_query(_context->handle(), qry.c_str());
-                std::vector<record_type> ret;
                 mysql::basic_result res(*_context);
                 if(res) {
+                    Container ret;
                     ret.reserve(res.rows());
-                    mysql::basic_row row;
-                    while ((row = res.fetch_row())) {
-                        ret.push_back(impl::make_record<record_type>::make(row));
-                    }
+                    std::transform(
+                        begin(res),
+                        end(res),
+                        std::back_inserter(ret),
+                        [](const basic_row& r) {
+                            return impl::make_record<TRecord>::make(r);
+                        }
+                    );
+                    return ret;
                 }
-                return ret;
+                throw std::runtime_error("No valid context available");
             }
 
             template<
@@ -100,9 +109,9 @@ namespace fp {
                     is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
                 > = _
             >
-            unsigned long long query(TQuery && q){
+            unsigned long long query(TQuery&& q){
                 using std::to_string;
-                std::string const qry = to_string(std::forward<TQuery>(q));
+                const std::string qry = to_string(fix::forward<TQuery>(q));
                 if (0 == ::mysql_query(_context->handle(), qry.c_str())) {
                     return ::mysql_affected_rows(_context->handle());
                 } else {

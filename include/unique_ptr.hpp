@@ -5,8 +5,6 @@
 #ifndef UNIQUE_PTR_HPP_
 #define UNIQUE_PTR_HPP_
 
-#include "type_traits.hpp"      // for fp::Invoke
-
 #include <memory>               // for std::unique_ptr
 #include <type_traits>          // for std::is_array, std::remove_extent
 #include <utility>              // for std::forward
@@ -18,7 +16,7 @@ namespace fp {
         template<typename T, typename... Args>
         inline std::unique_ptr<T> make_unique(std::true_type, Args&&... args) {
             static_assert(std::extent<T>::value == 0, "make_unique<T[N]>() is forbidden, please use make_unique<T[]>()");
-            using U = Invoke<std::remove_extent<T>>;
+            using U = typename std::remove_extent<T>::type;
             return std::unique_ptr<T>(new U[sizeof...(Args)] { std::forward<Args>(args)... });
         }
 
@@ -30,7 +28,7 @@ namespace fp {
 
     template<typename T, typename... Args>
     inline std::unique_ptr<T> make_unique(Args&&... args) {
-        return impl::make_unique(std::is_array<T>(), std::forward<Args>(args)...);
+        return impl::make_unique<T>(std::is_array<T>(), std::forward<Args>(args)...);
     }
 }
 

@@ -8,42 +8,29 @@
 #include "lock_guard.hpp"
 #include "mutex.hpp"
 #include "non_copyable.hpp"
+#include "runnable.hpp"
 #include "semaphore.hpp"
 #include "../impl/functor_impl.hpp"
 
 #include <cstddef>		// for std::size_t
 #include <deque>		// for std::deque
-#include <memory>               // for std::unique_ptr
-#include <type_traits>          // for std::remove_reference
+#include <memory>       // for std::unique_ptr
+#include <type_traits>  // for std::remove_reference
+#include <vector>       // for std::vector
 
 namespace fp {
-    struct thread;
+
+    class thread;
 
     struct threadpool : non_copyable {
     public:
-
-        enum mode_e {
+        enum class mode_e {
             wait = 0,
             terminate,
             finish
         };
-    private:
-        static void* task_runner(void*);
-        using mutex_t = mutex;
-        using semaphore_t = semaphore;
-    protected:
-        std::size_t const _size;
-        thread** _threads;
-        mode_e _mode;
-        volatile bool _run;
-        volatile bool _finish;
-        mutex_t _mutex;
-        semaphore_t _semaphore;
-        std::deque<impl::func_impl*> _tasks;
-
-        std::unique_ptr<impl::func_impl> pop();
     public:
-        explicit threadpool(std::size_t, mode_e = wait);
+        explicit threadpool(std::size_t, mode_e = mode_e::wait);
         ~threadpool();
 
         template<typename Fn> void push(Fn);
@@ -56,6 +43,21 @@ namespace fp {
 
         std::size_t size() const;
         std::size_t remaining() const;
+    private:
+        static void* task_runner(void*);
+    protected:
+        using mutex_t = mutex;
+        using semaphore_t = semaphore;
+
+        std::vector<std::unique_ptr<thread>> _threads;
+        std::deque<Runnable> _tasks;
+        mutex_t _mutex;
+        semaphore_t _semaphore;
+        mode_e _mode;
+        volatile bool _run;
+        volatile bool _finish;
+
+        Runnable pop();
     };
 
 #include "threadpool.inl"

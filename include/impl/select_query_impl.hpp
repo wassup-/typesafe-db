@@ -6,7 +6,7 @@
 #define _SELECT_QUERY_IMPL_HPP
 
 #include "../config.hpp"
-#include "../field.hpp"
+#include "../record.hpp"
 #include "../stringutil.hpp"
 #include "../unique_types.hpp"
 
@@ -16,30 +16,30 @@ namespace fp {
 
     namespace impl {
         
-        template<typename...>
+        template<typename... /* Columns */>
         struct select_query_impl;
         
-        template<typename...>
+        template<typename... /* Descriptors */>
         struct table_names;
 
         template<typename... TDescriptors>
         struct table_names {
-            static unsigned int const size = sizeof...(TDescriptors);
-            static std::string const names[];
+            constexpr static std::size_t size = sizeof...(TDescriptors);
+            constexpr static const char* names[size] = { TDescriptors::table.name()... };
         };
         
         template<typename... TDescriptors>
-        std::string const table_names<TDescriptors...>::names[] = { to_string(typename TDescriptors::table::type())... };
+        constexpr const char* table_names<TDescriptors...>::names[table_names<TDescriptors...>::size];
 
-        template<typename... TFields>
+        template<typename... TColumns>
         struct select_query_impl {
 
-            static std::string build_select_query() {
+            static std::string build_select_query(const TColumns&... f) {
                 using std::to_string;
-                using tables = typename Invoke<unique_types<DescriptorOf<TFields>...>>::template as<table_names>::type;
+                using tables = typename Invoke<unique_types<DescriptorOf<TColumns>...>>::template as<table_names>::type;
                 return stringutils::concatenate(
                     "SELECT ",
-                    stringutils::implode(", ", to_string(TFields())...),
+                    stringutils::implode(", ", to_string(f)...),
                     " FROM ",
                     stringutils::implode(", ", tables::names)
                 );

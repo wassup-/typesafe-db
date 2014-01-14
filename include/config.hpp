@@ -22,6 +22,8 @@
 //
 ////////////////////////////////////////////////////////////
 
+#include "cxx_required.hpp"
+
 #ifndef FP_CONFIG_HPP
 #define FP_CONFIG_HPP
 
@@ -80,15 +82,6 @@
 ////////////////////////////////////////////////////////////
 #if !defined(NDEBUG)
     #define FP_DEBUG
-#endif
-
-////////////////////////////////////////////////////////////
-// Define a portable constexpr macro
-////////////////////////////////////////////////////////////
-#if defined(__GXX_EXPERIMENTAL_CXX0X) || (__cplusplus >= 201103L)
-    #define CONSTEXPR constexpr
-#else
-    #define CONSTEXPR
 #endif
 
 #if defined(__GNUC__) && (__GNUC__ >= 4)

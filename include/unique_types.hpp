@@ -11,9 +11,6 @@
 namespace fp {
 
     template<typename...>
-    struct type_sequence;
-    
-    template<typename...>
     struct unique_types;
 
     namespace impl {

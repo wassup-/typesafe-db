@@ -7,7 +7,8 @@
 
 #include "impl/select_query_impl.hpp"
 
-#include "field.hpp"
+#include "ce_tuple.hpp"
+#include "forward.hpp"
 #include "is_query.hpp"
 #include "query_combiner.hpp"
 #include "record.hpp"
@@ -19,64 +20,73 @@ namespace fp {
     
     template<typename...>
     struct select_query;
-
-    template<typename... TFields>
-    struct is_query<select_query<TFields...> > : All<is_field<TFields>..., is_same<DescriptorOf<TFields>...>> { };
     
-    template<typename... TFields>
-    struct is_select_query<select_query<TFields...> > : Bool<true> { };
+    template<typename... TColumns>
+    struct is_select_query<select_query<TColumns...> > : All<is_column<TColumns>...> { };
 
-    template<typename... TFields>
+    template<typename... TColumns>
+    struct is_query<select_query<TColumns...> > : is_select_query<select_query<TColumns...>> { };
+
+    template<typename... TColumns>
     struct select_query {
     public:
         
         template<typename TRecord>
-        struct result_of {
-            using type = Invoke<typename TRecord::template rebind<TFields...>>;
-        };
+        struct result_of : TRecord::template rebind<TColumns...> { };
     public:
 
-        friend void swap(select_query& l, select_query& r) noexcept {
-            using std::swap;
+        constexpr select_query(TColumns... cols)
+        : _columns(cols...)
+        { }
+
+        template<
+            typename TRecord,
+            EnableIf<
+                is_record<TRecord>
+            > = _
+        >
+        friend Invoke<result_of<TRecord>> select(const TRecord& rec, const select_query& q) {
+            return { fp::get(rec, TColumns())... };
         }
 
-        template<typename TRecord, EnableIf<is_record<Unqualified<TRecord>>> = _>
-        friend Invoke<result_of<Unqualified<TRecord>>> select(TRecord&& rec, const select_query& q) {
-            return { std::get<TFields>(std::forward<TRecord>(rec))... };
-        }
-
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> select(const std::vector<TRecord>& recs, const select_query& q) {
-            std::vector<Invoke<result_of<TRecord>>> ret;
-            for (const TRecord& cur : recs) {
+        template<
+            typename TContainer,
+            typename TRecord = typename TContainer::value_type,
+            EnableIf<
+                is_record<TRecord>
+            > = _
+        >
+        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type select(const TContainer& recs, const select_query& q) {
+            using TReturnContainer = typename TRecord::template rebind<Invoke<result_of<TRecord>>>::type;
+            TReturnContainer ret;
+            ret.reserve(recs.size());
+            for(const TRecord& cur : recs) {
                 ret.push_back(select(cur, q));
             }
             return ret;
         }
         
-        template<typename TRecord, EnableIf<is_record<TRecord>> = _>
-        friend std::vector<Invoke<result_of<TRecord>>> query(const std::vector<TRecord>& recs, const select_query& q) {
+        template<
+            typename TContainer,
+            typename TRecord = typename TContainer::value_type,
+            EnableIf<
+                is_record<TRecord>
+            > = _
+        >
+        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(const TContainer& recs, const select_query& q) {
             return select(recs, q);
         }
 
         friend std::string to_string(const select_query& q) {
-             return impl::select_query_impl<TFields...>::build_select_query();
+            return call_with(&impl::select_query_impl<TColumns...>::build_select_query, q._columns);
         }
+    private:
+        fp::ce_tuple<TColumns...> _columns;
     };
     
-    template<typename... TFields, EnableIf<is_field<Unqualified<TFields>>...> = _>
-    CONSTEXPR inline select_query<Unqualified<TFields>...> select(TFields&&...) {
-        return { };
-    }
-
-    template<typename LeftSelect, typename RightSelect, EnableIf<is_select_query<LeftSelect>, is_select_query<RightSelect>> = _>
-    CONSTEXPR inline auto operator&(LeftSelect&& l, RightSelect&& r) -> decltype(combine(std::forward<LeftSelect>(l), std::forward<RightSelect>(r))) {
-        return combine(std::forward<LeftSelect>(l), std::forward<RightSelect>(r));
-    }
-
-    template<typename LeftSelect, typename RightSelect, EnableIf<is_select_query<LeftSelect>, is_select_query<RightSelect>> = _>
-    CONSTEXPR inline auto operator|(LeftSelect&& l, RightSelect&& r) -> decltype(combine_unique(std::forward<LeftSelect>(l), std::forward<RightSelect>(r))) {
-        return combine_unique(std::forward<LeftSelect>(l), std::forward<RightSelect>(r));
+    template<typename... TColumns, EnableIf<is_column<TColumns>...> = _>
+    constexpr inline select_query<Unqualified<TColumns>...> select(TColumns... cols) {
+        return { cols... };
     }
 }
 

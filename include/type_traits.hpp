@@ -8,33 +8,102 @@
 #include <type_traits>
 
 namespace fp {
-    
-    template<typename... T>
+
+    template<typename T>
+    using Invoke = typename T::type;
+
+    template<typename T>
+    struct identity { using type = T; };
+
+    template<typename T>
+    using Identity = Invoke<identity<T>>;
+
+    namespace detail {
+
+        template<std::size_t, typename, typename...>
+        struct type_index;
+        template<std::size_t I, typename T>
+        struct type_index<I, T>;
+
+        template<std::size_t I, typename T, typename H, typename... R>
+        struct type_index<I, T, H, R...> : type_index<(I + 1), T, R...> { };
+        template<std::size_t I, typename T, typename... R>
+        struct type_index<I, T, T, R...> : std::integral_constant<std::size_t, I> { };
+
+        template<std::size_t, typename T, T, T...>
+        struct value_index;
+        template<std::size_t I, typename T, T V>
+        struct value_index<I, T, V>;
+
+        template<std::size_t I, typename T, T V, T H, T... R>
+        struct value_index<I, T, V, H, R...> : value_index<(I + 1), T, V, R...> { };
+        template<std::size_t I, typename T, T V, T... R>
+        struct value_index<I, T, V, V, R...> : std::integral_constant<std::size_t, I> { };
+    }
+
+    template<typename... Ts>
     struct type_sequence {
         
         template<template<typename...> class C>
-        struct as {
-            using type = C<T...>;
-        };
+        struct as : identity<C<Ts...>> { };
+
+        template<typename T>
+        struct index_of : detail::type_index<0, T, Ts...> { };
     };
-    
-    template<typename T, T... V>
+
+    template<typename T, T... Vs>
     struct integer_sequence {
         
         template<template<T...> class C>
-        struct as {
-            using type = C<V...>;
-        };
+        struct as : identity<C<Vs...>> { };
+
+        template<T V>
+        struct index_of : detail::value_index<0, T, V, Vs...> { };
     };
+
+    template<std::size_t... Idx>
+    using index_sequence = integer_sequence<std::size_t, Idx...>;
+
+    template<typename T, typename... Ts>
+    using IndexOfType = typename type_sequence<Ts...>::template index_of<T>;
     
-    template<typename T>
-    using Invoke = typename T::type;
-    
-    template<typename T>
-    struct identity { using type = T; };
-    
-    template<typename T>
-    using Identity = Invoke<identity<T>>;
+    template<typename T, T V, T... Vs>
+    using IndexOfValue = typename integer_sequence<T, Vs...>::template index_of<V>;
+
+    namespace detail {
+
+        template<typename, typename...>
+        struct type_indices;
+        template<typename T, T, T...>
+        struct value_indices;
+
+        template<typename T /* Integer type */, typename /* Known indices */, std::size_t, T, T...>
+        struct value_indices_impl;
+
+        template<typename T, std::size_t... Known, std::size_t I, T V, T H, T... R>
+        struct value_indices_impl<T, index_sequence<Known...>, I, V, H, R...>
+        : value_indices_impl<T, index_sequence<Known...>, (I + 1), V, R...> { };
+
+        template<typename T, std::size_t... Known, std::size_t I, T V, T... R>
+        struct value_indices_impl<T, index_sequence<Known...>, I, V, V, R...>
+        : value_indices_impl<T, index_sequence<Known..., I>, (I + 1), V, R...> { };
+
+        template<typename T, std::size_t... Known, std::size_t I, T V>
+        struct value_indices_impl<T, index_sequence<Known...>, I, V>
+        : identity<index_sequence<Known...>> { };
+
+        template<typename T, typename... Ts>
+        struct type_indices : value_indices<std::size_t, 1, std::is_same<T, Ts>::value...> { };
+
+        template<typename T, T V, T... Vs>
+        struct value_indices : value_indices_impl<T, index_sequence<>, 0, V, Vs...> { };
+    }
+
+    template<typename T, typename... Ts>
+    using IndicesOfType = Invoke<detail::type_indices<T, Ts...>>;
+
+    template<typename T, T V, T... Vs>
+    using IndicesOfValue = Invoke<detail::value_indices<T, V, Vs...>>;
     
     template<bool B, typename...>
     struct dependent_bool_type : std::integral_constant<bool, B> { };
@@ -47,6 +116,9 @@ namespace fp {
     
     template<int I>
     using Int = Const<decltype(I), I>;
+
+    template<std::size_t I>
+    using Index = Const<std::size_t, I>;
     
     template<typename T>
     using Alias = T;
@@ -168,21 +240,20 @@ namespace fp {
         
         template<typename...> struct first_type_of;
         template<typename...> struct last_type_of;
-        template<int, typename...> struct nth_type_of;
-        
+        template<std::size_t, typename...> struct nth_type_of;
         
         template<typename H, typename... T>
-        struct first_type_of<H, T...> { using type = H; };
+        struct first_type_of<H, T...> : identity<H> { };
 
         template<typename H, typename... T>
         struct last_type_of<H, T...> : last_type_of<T...> { };
         template<typename T>
-        struct last_type_of<T> { using type = T; };
+        struct last_type_of<T> : identity<T> { };
         
-        template<int I, typename H, typename... T>
+        template<std::size_t I, typename H, typename... T>
         struct nth_type_of<I, H, T...> : nth_type_of<(I - 1), T...> { };
         template<typename H, typename... T>
-        struct nth_type_of<0, H, T...> { using type = H; };
+        struct nth_type_of<0, H, T...> : identity<H> { };
     }
     
     template<typename... T>
@@ -191,46 +262,37 @@ namespace fp {
     template<typename... T>
     using LastTypeOf = Invoke<impl::last_type_of<T...>>;
     
-    template<int I, typename... T>
+    template<std::size_t I, typename... T>
     using NthTypeOf = Invoke<impl::nth_type_of<I, T...>>;
     
     namespace impl {
         
-        template<int...> struct first_value_of;
-        template<int...> struct last_value_of;
-        template<int, int...> struct nth_value_of;
-        template<int, int, int...> struct index_of;
+        template<typename T, T...> struct first_value_of;
+        template<typename T, T...> struct last_value_of;
+        template<std::size_t, typename T, T...> struct nth_value_of;
         
-        template<int H, int... T>
-        struct first_value_of<H, T...> { enum { value = H }; };
+        template<typename T, T H, T... R>
+        struct first_value_of<T, H, R...> : Const<T, H> { };
 
-        template<int H, int... T>
-        struct last_value_of<H, T...> : last_value_of<T...> { };
-        template<int T>
-        struct last_value_of<T> { enum { value = T }; };
+        template<typename T, T H, T... R>
+        struct last_value_of<T, H, R...> : last_value_of<T, R...> { };
+        template<typename T, T V>
+        struct last_value_of<T, V> : Const<T, V> { };
         
-        template<int I, int H, int... T>
-        struct nth_value_of<I, H, T...> : nth_value_of<(I - 1), T...> { };
-        template<int H, int... T>
-        struct nth_value_of<0, H, T...> { enum { value = H }; };
-        
-        template<int N, int V, int H, int... T>
-        struct index_of<N, V, H, T...> : index_of<(N + 1), V, T...> { };
-        template<int N, int V, int... T>
-        struct index_of<N, V, V, T...> { enum { value = N }; };
+        template<std::size_t I, typename T, T H, T... R>
+        struct nth_value_of<I, T, H, R...> : nth_value_of<(I - 1), T, R...> { };
+        template<typename T, T H, T... R>
+        struct nth_value_of<0, T, H, R...> : Const<T, H> { };
     }
     
-    template<int... T>
-    using FirstValueOf = Invoke<impl::first_value_of<T...>>;
+    template<typename T, T... V>
+    using FirstValueOf = Invoke<impl::first_value_of<T, V...>>;
     
-    template<int... T>
-    using LastValueOf = Invoke<impl::last_value_of<T...>>;
+    template<typename T, T... V>
+    using LastValueOf = Invoke<impl::last_value_of<T, V...>>;
     
-    template<int I, int... T>
-    using NthValueOf = Invoke<impl::nth_value_of<I, T...>>;
-    
-    template<int V, int... Vs>
-    struct index_of : impl::index_of<0, V, Vs...> { };
+    template<std::size_t I, typename T, T... V>
+    using NthValueOf = Invoke<impl::nth_value_of<I, T, V...>>;
     
     namespace impl {
         
@@ -241,7 +303,7 @@ namespace fp {
         struct skip_n_types<N, H, T...> : skip_n_types<(N - 1), T...> { };
         
         template<typename... T>
-        struct skip_n_types<0, T...> { using type = type_sequence<T...>; };
+        struct skip_n_types<0, T...> : identity<type_sequence<T...>> { };
         
         template<typename T, int N, T...>
         struct skip_n_values;
@@ -250,7 +312,7 @@ namespace fp {
         struct skip_n_values<T, N, H, Tail...> : skip_n_values<T, (N - 1), Tail...> { };
         
         template<typename T, int... Tail>
-        struct skip_n_values<T, 0, Tail...> { using type = integer_sequence<T, Tail...>; };
+        struct skip_n_values<T, 0, Tail...> : identity<integer_sequence<T, Tail...>> { };
     }
     
     template<int N, typename... T>
@@ -262,24 +324,16 @@ namespace fp {
     namespace impl {
         
         template<typename T>
-        struct result_of {
-            using type = Invoke<T>;
-        };
+        struct result_of : identity<Invoke<T>> { };
         
         template<typename TRet, typename... TArg>
-        struct result_of<TRet(*)(TArg...) > {
-            using type = TRet;
-        };
+        struct result_of<TRet(*)(TArg...) > : identity<TRet> { };
 
         template<typename TClass, typename TRet, typename... TArg>
-        struct result_of<TRet(TClass::*)(TArg...)> {
-            using type = TRet;
-        };
+        struct result_of<TRet(TClass::*)(TArg...)> : identity<TRet> { };
 
         template<typename Fn, typename... Arg>
-        struct result_of<Fn(Arg...)> {
-            using type = Invoke<std::result_of<Fn(Arg...)>>;
-        };
+        struct result_of<Fn(Arg...)> : identity<Invoke<std::result_of<Fn(Arg...)>>> { };
     }
     
     template<typename T>
@@ -342,16 +396,6 @@ namespace fp {
     
     template<typename... T>
     struct is_same : impl::is_same<T...> { };
-    
-    template<int Idx>
-    struct indexed {
-        using value_type = int;
-        constexpr static int index = Idx;
-
-        constexpr operator value_type() const {
-            return index;
-        }
-    };
 }
 
 #endif

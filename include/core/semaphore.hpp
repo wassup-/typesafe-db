@@ -32,7 +32,6 @@ namespace fp {
         std::unique_ptr<impl::semaphore_impl> _impl;
     public:
         explicit semaphore(int = 0, mode_e = non_shared);
-        ~semaphore();
 
         friend void swap(semaphore& l, semaphore& r) {
             using std::swap;

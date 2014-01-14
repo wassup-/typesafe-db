@@ -27,7 +27,6 @@ namespace fp {
         template<typename> struct where_contains;
         template<typename, typename> struct where_or;
         template<typename, typename> struct where_and;
-        
     }
     
     namespace impl {
@@ -35,20 +34,20 @@ namespace fp {
         template<typename>
         struct is_where_clause : Bool<false> { };
 
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_eq<TField> > : Bool<true> { };
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_neq<TField> > : Bool<true> { };
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_lt<TField> > : Bool<true> { };
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_gt<TField> > : Bool<true> { };
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_lte<TField> > : Bool<true> { };
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_gte<TField> > : Bool<true> { };
-        template<typename TField>
-        struct is_where_clause<where_clauses::where_contains<TField> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_eq<TColumn> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_neq<TColumn> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_lt<TColumn> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_gt<TColumn> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_lte<TColumn> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_gte<TColumn> > : Bool<true> { };
+        template<typename TColumn>
+        struct is_where_clause<where_clauses::where_contains<TColumn> > : Bool<true> { };
         template<typename TLeft, typename TRight>
         struct is_where_clause<where_clauses::where_or<TLeft, TRight> > : Bool<true> { };
         template<typename TLeft, typename TRight>
@@ -57,248 +56,206 @@ namespace fp {
     
     namespace where_clauses {
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_eq {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_eq() = default;
-
-            explicit where_eq(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_eq(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_eq(const where_eq&) = default;
-            
-            where_eq(where_eq&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_eq& l, where_eq& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (get<TField>(r) == _value);
+                return (get<TColumn>(r) == _value);
             }
 
             friend std::string to_string(const where_eq& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " = ", to_string(c._value), ")");
+                return stringutils::concatenate("(", to_string(c._column), " = ", to_string(c._value), ")");
             }
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_neq {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_neq() = default;
-
-            explicit where_neq(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_neq(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_neq(const where_neq&) = default;
-            
-            where_neq(where_neq&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_neq& l, where_neq& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (get<TField>(r) != _value);
+                return (get<TColumn>(r) != _value);
             }
 
             friend std::string to_string(const where_neq& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " != ", to_string(c._value), ")");
+                return stringutils::concatenate("(", to_string(c._column), " != ", to_string(c._value), ")");
             }
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_lt {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_lt() = default;
-
-            explicit where_lt(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_lt(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_lt(const where_lt&) = default;
-            
-            where_lt(where_lt&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_lt& l, where_lt& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (get<TField>(r) < _value);
+                return (get<TColumn>(r) < _value);
             }
 
             friend std::string to_string(const where_lt& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " < ", to_string(c._value), ")");
+                return stringutils::concatenate("(", to_string(c._column), " < ", to_string(c._value), ")");
             }
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_gt {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_gt() = default;
-
-            explicit where_gt(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_gt(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_gt(const where_gt&) = default;
-            
-            where_gt(where_gt&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_gt& l, where_gt& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (get<TField>(r) > _value);
+                return (get<TColumn>(r) > _value);
             }
 
             friend std::string to_string(const where_gt& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " > ", to_string(c._value), ")");
+                return stringutils::concatenate("(", to_string(c._column), " > ", to_string(c._value), ")");
             }
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_lte {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_lte() = default;
-
-            explicit where_lte(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_lte(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_lte(const where_lte&) = default;
-            
-            where_lte(where_lte&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_lte& l, where_lte& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (get<TField>(r) <= _value);
+                return (get<TColumn>(r) <= _value);
             }
 
             friend std::string to_string(const where_lte& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " <= ", to_string(c._value), ")");
+                return stringutils::concatenate("(", to_string(c._column), " <= ", to_string(c._value), ")");
             }
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_gte {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_gte() = default;
-
-            explicit where_gte(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_gte(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_gte(const where_gte&) = default;
-            
-            where_gte(where_gte&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_gte& l, where_gte& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (get<TField>(r) >= _value);
+                return (get<TColumn>(r) >= _value);
             }
 
             friend std::string to_string(const where_gte& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " >= ", to_string(c._value), ")");
+                return stringutils::concatenate("(", to_string(c._column), " >= ", to_string(c._value), ")");
             }
         };
 
-        template<typename TField>
+        template<typename TColumn>
         struct where_contains {
         public:
-            using descriptor_type = DescriptorOf<TField>;
+            using descriptor_type = DescriptorOf<TColumn>;
         protected:
-            Invoke<TField> _value;
+            TColumn _column;
+            typename TColumn::value_type _value;
         public:
-            where_contains() = default;
-            
-            explicit where_contains(Invoke<TField> v)
-            : _value(std::move(v))
+            explicit where_contains(TColumn col, typename TColumn::value_type v)
+            : _column(col), _value(std::move(v))
             { }
-            
-            where_contains(const where_contains&) = default;
-            
-            where_contains(where_contains&& c)
-            : _value()
-            { swap(*this, c); }
             
             friend void swap(where_contains& l, where_contains& r) {
                 using std::swap;
+                swap(l._column, r._column);
                 swap(l._value, r._value);
             }
 
             template<typename TRecord>
             bool operator()(const TRecord& r) const {
-                return (TField::type::npos != get<TField>(r).find(_value));
+                return (TColumn::type::npos != get<TColumn>(r).find(_value));
             }
 
             friend std::string to_string(const where_contains& c) {
                 using std::to_string;
-                return stringutils::concatenate("(", to_string(TField()), " LIKE \"%", c._value, "%\")");
+                return stringutils::concatenate("(", to_string(c._column), " LIKE \"%", c._value, "%\")");
             }
         };
 
@@ -375,74 +332,74 @@ namespace fp {
         };
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_eq<TField> eq(TField, Invoke<TField> v) {
-        return where_clauses::where_eq<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_eq<TColumn> eq(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_eq<TColumn>(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_neq<TField> neq(TField, Invoke<TField> v) {
-        return where_clauses::where_neq<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_neq<TColumn> neq(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_neq<TColumn>(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_lt<TField> lt(TField, Invoke<TField> v) {
-        return where_clauses::where_lt<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_lt<TColumn> lt(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_lt<TColumn>(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_gt<TField> gt(TField, Invoke<TField> v) {
-        return where_clauses::where_gt<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_gt<TColumn> gt(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_gt<TColumn>(c, v);
     }
     
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_lte<TField> lte(TField, Invoke<TField> v) {
-        return where_clauses::where_lte<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_lte<TColumn> lte(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_lte<TColumn>(c, v);
     }
     
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_gte<TField> gte(TField, Invoke<TField> v) {
-        return where_clauses::where_gte<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_gte<TColumn> gte(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_gte<TColumn>(c, v);
     }
     
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline where_clauses::where_contains<TField> contains(TField, Invoke<TField> v) {
-        return where_clauses::where_contains<TField>(v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline where_clauses::where_contains<TColumn> contains(TColumn c, typename TColumn::value_type v) {
+        return where_clauses::where_contains<TColumn>(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator==(TField f, Invoke<TField> v) -> decltype(fp::eq(f, v)) {
-        return fp::eq(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator==(TColumn c, typename TColumn::value_type v) -> decltype(fp::eq(c, v)) {
+        return fp::eq(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator!=(TField f, Invoke<TField> v) -> decltype(fp::neq(f, v)) {
-        return fp::neq(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator!=(TColumn c, typename TColumn::value_type v) -> decltype(fp::neq(c, v)) {
+        return fp::neq(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator<(TField f, Invoke<TField> v) -> decltype(fp::lt(f, v)) {
-        return fp::lt(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator<(TColumn c, typename TColumn::value_type v) -> decltype(fp::lt(c, v)) {
+        return fp::lt(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator>(TField f, Invoke<TField> v) -> decltype(fp::gt(f, v)) {
-        return fp::gt(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator>(TColumn c, typename TColumn::value_type v) -> decltype(fp::gt(c, v)) {
+        return fp::gt(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator<=(TField f, Invoke<TField> v) -> decltype(fp::lte(f, v)) {
-        return fp::lte(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator<=(TColumn c, typename TColumn::value_type v) -> decltype(fp::lte(c, v)) {
+        return fp::lte(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator>=(TField f, Invoke<TField> v) -> decltype(fp::gte(f, v)) {
-        return fp::gte(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator>=(TColumn c, typename TColumn::value_type v) -> decltype(fp::gte(c, v)) {
+        return fp::gte(c, v);
     }
 
-    template<typename TField, EnableIf<is_field<TField>> = _>
-    inline auto operator%(TField f, Invoke<TField> v) -> decltype(fp::contains(f, v)) {
-        return fp::contains(f, v);
+    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    inline auto operator%(TColumn c, typename TColumn::value_type v) -> decltype(fp::contains(c, v)) {
+        return fp::contains(c, v);
     }
 }
 

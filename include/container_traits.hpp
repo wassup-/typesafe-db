@@ -6,19 +6,19 @@
 #define CONTAINER_TRAITS_HPP
 
 namespace std {
-    template<typename, typename> struct vector;
-    template<typename, typename> struct deque;
-    template<typename, typename, typename> struct basic_string;
-    template<typename, typename> struct list;
-    template<typename, typename> struct forward_list;
-    template<typename, typename, typename> struct set;
-    template<typename, typename, typename, typename> struct unordered_set;
-    template<typename, typename, typename> struct multiset;
-    template<typename, typename, typename, typename> struct unordered_multiset;
-    template<typename, typename, typename, typename> struct map;
-    template<typename, typename, typename, typename, typename> struct unordered_map;
-    template<typename, typename, typename, typename> struct multimap;
-    template<typename, typename, typename, typename, typename> struct unordered_multimap;
+    template<typename, typename> class vector;
+    template<typename, typename> class deque;
+    template<typename, typename, typename> class basic_string;
+    template<typename, typename> class list;
+    template<typename, typename> class forward_list;
+    template<typename, typename, typename> class set;
+    template<typename, typename, typename, typename> class unordered_set;
+    template<typename, typename, typename> class multiset;
+    template<typename, typename, typename, typename> class unordered_multiset;
+    template<typename, typename, typename, typename> class map;
+    template<typename, typename, typename, typename, typename> class unordered_map;
+    template<typename, typename, typename, typename> class multimap;
+    template<typename, typename, typename, typename, typename> class unordered_multimap;
 }
 
 namespace fp {

@@ -53,13 +53,13 @@ namespace fp {
 
     template<typename TContainer, typename TValue>
     typename TContainer::iterator erase(TContainer& cont, const TValue& val) {
-        typedef typename container_traits<TContainer>::category tag;
+        using tag = typename container_traits<TContainer>::category;
         return impl::erase_impl(cont, val, tag());
     }
 
     template<typename TContainer, typename TPred>
     typename TContainer::iterator erase_if(TContainer& cont, TPred pred) {
-        typedef typename container_traits<TContainer>::category tag;
+        using tag = typename container_traits<TContainer>::category;
         return impl::erase_if_impl(cont, pred, tag());
     }
 }
