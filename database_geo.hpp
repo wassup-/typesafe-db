@@ -3,6 +3,7 @@
 
 #include "include/column.hpp"
 #include "include/field.hpp"
+#include "include/primary_key.hpp"
 #include "include/table.hpp"
 
 namespace geo { namespace db {
@@ -30,6 +31,10 @@ namespace geo { namespace db {
         constexpr static fp::column<city, strings::code, fp::field<std::string>> code = { };
         constexpr static fp::column<city, strings::longitude, fp::field<double>> longitude = { };
         constexpr static fp::column<city, strings::latitude, fp::field<double>> latitude = { };
+
+        using primary_key = fp::identity<fp::Unqualified<decltype(id)>>;
+        using unique_keys = fp::type_sequence<fp::Unqualified<decltype(name)>>;
+        using index_keys = fp::type_sequence<fp::Unqualified<decltype(code)>>;
     };
 
     constexpr fp::table<city, strings::city> city::table;

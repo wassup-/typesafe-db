@@ -23,7 +23,7 @@ namespace fp {
         template<std::size_t, typename, typename...>
         struct type_index;
         template<std::size_t I, typename T>
-        struct type_index<I, T>;
+        struct type_index<I, T> : std::integral_constant<int, -1> { };
 
         template<std::size_t I, typename T, typename H, typename... R>
         struct type_index<I, T, H, R...> : type_index<(I + 1), T, R...> { };
@@ -49,6 +49,9 @@ namespace fp {
 
         template<typename T>
         struct index_of : detail::type_index<0, T, Ts...> { };
+
+        template<typename T>
+        struct contains : std::integral_constant<bool, (index_of<T>::value >= 0)> { };
     };
 
     template<typename T, T... Vs>
@@ -59,6 +62,9 @@ namespace fp {
 
         template<T V>
         struct index_of : detail::value_index<0, T, V, Vs...> { };
+
+        template<T V>
+        struct contains : std::integral_constant<bool, (index_of<V>::value >= 0)> { };
     };
 
     template<std::size_t... Idx>

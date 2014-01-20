@@ -2,6 +2,7 @@
 #define COLUMN_HPP_
 
 #include "field.hpp"
+#include "primary_key.hpp"
 
 namespace fp {
 
@@ -22,6 +23,39 @@ namespace fp {
     template<typename Descriptor, const char* Name, typename Field>
     struct is_column<column<Descriptor, Name, Field>> : is_field<Field> { };
 
+    namespace detail {
+
+        template<typename Column, typename Descriptor>
+        constexpr static bool is_primary_key_of(std::true_type /* HasPrimaryKey */) noexcept {
+            return std::is_same<typename Descriptor::primary_key::type, Column>::value;
+        }
+
+        template<typename Column, typename Descriptor>
+        constexpr static bool is_primary_key_of(std::false_type /* HasPrimaryKey */) noexcept {
+            return false;
+        }
+
+        template<typename Column, typename Descriptor>
+        constexpr static bool is_unique_key_of(std::true_type /* HasUniqueKeys */) noexcept {
+            return Descriptor::unique_keys::template contains<Column>::value;
+        }
+
+        template<typename Column, typename Descriptor>
+        constexpr static bool is_unique_key_of(std::false_type /* HasUniqueKeys */) noexcept {
+            return false;
+        }
+
+        template<typename Column, typename Descriptor>
+        constexpr static bool is_index_key_of(std::true_type /* HasIndexKeys */) noexcept {
+            return Descriptor::index_keys::template contains<Column>::value;
+        }
+
+        template<typename Column, typename Descriptor>
+        constexpr static bool is_index_key_of(std::false_type /* HasIndexKeys */) noexcept {
+            return false;
+        }
+    }
+
     template<typename Descriptor, const char* Name, typename Field>
     struct column {
     public:
@@ -30,8 +64,8 @@ namespace fp {
         using table_type = decltype(Descriptor::table);
         using field_type = field<Field>;
         using value_type = typename field_traits<Field>::value_type;
-    public:
 
+    public:
         constexpr static decltype(Descriptor::table) table() {
             return Descriptor::table;
         }
@@ -39,11 +73,25 @@ namespace fp {
         constexpr static const char* name() noexcept {
             return Name;
         }
+
+        constexpr static bool is_primary_key() noexcept {
+           return detail::is_primary_key_of<this_type, Descriptor>(HasPrimaryKey<Descriptor>{});
+        }
+
+        constexpr static bool is_unique_key() noexcept {
+           return (detail::is_unique_key_of<this_type, Descriptor>(HasUniqueKeys<Descriptor>{}) || is_primary_key());
+        }
+
+        constexpr static bool is_index_key() noexcept {
+           return (detail::is_index_key_of<this_type, Descriptor>(HasIndexKeys<Descriptor>{}) || is_unique_key() || is_primary_key());
+        }
+
     public:
         friend std::string to_string(const column& f) {
             using std::to_string;
             return stringutils::concatenate(to_string(f.table()), ".", f.name());
         }
+
     };
 
     template<typename Descriptor, const char* Name, typename Field>

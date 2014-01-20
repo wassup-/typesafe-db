@@ -40,21 +40,51 @@ namespace fp {
         template<typename Descriptor>
         struct has_primary_key_impl {
 
-            struct yes {  char _; };
+            struct yes { char _; };
             struct no { yes _[2]; };
 
-            template<typename T> static yes test(decltype(&Descriptor::primary_key));
+            template<typename T> static yes test(typename T::primary_key*);
             template<typename T> static no test(...);
 
-            constexpr static bool value = (sizeof(yes) == (sizeof(test<Descriptor>(0))));
+            using type = typename std::conditional<(sizeof(yes) == sizeof(test<Descriptor>(0))), std::true_type, std::false_type>::type;
+        };
+
+        template<typename Descriptor>
+        struct has_unique_keys_impl {
+            struct yes { char _; };
+            struct no { yes _[2]; };
+
+            template<typename T> static yes test(typename T::unique_keys*);
+            template<typename T> static no test(...);
+
+            using type = typename std::conditional<(sizeof(yes) == sizeof(test<Descriptor>(0))), std::true_type, std::false_type>::type;
+        };
+
+        template<typename Descriptor>
+        struct has_index_keys_impl {
+            struct yes { char _; };
+            struct no { yes _[2]; };
+
+            template<typename T> static yes test(typename T::index_keys*);
+            template<typename T> static no test(...);
+
+            using type = typename std::conditional<(sizeof(yes) == sizeof(test<Descriptor>(0))), std::true_type, std::false_type>::type;
         };
     }
 
     template<typename Table>
-    struct has_primary_key : Bool<detail::has_primary_key_impl<typename Table::descriptor_type>::value> { };
+    struct has_primary_key : detail::has_primary_key_impl<typename Table::descriptor_type>::type { };
+    template<typename Table>
+    struct has_primary_key<const Table> : has_primary_key<Table> { };
 
     template<typename T>
-    using HasPrimaryKey = has_primary_key<T>;
+    using HasPrimaryKey = typename detail::has_primary_key_impl<T>::type;
+
+    template<typename T>
+    using HasUniqueKeys = typename detail::has_unique_keys_impl<T>::type;
+
+    template<typename T>
+    using HasIndexKeys = typename detail::has_index_keys_impl<T>::type;
 }
 
 #endif
