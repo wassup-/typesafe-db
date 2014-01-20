@@ -75,10 +75,7 @@ namespace fp {
                 typename TQuery,
                 typename TRecord = Invoke<typename Unqualified<TQuery>::template result_of<default_record_type>>,
                 typename Container = std::vector<TRecord>,
-                EnableIf<
-                        is_query<Unqualified<TQuery>>,
-                        is_record<TRecord>
-                > = _
+                typename = mpl::enable_if_t<mpl::all_<is_query<Unqualified<TQuery>>, is_record<TRecord>>>
             >
             Container query(TQuery&& q) {
                 using std::to_string; using std::begin; using std::end;
@@ -102,12 +99,14 @@ namespace fp {
             }
 
             template<
-                typename TQuery, 
-                typename TRecord = default_record_type, 
-                DisableIf<
-                    is_query<Unqualified<TQuery>>,
-                    is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
-                > = _
+                typename TQuery,
+                typename TRecord = default_record_type,
+                typename = mpl::disable_if_t<
+                    mpl::all_<
+                        is_query<Unqualified<TQuery>>,
+                        is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
+                    >
+                >
             >
             unsigned long long query(TQuery&& q){
                 using std::to_string;
@@ -124,7 +123,7 @@ namespace fp {
     namespace detail {
 
         template<>
-        struct is_engine<mysql::basic_engine> : Bool<true> { };
+        struct is_engine<mysql::basic_engine> : mpl::true_ { };
     }
 }
 

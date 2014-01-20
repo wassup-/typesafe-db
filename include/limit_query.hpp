@@ -23,14 +23,14 @@ namespace fp {
     struct is_query<limit_query<TQuery> > : is_query<TQuery> { };
     
     template<typename TQuery>
-    struct is_limit_query<limit_query<TQuery> > : Bool<true> { };
+    struct is_limit_query<limit_query<TQuery> > : mpl::true_ { };
 
     template<typename TQuery>
     struct limit_query {
     public:
         
         template<typename TRecord>
-        struct result_of : identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
+        struct result_of : mpl::identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
     protected:
         TQuery _query;
         int _limit;
@@ -48,9 +48,7 @@ namespace fp {
 
         template<
             typename TRecord,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend bool evaluate(const TRecord& rec, const limit_query& q) {
             return evaluate(rec, q._query);
@@ -58,9 +56,7 @@ namespace fp {
 
         template<
             typename TRecord,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend Invoke<result_of<TRecord>> select(const TRecord& rec, const limit_query& q) {
             return select(rec, q._query);
@@ -69,9 +65,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend TContainer query(const TContainer& recs, const limit_query& q) {
             TContainer ret;
@@ -95,9 +89,7 @@ namespace fp {
 
     template<
         typename TQuery,
-        EnableIf<
-            is_query<TQuery>
-        > = _
+        typename = mpl::enable_if_t<is_query<TQuery>>
     >
     constexpr inline limit_query<TQuery> limit(TQuery q, int l) {
         return { q, l };

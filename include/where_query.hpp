@@ -18,7 +18,6 @@
 #include <algorithm>            // for std::swap
 #include <functional>           // for std::bind
 #include <string>               // for std::string, std::to_string
-#include <vector>               // for std::vector
 
 namespace fp {
 
@@ -26,7 +25,7 @@ namespace fp {
     struct where_query;
     
     template<typename... TWhere>
-    struct is_where_query<where_query<TWhere...>> : All<impl::is_where_clause<TWhere>...> { };
+    struct is_where_query<where_query<TWhere...>> : mpl::all_<impl::is_where_clause<TWhere>...> { };
 
     template<typename... TWhere>
     struct is_query<where_query<TWhere...>> : is_where_query<where_query<TWhere...>> { };
@@ -53,9 +52,7 @@ namespace fp {
 
         template<
             typename TRecord,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend bool evaluate(const TRecord& rec, const where_query& q) {
             return q.evaluate(rec);
@@ -64,9 +61,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend TContainer evaluate(TContainer cont, const where_query& q) {
             erase_if(cont, std::bind(&where_query::evaluate, std::cref(q), std::placeholders::_1, std::cref(q)));//[&](const TRecord& cur) { return evaluate(cur, q); });
@@ -76,9 +71,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend TContainer query(const TContainer& rec, const where_query& q) {
             //return evaluate(rec, q);

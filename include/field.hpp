@@ -17,13 +17,13 @@ namespace fp {
     struct field;
 
     template<typename>
-    struct is_field : Bool<false> { };
+    struct is_field : mpl::false_ { };
 
     template<typename T>
     struct is_field<const T> : is_field<T> { };
 
     template<typename Type>
-    struct is_field<field<Type>> : Bool<true> { };
+    struct is_field<field<Type>> : mpl::true_ { };
     
     template<typename>
     struct field_traits;

@@ -15,10 +15,10 @@ namespace fp {
     struct table;
 
     template<typename>
-    struct is_table : Bool<false> { };
+    struct is_table : mpl::false_ { };
     
     template<typename Descriptor, const char* Name>
-    struct is_table<table<Descriptor, Name>> : Bool<true> { };
+    struct is_table<table<Descriptor, Name>> : mpl::true_ { };
 
     template<typename Descriptor, const char* Name>
     struct table {

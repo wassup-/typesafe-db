@@ -20,16 +20,16 @@ namespace fp {
         struct skip_values_impl<C, H, T...> : skip_values_impl<(C - 1), T...> { };
 
         template<int H, int... T>
-        struct skip_values_impl<0, H, T...> : identity<integer_sequence<int, H, T...>> { };
+        struct skip_values_impl<0, H, T...> : mpl::identity<integer_sequence<int, H, T...>> { };
 
         template<>
-        struct skip_values_impl<0> : identity<integer_sequence<int>> { };
+        struct skip_values_impl<0> : mpl::identity<integer_sequence<int>> { };
 
         template<int C, bool S, int... I>
         struct skip_values_helper : skip_values_impl<C, I...> { };
 
         template<int C, int... I>
-        struct skip_values_helper<C, true, I...> : identity<integer_sequence<int>> { };
+        struct skip_values_helper<C, true, I...> : mpl::identity<integer_sequence<int>> { };
     }
 }
 

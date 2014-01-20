@@ -14,7 +14,7 @@ namespace fp {
 
     template<typename T, T... I, typename... Ts>
     struct extract_types<integer_sequence<T, I...>, type_sequence<Ts...>>
-    : identity<type_sequence<NthTypeOf<I, Ts...>...>> { };
+    : mpl::identity<type_sequence<NthTypeOf<I, Ts...>...>> { };
 }
 
 #endif

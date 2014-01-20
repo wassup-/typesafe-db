@@ -14,7 +14,11 @@ namespace fp { namespace impl { namespace ordered_query {
     
     constexpr static const char* ORDERINGS[] = { "ASC", "DESC" };
 
-    template<typename TRecord, typename TField, EnableIf<is_record<TRecord>> = _>
+    template<
+        typename TRecord,
+        typename TField,
+        typename = mpl::enable_if_t<is_record<TRecord>>
+    >
     struct ascending_sorter : std::binary_function<const TRecord&, const TRecord&, bool> {
 
         bool operator()(const TRecord& l, const TRecord& r) const {
@@ -22,7 +26,11 @@ namespace fp { namespace impl { namespace ordered_query {
         }
     };
 
-    template<typename TRecord, typename TField, EnableIf<is_record<TRecord>> = _>
+    template<
+        typename TRecord,
+        typename TField,
+        typename = mpl::enable_if_t<is_record<TRecord>>
+    >
     struct descending_sorter : std::binary_function<const TRecord&, const TRecord&, bool> {
 
         bool operator()(const TRecord& l, const TRecord& r) const {

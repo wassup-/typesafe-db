@@ -14,13 +14,13 @@ namespace fp {
     namespace detail {
 
         template<typename>
-        struct is_engine : Bool<false> { };
+        struct is_engine : mpl::false_ { };
     }
 
     template<typename T>
     struct is_engine : detail::is_engine<T> { };
 
-    template<typename TQuery, EnableIf<is_query<Unqualified<TQuery>>> = _>
+    template<typename TQuery>
     inline void expected_result(TQuery&& qry) {
         static_assert(is_query<Unqualified<TQuery>>::value, "TQuery is not a query");
     }

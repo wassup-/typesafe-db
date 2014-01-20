@@ -23,7 +23,7 @@ namespace fp {
     struct ordered_query;
 
     template<typename TQuery, typename TColumn>
-    struct is_ordered_query<ordered_query<TQuery, TColumn> > : All<is_query<TQuery>, is_column<TColumn>> { };
+    struct is_ordered_query<ordered_query<TQuery, TColumn> > : mpl::all_<is_query<TQuery>, is_column<TColumn>> { };
 
     template<typename TQuery, typename TColumn>
     struct is_query<ordered_query<TQuery, TColumn> > : is_ordered_query<ordered_query<TQuery, TColumn>> { };
@@ -40,7 +40,7 @@ namespace fp {
     struct ordered_query {
     public:
         template<typename TRecord>
-        struct result_of : identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
+        struct result_of : mpl::identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
     
     public:
         ordered_query(TQuery q, TColumn c, ordering_e o)
@@ -70,9 +70,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend TContainer query(TContainer recs, const ordered_query& q) {
             switch(q._order){
@@ -101,10 +99,7 @@ namespace fp {
     template<
         typename TQuery,
         typename TColumn,
-        EnableIf<
-            is_query<TQuery>,
-            is_column<TColumn>
-        > = _
+        typename = mpl::enable_if_t<mpl::all_<is_query<TQuery>, is_column<TColumn>>>
     >
     constexpr inline ordered_query<TQuery, TColumn> order(TQuery q, TColumn c, ordering_e o = ordering_e::ascending) {
         return { q, c, o };

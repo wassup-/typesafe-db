@@ -17,9 +17,9 @@ namespace fp {
     struct record;
 
     template<typename>
-    struct is_record : Bool<false> { };
+    struct is_record : mpl::false_ { };
     template<typename... TColumns>
-    struct is_record<record<TColumns...> > : All<is_column<TColumns>...> { };
+    struct is_record<record<TColumns...> > : mpl::all_<is_column<TColumns>...> { };
 
     template<typename... Columns>
     struct record {
@@ -27,10 +27,10 @@ namespace fp {
         using this_type = record;
 
         template<typename... TOther>
-        struct rebind : identity<record<TOther...>> { };
+        struct rebind : mpl::identity<record<TOther...>> { };
 
         template<std::size_t Idx>
-        struct nth_type : identity<NthTypeOf<Idx, Columns...>> { };
+        struct nth_type : mpl::identity<NthTypeOf<Idx, Columns...>> { };
 
     public:
         record(typename Columns::value_type... x)
@@ -79,28 +79,40 @@ namespace fp {
     namespace detail {
 
         template<typename Ret, typename Record, std::size_t Idx>
-        inline Ret get(const Record& rec, Index<Idx>) {
+        inline Ret get(const Record& rec, mpl::index_<Idx>) {
             return rec.template get<Idx>();
         }
 
         template<typename Value, typename Record, std::size_t Idx>
-        inline void set(Record& rec, const Value& x, Index<Idx>) {
+        inline void set(Record& rec, const Value& x, mpl::index_<Idx>) {
             rec.template get<Idx>() = x;
         }
     }
 
-    template<typename... Columns, typename Column>
-    inline const typename Column::value_type& get(const record<Columns...>& r, const Column& col) {
-        return detail::get<const typename Column::value_type&>(r, IndexOfType<Column, Columns...>{});
+    template<
+        typename... Columns,
+        typename Column,
+        typename Value = typename Column::value_type
+    >
+    inline const Value& get(const record<Columns...>& r, const Column& col) {
+        return detail::get<const Value&>(r, IndexOfType<Column, Columns...>{});
     }
 
-    template<typename... Columns, typename... Column, EnableIf<Bool<(sizeof...(Column) > 1)>> = _>
+    template<
+        typename... Columns,
+        typename... Column,
+        typename = mpl::enable_if_t<mpl::bool_<(sizeof...(Column) > 1)>>
+    >
     inline std::tuple<const typename Column::value_type&...> get(const record<Columns...>& r, const Column&... col) {
         return std::tie(get(r, col)...);
     }
 
-    template<typename... Columns, typename Column>
-    inline void set(record<Columns...>& r, const Column& col, const typename Column::value_type& x) {
+    template<
+        typename... Columns,
+        typename Column,
+        typename Value = typename Column::value_type
+    >
+    inline void set(record<Columns...>& r, const Column& col, const Value& x) {
         return detail::set(r, x, IndexOfType<Column, Columns...>{});
     }
 }

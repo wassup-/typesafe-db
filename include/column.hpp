@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #ifndef COLUMN_HPP_
 #define COLUMN_HPP_
 
@@ -19,7 +23,7 @@ namespace fp {
     struct column;
 
     template<typename>
-    struct is_column : Bool<false> { };
+    struct is_column : mpl::false_ { };
     template<typename Descriptor, const char* Name, typename Field>
     struct is_column<column<Descriptor, Name, Field>> : is_field<Field> { };
 

@@ -24,7 +24,7 @@ namespace fp {
         : unique_values_helper<is_contained_value<T, H, TLeft...>::value, integer_sequence<T, TLeft...>, integer_sequence<T, H, R...>> { };
 
         template<typename T, T... TLeft>
-        struct unique_values_impl<integer_sequence<T, TLeft...>, integer_sequence<T>> : identity<integer_sequence<T, TLeft...>> { };
+        struct unique_values_impl<integer_sequence<T, TLeft...>, integer_sequence<T>> : mpl::identity<integer_sequence<T, TLeft...>> { };
 
         template<typename T, T... TLeft, T THead, T... TTail>
         struct unique_values_helper<false, integer_sequence<T, TLeft...>, integer_sequence<T, THead, TTail...> >

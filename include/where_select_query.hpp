@@ -13,7 +13,6 @@
 
 #include <algorithm>            // for std::swap
 #include <string>               // for std::string, std::to_string
-#include <vector>               // for std::vector
 
 namespace fp {
 
@@ -27,14 +26,14 @@ namespace fp {
     struct is_where_query<where_select_query<TSelect, TWhere> > : is_where_query<TWhere> { };
 
     template<typename TSelect, typename TWhere>
-    struct is_query<where_select_query<TSelect, TWhere> > : All<is_select_query<TSelect>, is_where_query<TWhere>> { };
+    struct is_query<where_select_query<TSelect, TWhere> > : mpl::all_<is_select_query<TSelect>, is_where_query<TWhere>> { };
 
     template<typename TSelect, typename TWhere>
     struct where_select_query {
     public:
         
         template<typename TRecord>
-        struct result_of : identity<Invoke<typename TSelect::template result_of<TRecord>>> { };
+        struct result_of : mpl::identity<Invoke<typename TSelect::template result_of<TRecord>>> { };
     protected:
         TSelect _select;
         TWhere _where;
@@ -52,9 +51,7 @@ namespace fp {
 
         template<
             typename TRecord,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend bool evaluate(const TRecord& rec, const where_select_query& q) {
             return evaluate(rec, q._where);
@@ -62,9 +59,7 @@ namespace fp {
 
         template<
             typename TRecord,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend Invoke<result_of<Unqualified<TRecord>>> select(const TRecord& rec, const where_select_query& q) {
             return select(rec, q._select);
@@ -73,9 +68,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(const TContainer& recs, const where_select_query& q) {
             using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
@@ -97,10 +90,7 @@ namespace fp {
     template<
         typename TSelect,
         typename TWhere,
-        EnableIf<
-            is_select_query<TSelect>,
-            is_where_query<TWhere>
-        > = _
+        typename = mpl::enable_if_t<mpl::all_<is_select_query<TSelect>, is_where_query<TWhere>>>
     >
     constexpr inline where_select_query<TSelect, TWhere> operator+(TSelect s, TWhere w) {
         return { s, w };

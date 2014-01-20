@@ -12,12 +12,20 @@ namespace fp {
     template<typename...>
     struct select_query;
 
-    template<typename... LColumns, typename... RColumns, EnableIf<is_column<LColumns>..., is_column<RColumns>...> = _>
+    template<
+        typename... LColumns,
+        typename... RColumns,
+        typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...>>
+    >
     constexpr inline Invoke<typename impl::query_combiner_impl<LColumns..., RColumns...>::normal> combine(const select_query<LColumns...>&, const select_query<RColumns...>&) {
         return { };
     }
 
-    template<typename... LColumns, typename... RColumns, EnableIf<is_column<LColumns>..., is_column<RColumns>...> = _>
+    template<
+        typename... LColumns,
+        typename... RColumns,
+        typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...>>
+    >
     constexpr inline Invoke<typename impl::query_combiner_impl<LColumns..., RColumns...>::unique> combine_unique(const select_query<LColumns...>&, const select_query<RColumns...>&) {
         return { };
     }

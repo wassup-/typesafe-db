@@ -14,7 +14,6 @@
 #include "record.hpp"
 
 #include <string>       // for std::string, std::to_string
-#include <vector>       // for std::vector
 
 namespace fp {
     
@@ -22,7 +21,7 @@ namespace fp {
     struct select_query;
     
     template<typename... TColumns>
-    struct is_select_query<select_query<TColumns...> > : All<is_column<TColumns>...> { };
+    struct is_select_query<select_query<TColumns...> > : mpl::all_<is_column<TColumns>...> { };
 
     template<typename... TColumns>
     struct is_query<select_query<TColumns...> > : is_select_query<select_query<TColumns...>> { };
@@ -41,9 +40,7 @@ namespace fp {
 
         template<
             typename TRecord,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend Invoke<result_of<TRecord>> select(const TRecord& rec, const select_query& q) {
             return { fp::get(rec, TColumns())... };
@@ -52,9 +49,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type select(const TContainer& recs, const select_query& q) {
             using TReturnContainer = typename TRecord::template rebind<Invoke<result_of<TRecord>>>::type;
@@ -69,9 +64,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(const TContainer& recs, const select_query& q) {
             return select(recs, q);
@@ -84,8 +77,11 @@ namespace fp {
         fp::ce_tuple<TColumns...> _columns;
     };
     
-    template<typename... TColumns, EnableIf<is_column<TColumns>...> = _>
-    constexpr inline select_query<Unqualified<TColumns>...> select(TColumns... cols) {
+    template<
+        typename... TColumns,
+        typename = mpl::enable_if_t<mpl::all_<is_column<TColumns>...>>
+    >
+    constexpr inline select_query<TColumns...> select(TColumns... cols) {
         return { cols... };
     }
 }

@@ -13,7 +13,6 @@
 
 #include <stdexcept>
 #include <string>               // for std::string, std::to_string
-#include <vector>               // for std::vector
 
 namespace fp {
     
@@ -21,17 +20,17 @@ namespace fp {
     struct insert_query;
 
     template<typename... TColumns>
-    struct is_query<insert_query<TColumns...> > : All<is_column<TColumns>...> { };
+    struct is_query<insert_query<TColumns...> > : mpl::all_<is_column<TColumns>...> { };
 
     template<typename... TColumns>
-    struct is_insert_query<insert_query<TColumns...> > : Bool<true> { };
+    struct is_insert_query<insert_query<TColumns...> > : mpl::true_ { };
 
     template<typename... TColumns>
     struct insert_query {
     public:
         
         template<typename TRecord>
-        struct result_of : identity<Invoke<typename TRecord::template rebind<TColumns...>>> { };
+        struct result_of : mpl::identity<Invoke<typename TRecord::template rebind<TColumns...>>> { };
     public:
 
         friend void swap(insert_query& l, insert_query& r) noexcept {
@@ -41,9 +40,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                    is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type insert(TContainer& recs, const insert_query& q) {
             using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
@@ -58,9 +55,7 @@ namespace fp {
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            EnableIf<
-                    is_record<TRecord>
-            > = _
+            typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(TContainer& recs, const insert_query& q) {
             return insert(recs, q);
@@ -74,9 +69,7 @@ namespace fp {
 
     template<
         typename... TColumns,
-        EnableIf<
-            is_column<TColumns>...
-        > = _
+        typename = mpl::enable_if_t<mpl::all_<is_column<TColumns>...>>
     >
     insert_query<TColumns...> insert(TColumns... c) {
         return { c... };

@@ -25,33 +25,33 @@ namespace std {
 namespace stringutils {
 
 	template<typename>
-	struct is_char_type : std::false_type { };
+	struct is_char_type : mpl::false_ { };
 	template<typename T>
 	struct is_char_type<const T> : is_char_type<T> { };
 	template<>
-	struct is_char_type<char> : std::true_type { };
+	struct is_char_type<char> : mpl::true_ { };
 	template<>
-	struct is_char_type<wchar_t> : std::true_type { };
+	struct is_char_type<wchar_t> : mpl::true_ { };
 	template<>
-	struct is_char_type<char16_t> : std::true_type { };
+	struct is_char_type<char16_t> : mpl::true_ { };
 	template<>
-	struct is_char_type<char32_t> : std::true_type { };
+	struct is_char_type<char32_t> : mpl::true_ { };
 
 	template<typename>
-	struct is_std_string : std::false_type { };
+	struct is_std_string : mpl::false_ { };
 	template<typename T>
 	struct is_std_string<const T> : is_std_string<T> { };
 	template<typename CharT, typename Traits, typename Alloc>
-	struct is_std_string<std::basic_string<CharT, Traits, Alloc>> : std::true_type { };
+	struct is_std_string<std::basic_string<CharT, Traits, Alloc>> : mpl::true_ { };
 
 	template<typename T>
-	struct is_string_like : std::conditional<
-								is_std_string<T>::value,
-								std::true_type,
+	struct is_string_like : mpl::conditional_t<
+								is_std_string<T>,
+								mpl::true_,
 								is_char_type<
 									decltype(std::declval<T&>()[0])
 								>
-							>::type { };
+							> { };
 
 
 	namespace detail {
@@ -59,26 +59,26 @@ namespace stringutils {
 		template<
 			typename Char,
 			std::size_t N,
-			fp::EnableIf<is_char_type<Char>> = fp::_
+			typename = mpl::enable_if_t<is_char_type<Char>>
 		>
 		constexpr inline std::size_t string_size(Char(&)[N])
 		{ return N - 1; }
 
 		template<
 			typename Ptr,
-			fp::EnableIf<
-				fp::All<
+			typename = mpl::enable_if_t<
+				mpl::all_<
 					std::is_pointer<Ptr>,
 					is_char_type<fp::RemovePointer<Ptr>>
 				>
-			> = fp::_
+			>
 		>
 		constexpr inline std::size_t string_size(Ptr s)
 		{ return s ? std::strlen(s) : 0; }
 
 		template<
 			typename String,
-			fp::EnableIf<is_std_string<fp::Unqualified<String>>> = fp::_
+			typename = mpl::enable_if_t<is_std_string<fp::Unqualified<String>>>
 		>
 		constexpr inline std::size_t string_size(String&& s)
 		{ return fix::forward<String>(s).size(); }
@@ -158,7 +158,7 @@ namespace stringutils {
 	template<
 		typename String,
 		std::size_t N,
-		fp::DisableIf<is_char_type<String>> = fp::_
+		typename = mpl::disable_if_t<is_char_type<String>>
 	>
 	inline std::string implode(std::string glue, const String(&strings)[N]) {
 		if(N == 1) { return strings[0]; }
@@ -167,7 +167,7 @@ namespace stringutils {
 
 	template<
 		typename String,
-		fp::EnableIf<is_std_string<String>> = fp::_
+		typename = mpl::enable_if_t<is_std_string<String>>
 	>
 	inline String tolower(String s) {
 		using std::begin; using std::end;
@@ -177,7 +177,7 @@ namespace stringutils {
 
 	template<
 		typename String,
-		fp::EnableIf<is_std_string<String>> = fp::_
+		typename = mpl::enable_if_t<is_std_string<String>>
 	>
 	inline String toupper(String s) {
 		using std::begin; using std::end;

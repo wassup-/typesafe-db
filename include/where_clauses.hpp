@@ -32,26 +32,26 @@ namespace fp {
     namespace impl {
         
         template<typename>
-        struct is_where_clause : Bool<false> { };
+        struct is_where_clause : mpl::false_ { };
 
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_eq<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_eq<TColumn> > : mpl::true_ { };
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_neq<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_neq<TColumn> > : mpl::true_ { };
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_lt<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_lt<TColumn> > : mpl::true_ { };
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_gt<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_gt<TColumn> > : mpl::true_ { };
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_lte<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_lte<TColumn> > : mpl::true_ { };
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_gte<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_gte<TColumn> > : mpl::true_ { };
         template<typename TColumn>
-        struct is_where_clause<where_clauses::where_contains<TColumn> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_contains<TColumn> > : mpl::true_ { };
         template<typename TLeft, typename TRight>
-        struct is_where_clause<where_clauses::where_or<TLeft, TRight> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_or<TLeft, TRight> > : mpl::true_ { };
         template<typename TLeft, typename TRight>
-        struct is_where_clause<where_clauses::where_and<TLeft, TRight> > : Bool<true> { };
+        struct is_where_clause<where_clauses::where_and<TLeft, TRight> > : mpl::true_ { };
     }
     
     namespace where_clauses {
@@ -332,72 +332,72 @@ namespace fp {
         };
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_eq<TColumn> eq(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_eq<TColumn>(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_neq<TColumn> neq(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_neq<TColumn>(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_lt<TColumn> lt(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_lt<TColumn>(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_gt<TColumn> gt(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_gt<TColumn>(c, v);
     }
     
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_lte<TColumn> lte(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_lte<TColumn>(c, v);
     }
     
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_gte<TColumn> gte(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_gte<TColumn>(c, v);
     }
     
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline where_clauses::where_contains<TColumn> contains(TColumn c, typename TColumn::value_type v) {
         return where_clauses::where_contains<TColumn>(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator==(TColumn c, typename TColumn::value_type v) -> decltype(fp::eq(c, v)) {
         return fp::eq(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator!=(TColumn c, typename TColumn::value_type v) -> decltype(fp::neq(c, v)) {
         return fp::neq(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator<(TColumn c, typename TColumn::value_type v) -> decltype(fp::lt(c, v)) {
         return fp::lt(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator>(TColumn c, typename TColumn::value_type v) -> decltype(fp::gt(c, v)) {
         return fp::gt(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator<=(TColumn c, typename TColumn::value_type v) -> decltype(fp::lte(c, v)) {
         return fp::lte(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator>=(TColumn c, typename TColumn::value_type v) -> decltype(fp::gte(c, v)) {
         return fp::gte(c, v);
     }
 
-    template<typename TColumn, EnableIf<is_column<TColumn>> = _>
+    template<typename TColumn, typename = mpl::enable_if_t<is_column<TColumn>>>
     inline auto operator%(TColumn c, typename TColumn::value_type v) -> decltype(fp::contains(c, v)) {
         return fp::contains(c, v);
     }
