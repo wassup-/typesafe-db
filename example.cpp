@@ -38,7 +38,7 @@ int main(int argc, char ** argv) {
     using std::to_string;
 
     fp::mysql::basic_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
-
+    
     std::cout << "id is primary key?" << geo::db::city::id.is_primary_key() << std::endl;
     std::cout << "id is unique key?" << geo::db::city::id.is_unique_key() << std::endl;
     std::cout << "id is index key?" << geo::db::city::id.is_index_key() << std::endl;
@@ -48,6 +48,7 @@ int main(int argc, char ** argv) {
 
     auto qry = fp::limit(fp::order(sq1 + wq1, geo::db::city::alpha, fp::ascending), 10);
     auto res = fp::query(engine, qry);
+
     std::cout << "[Query]" << std::endl << to_string(qry) << std::endl;
     std::cout << "[Results]" << std::endl << res.size() << std::endl;
     std::cout << "----------" << std::endl;

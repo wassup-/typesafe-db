@@ -79,13 +79,13 @@ namespace fp { namespace impl {
     namespace update_modifiers {
 
         template<typename TColumn>
-        struct field_getter {
+        struct column_getter {
         public:
             using descriptor_type = DescriptorOf<TColumn>;
             using value_type = typename TColumn::value_type;
         public:
 
-            field_getter(TColumn col)
+            column_getter(TColumn col)
             : column_(col)
             { }
 
@@ -93,7 +93,7 @@ namespace fp { namespace impl {
             constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
             { return get(mapping, rec, column_); }
 
-            friend std::string to_string(const field_getter&) {
+            friend std::string to_string(const column_getter&) {
                 using std::to_string;
                 return to_string(TColumn());
             }
@@ -102,13 +102,13 @@ namespace fp { namespace impl {
         };
         
         template<typename TLeft, typename TRight>
-        struct field_add {
+        struct column_add {
         public:
             using descriptor_type = DescriptorOf<TRight>;
             using value_type = typename TRight::value_type;
         public:
 
-            constexpr field_add(TLeft l, TRight r)
+            constexpr column_add(TLeft l, TRight r)
             : left_(l), right_(r)
             { }
 
@@ -117,7 +117,7 @@ namespace fp { namespace impl {
                 return get(mapping, rec, left_) + get(mapping, rec, right_);
             }
 
-            friend std::string to_string(const field_add& g) {
+            friend std::string to_string(const column_add& g) {
                 using std::to_string;
                 return stringutils::concatenate(to_string(g.left_), " + ", to_string(g.right_));
             }
@@ -127,13 +127,13 @@ namespace fp { namespace impl {
         };
         
         template<typename TLeft, typename TRight>
-        struct field_sub {
+        struct column_sub {
         public:
             using descriptor_type = DescriptorOf<TRight>;
             using value_type = typename TRight::value_type;
         public:
 
-            constexpr field_sub(TLeft l, TRight r)
+            constexpr column_sub(TLeft l, TRight r)
             : left_(l), right_(r)
             { }
 
@@ -142,7 +142,7 @@ namespace fp { namespace impl {
                 return get(mapping, rec, left_) - get(mapping, rec, right_);
             }
 
-            friend std::string to_string(const field_sub& g) {
+            friend std::string to_string(const column_sub& g) {
                 using std::to_string;
                 return stringutils::concatenate(to_string(g.left_), " - ", to_string(g.right_));
             }
@@ -152,13 +152,13 @@ namespace fp { namespace impl {
         };
         
         template<typename TLeft, typename TRight>
-        struct field_mul {
+        struct column_mul {
         public:
             using descriptor_type = DescriptorOf<TRight>;
             using value_type = typename TRight::value_type;
         public:
 
-            constexpr field_mul(TLeft l, TRight r)
+            constexpr column_mul(TLeft l, TRight r)
             : left_(l), right_(r)
             { }
 
@@ -167,7 +167,7 @@ namespace fp { namespace impl {
                 return get(mapping, rec, left_) * get(mapping, rec, right_);
             }
 
-            friend std::string to_string(const field_mul& g) {
+            friend std::string to_string(const column_mul& g) {
                 using std::to_string;
                 return stringutils::concatenate(to_string(g.left_), " * ", to_string(g.right_));
             }
@@ -177,13 +177,13 @@ namespace fp { namespace impl {
         };
         
         template<typename TLeft, typename TRight>
-        struct field_div {
+        struct column_div {
         public:
             using descriptor_type = DescriptorOf<TRight>;
             using value_type = typename TRight::value_type;
         public:
 
-            constexpr field_div(TLeft l, TRight r)
+            constexpr column_div(TLeft l, TRight r)
             : left_(l), right_(r)
             { }
 
@@ -192,7 +192,7 @@ namespace fp { namespace impl {
                 return get(mapping, rec, left_) / get(mapping, rec, right_);
             }
 
-            friend std::string to_string(const field_div& g) {
+            friend std::string to_string(const column_div& g) {
                 using std::to_string;
                 return stringutils::concatenate(to_string(g.left_), " / ", to_string(g.right_));
             }

@@ -19,7 +19,7 @@ namespace fp {
         struct make_select_query;
 
         template<typename... TFields>
-        struct make_select_query<type_sequence<TFields...> > : mpl::identity<select_query<TFields...>> { };
+        struct make_select_query<mpl::type_sequence<TFields...> > : mpl::identity<select_query<TFields...>> { };
 
         template<typename... TFields>
         struct query_combiner_impl {

@@ -22,24 +22,24 @@ namespace fp {
         struct unique_types_helper;
 
         template<typename... TLeft, typename H, typename... T>
-        struct unique_types_impl<type_sequence<TLeft...>, type_sequence<H, T...> >
-        : mpl::identity<Invoke<unique_types_helper<is_contained_type<H, TLeft...>::value, type_sequence<TLeft...>, type_sequence<H, T...>>>> { };
+        struct unique_types_impl<mpl::type_sequence<TLeft...>, mpl::type_sequence<H, T...> >
+        : mpl::identity<Invoke<unique_types_helper<is_contained_type<H, TLeft...>::value, mpl::type_sequence<TLeft...>, mpl::type_sequence<H, T...>>>> { };
 
         template<typename... TLeft>
-        struct unique_types_impl<type_sequence<TLeft...>, type_sequence<> >
-        : mpl::identity<type_sequence<TLeft...> > { };
+        struct unique_types_impl<mpl::type_sequence<TLeft...>, mpl::type_sequence<> >
+        : mpl::identity<mpl::type_sequence<TLeft...> > { };
 
         template<typename... TLeft, typename TRightHead, typename... TRightTail>
-        struct unique_types_helper<false, type_sequence<TLeft...>, type_sequence<TRightHead, TRightTail...>>
-        : mpl::identity<Invoke<unique_types_impl<type_sequence<TLeft..., TRightHead>, type_sequence<TRightTail...>>>> { };
+        struct unique_types_helper<false, mpl::type_sequence<TLeft...>, mpl::type_sequence<TRightHead, TRightTail...>>
+        : mpl::identity<Invoke<unique_types_impl<mpl::type_sequence<TLeft..., TRightHead>, mpl::type_sequence<TRightTail...>>>> { };
 
         template<typename... TLeft, typename TRightHead, typename... TRightTail>
-        struct unique_types_helper<true, type_sequence<TLeft...>, type_sequence<TRightHead, TRightTail...>>
-        : mpl::identity<Invoke<unique_types_impl<type_sequence<TLeft...>, type_sequence<TRightTail...>>>> { };
+        struct unique_types_helper<true, mpl::type_sequence<TLeft...>, mpl::type_sequence<TRightHead, TRightTail...>>
+        : mpl::identity<Invoke<unique_types_impl<mpl::type_sequence<TLeft...>, mpl::type_sequence<TRightTail...>>>> { };
     }
 
     template<typename H, typename... T>
-    struct unique_types<H, T...> : impl::unique_types_impl<type_sequence<H>, type_sequence<T...>> { };
+    struct unique_types<H, T...> : impl::unique_types_impl<mpl::type_sequence<H>, mpl::type_sequence<T...>> { };
 }
 
 #endif

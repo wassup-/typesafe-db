@@ -52,7 +52,7 @@ namespace fp {
         { };
 
         template<std::size_t... Is>
-        struct build_indices_impl<0, Is...> : integer_sequence<std::size_t, Is...>
+        struct build_indices_impl<0, Is...> : mpl::index_sequence<Is...>
         { };
         
         template<std::size_t N>
@@ -72,13 +72,13 @@ namespace fp {
         }
         
         template<typename F, typename T, std::size_t... Is>
-        auto call_with(F&& f, T&& tup, integer_sequence<std::size_t, Is...>, tuplelike_tag) -> ResultOf<Unqualified<F>> {
+        auto call_with(F&& f, T&& tup, mpl::index_sequence<Is...>, tuplelike_tag) -> ResultOf<Unqualified<F>> {
             using std::get;     // enable ADL
             return (fix::forward<F>(f))(get<Is>(fix::forward<T>(tup))...);
         }
 
         template<typename F, typename A, std::size_t... Is>
-        auto call_with(F&& f, A&& arr, integer_sequence<std::size_t, Is...>, arraylike_tag) -> ResultOf<Unqualified<F>> {
+        auto call_with(F&& f, A&& arr, mpl::index_sequence<Is...>, arraylike_tag) -> ResultOf<Unqualified<F>> {
             using std::get;     // enable ADL
             return (fix::forward<F>(f))(get<Is>(fix::forward<A>(arr))...);
         }

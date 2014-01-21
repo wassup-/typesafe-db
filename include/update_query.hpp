@@ -79,86 +79,56 @@ namespace fp {
     constexpr inline update_query<Unqualified<TUpdate>...> update(TUpdate... u) {
         return { u... };
     }
-  
-    template<typename TColumn>
-    constexpr inline impl::update_modifiers::modifier<TColumn, impl::update_modifiers::value_getter<TColumn>> set(TColumn c, typename TColumn::value_type v) {
-        using getter_type = impl::update_modifiers::value_getter<TColumn>;
-        return impl::update_modifiers::modifier<TColumn, getter_type>{ c, getter_type{ c, v} };
-    }
-    
+
     template<
         typename TLeft,
         typename TRight,
-        typename = mpl::enable_if_t<mpl::all_<is_column<TLeft>, is_column<TRight>>>
+        typename = mpl::enable_if_t<is_column<TLeft>>
     >
-    constexpr inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_getter<TRight>> set(TLeft l, TRight r) {
-        using getter_type = impl::update_modifiers::field_getter<TRight>;
-        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type{ l, r } };
+    constexpr inline impl::update_modifiers::modifier<
+                        TLeft,
+                        mpl::conditional_t<
+                            is_column<TRight>,
+                            mpl::identity<impl::update_modifiers::column_getter<TRight>>,
+                            mpl::identity<impl::update_modifiers::value_getter<TLeft>>
+                        >
+    > set(TLeft l, TRight r) {
+        using getter_type = mpl::conditional_t<
+                                is_column<TRight>,
+                                mpl::identity<impl::update_modifiers::column_getter<TRight>>,
+                                mpl::identity<impl::update_modifiers::value_getter<TLeft>>
+                            >;
+        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type(l, r) };
+    }
+
+#define DECLARE_BIN_OP_UPDATE(name, suffix) \
+    template< \
+        typename TLeft, \
+        typename TRight, \
+        typename = mpl::enable_if_t<is_column<TLeft>> \
+    > \
+    constexpr inline impl::update_modifiers::modifier< \
+                        TLeft, \
+                        mpl::conditional_t< \
+                            is_column<TRight>, \
+                            mpl::identity<impl::update_modifiers::column ## suffix <TLeft, TRight>>, \
+                            mpl::identity<impl::update_modifiers::value ## suffix <TLeft>> \
+                        > \
+    > name (TLeft l, TRight r) { \
+        using getter_type = mpl::conditional_t< \
+                                is_column<TRight>, \
+                                mpl::identity<impl::update_modifiers::column ## suffix <TLeft, TRight>>, \
+                                mpl::identity<impl::update_modifiers::value ## suffix <TLeft>> \
+                            >; \
+        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type(l, r) }; \
     }
     
-    template<typename TColumn>
-    constexpr inline impl::update_modifiers::modifier<TColumn, impl::update_modifiers::value_add<TColumn>> add(TColumn c, typename TColumn::value_type v) {
-        using getter_type = impl::update_modifiers::value_add<TColumn>;
-        return impl::update_modifiers::modifier<TColumn, getter_type>{ c, getter_type{ c, v} };
-    }
-    
-    template<
-        typename TLeft,
-        typename TRight,
-        typename = mpl::enable_if_t<mpl::all_<is_column<TLeft>, is_column<TRight>>>
-    >
-    constexpr inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_add<TLeft, TRight>> add(TLeft l, TRight r) {
-        using getter_type = impl::update_modifiers::field_add<TLeft, TRight>;
-        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type{ l, r } };
-    }
-    
-    template<typename TColumn>
-    constexpr inline impl::update_modifiers::modifier<TColumn, impl::update_modifiers::value_sub<TColumn>> sub(TColumn c, typename TColumn::value_type v) {
-        using getter_type = impl::update_modifiers::value_sub<TColumn>;
-        return impl::update_modifiers::modifier<TColumn, getter_type>{ c, getter_type{ c, v} };
-    }
-    
-    template<
-        typename TLeft,
-        typename TRight,
-        typename = mpl::enable_if_t<mpl::all_<is_column<TLeft>, is_column<TRight>>>
-    >
-    constexpr inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_sub<TLeft, TRight>> sub(TLeft l, TRight r) {
-        using getter_type = impl::update_modifiers::field_sub<TLeft, TRight>;
-        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type{ l, r } };
-    }
-    
-    template<typename TColumn>
-    constexpr inline impl::update_modifiers::modifier<TColumn, impl::update_modifiers::value_mul<TColumn>> mul(TColumn c, typename TColumn::value_type v) {
-        using getter_type = impl::update_modifiers::value_mul<TColumn>;
-        return impl::update_modifiers::modifier<TColumn, getter_type>{ c, getter_type{ c, v} };
-    }
-    
-    template<
-        typename TLeft,
-        typename TRight,
-        typename = mpl::enable_if_t<mpl::all_<is_column<TLeft>, is_column<TRight>>>
-    >
-    constexpr inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_mul<TLeft, TRight>> mul(TLeft l, TRight r) {
-        using getter_type = impl::update_modifiers::field_mul<TLeft, TRight>;
-        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type{ l, r } };
-    }
-    
-    template<typename TColumn>
-    constexpr inline impl::update_modifiers::modifier<TColumn, impl::update_modifiers::value_div<TColumn>> div(TColumn c, typename TColumn::value_type v) {
-        using getter_type = impl::update_modifiers::value_div<TColumn>;
-        return impl::update_modifiers::modifier<TColumn, getter_type>{ c, getter_type{ c, v} };
-    }
-    
-    template<
-        typename TLeft,
-        typename TRight,
-        typename = mpl::enable_if_t<mpl::all_<is_column<TLeft>, is_column<TRight>>>
-    >
-    constexpr inline impl::update_modifiers::modifier<TLeft, impl::update_modifiers::field_div<TLeft, TRight>> div(TLeft l, TRight r) {
-        using getter_type = impl::update_modifiers::field_div<TLeft, TRight>;
-        return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type{ l, r } };
-    }
+    DECLARE_BIN_OP_UPDATE(add, _add)
+    DECLARE_BIN_OP_UPDATE(sub, _sub)
+    DECLARE_BIN_OP_UPDATE(mul, _mul)
+    DECLARE_BIN_OP_UPDATE(div, _div)
+
+#undef DECLARE_BIN_OP_UPDATE
 }
 
 #endif

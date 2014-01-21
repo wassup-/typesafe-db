@@ -95,7 +95,7 @@ namespace fp {
         typename Value = typename Column::value_type
     >
     inline const Value& get(const record<Columns...>& r, const Column& col) {
-        return detail::get<const Value&>(r, IndexOfType<Column, Columns...>{});
+        return detail::get<const Value&>(r, mpl::index_of_t<Column, Columns...>{});
     }
 
     template<
@@ -113,7 +113,7 @@ namespace fp {
         typename Value = typename Column::value_type
     >
     inline void set(record<Columns...>& r, const Column& col, const Value& x) {
-        return detail::set(r, x, IndexOfType<Column, Columns...>{});
+        return detail::set(r, x, mpl::index_of_t<Column, Columns...>{});
     }
 }
 

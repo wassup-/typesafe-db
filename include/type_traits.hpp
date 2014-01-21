@@ -5,71 +5,13 @@
 #ifndef TYPE_TRAITS_HPP_
 #define TYPE_TRAITS_HPP_
 
-#include "mpl.hpp"
+#include "mpl/mpl.hpp"
 #include <type_traits>
 
 namespace fp {
 
     template<typename T>
     using Invoke = typename T::type;
-
-    namespace detail {
-
-        template<std::size_t, typename, typename...>
-        struct type_index;
-        template<std::size_t I, typename T>
-        struct type_index<I, T> : mpl::int_<-1> { };
-
-        template<std::size_t I, typename T, typename H, typename... R>
-        struct type_index<I, T, H, R...> : type_index<(I + 1), T, R...> { };
-        template<std::size_t I, typename T, typename... R>
-        struct type_index<I, T, T, R...> : mpl::index_<I> { };
-
-        template<std::size_t, typename T, T, T...>
-        struct value_index;
-        template<std::size_t I, typename T, T V>
-        struct value_index<I, T, V>;
-
-        template<std::size_t I, typename T, T V, T H, T... R>
-        struct value_index<I, T, V, H, R...> : value_index<(I + 1), T, V, R...> { };
-        template<std::size_t I, typename T, T V, T... R>
-        struct value_index<I, T, V, V, R...> : mpl::index_<I> { };
-    }
-
-    template<typename... Ts>
-    struct type_sequence {
-        
-        template<template<typename...> class C>
-        struct as : mpl::identity<C<Ts...>> { };
-
-        template<typename T>
-        struct index_of : detail::type_index<0, T, Ts...> { };
-
-        template<typename T>
-        struct contains : mpl::bool_<(index_of<T>::value >= 0)> { };
-    };
-
-    template<typename T, T... Vs>
-    struct integer_sequence {
-        
-        template<template<T...> class C>
-        struct as : mpl::identity<C<Vs...>> { };
-
-        template<T V>
-        struct index_of : detail::value_index<0, T, V, Vs...> { };
-
-        template<T V>
-        struct contains : mpl::bool_<(index_of<V>::value >= 0)> { };
-    };
-
-    template<std::size_t... Idx>
-    using index_sequence = integer_sequence<std::size_t, Idx...>;
-
-    template<typename T, typename... Ts>
-    using IndexOfType = typename type_sequence<Ts...>::template index_of<T>;
-    
-    template<typename T, T V, T... Vs>
-    using IndexOfValue = typename integer_sequence<T, Vs...>::template index_of<V>;
 
     namespace detail {
 
@@ -82,22 +24,22 @@ namespace fp {
         struct value_indices_impl;
 
         template<typename T, std::size_t... Known, std::size_t I, T V, T H, T... R>
-        struct value_indices_impl<T, index_sequence<Known...>, I, V, H, R...>
-        : value_indices_impl<T, index_sequence<Known...>, (I + 1), V, R...> { };
+        struct value_indices_impl<T, mpl::index_sequence<Known...>, I, V, H, R...>
+        : value_indices_impl<T, mpl::index_sequence<Known...>, (I + 1), V, R...> { };
 
         template<typename T, std::size_t... Known, std::size_t I, T V, T... R>
-        struct value_indices_impl<T, index_sequence<Known...>, I, V, V, R...>
-        : value_indices_impl<T, index_sequence<Known..., I>, (I + 1), V, R...> { };
+        struct value_indices_impl<T, mpl::index_sequence<Known...>, I, V, V, R...>
+        : value_indices_impl<T, mpl::index_sequence<Known..., I>, (I + 1), V, R...> { };
 
         template<typename T, std::size_t... Known, std::size_t I, T V>
-        struct value_indices_impl<T, index_sequence<Known...>, I, V>
-        : mpl::identity<index_sequence<Known...>> { };
+        struct value_indices_impl<T, mpl::index_sequence<Known...>, I, V>
+        : mpl::identity<mpl::index_sequence<Known...>> { };
 
         template<typename T, typename... Ts>
         struct type_indices : value_indices<std::size_t, 1, mpl::is_same<T, Ts>::value...> { };
 
         template<typename T, T V, T... Vs>
-        struct value_indices : value_indices_impl<T, index_sequence<>, 0, V, Vs...> { };
+        struct value_indices : value_indices_impl<T, mpl::index_sequence<>, 0, V, Vs...> { };
     }
 
     template<typename T, typename... Ts>
@@ -264,7 +206,7 @@ namespace fp {
         struct skip_n_types<N, H, T...> : skip_n_types<(N - 1), T...> { };
         
         template<typename... T>
-        struct skip_n_types<0, T...> : mpl::identity<type_sequence<T...>> { };
+        struct skip_n_types<0, T...> : mpl::identity<mpl::type_sequence<T...>> { };
         
         template<typename T, int N, T...>
         struct skip_n_values;
@@ -273,7 +215,7 @@ namespace fp {
         struct skip_n_values<T, N, H, Tail...> : skip_n_values<T, (N - 1), Tail...> { };
         
         template<typename T, int... Tail>
-        struct skip_n_values<T, 0, Tail...> : mpl::identity<integer_sequence<T, Tail...>> { };
+        struct skip_n_values<T, 0, Tail...> : mpl::identity<mpl::integer_sequence<T, Tail...>> { };
     }
     
     template<int N, typename... T>

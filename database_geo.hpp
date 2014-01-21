@@ -33,8 +33,8 @@ namespace geo { namespace db {
         constexpr static fp::column<city, strings::latitude, fp::field<double>> latitude = { };
 
         using primary_key = mpl::identity<fp::Unqualified<decltype(id)>>;
-        using unique_keys = fp::type_sequence<fp::Unqualified<decltype(name)>>;
-        using index_keys = fp::type_sequence<fp::Unqualified<decltype(code)>>;
+        using unique_keys = mpl::type_sequence<fp::Unqualified<decltype(name)>>;
+        using index_keys = mpl::type_sequence<fp::Unqualified<decltype(code)>>;
     };
 
     constexpr fp::table<city, strings::city> city::table;
