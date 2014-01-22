@@ -2,7 +2,7 @@
 #define MPL_ANY_HPP_
 
 #include "bool.hpp"
-#include "eval_if.hpp"
+#include "conditional.hpp"
 #include "identity.hpp"
 
 namespace mpl {
@@ -10,9 +10,9 @@ namespace mpl {
 	namespace detail {
 
 		template<typename H, typename... T>
-		struct any_of : eval_if<H, true_, any_of<T...>> { };
+		struct any_of : conditional<H, true_, any_of<T...>> { };
 		template<typename H>
-		struct any_of<H> : eval_if<H, true_, false_> { };
+		struct any_of<H> : conditional<H, true_, false_> { };
 	}
 
 	template<typename... T>

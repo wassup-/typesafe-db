@@ -2,7 +2,7 @@
 #define MPL_NONE_HPP_
 
 #include "bool.hpp"
-#include "eval_if.hpp"
+#include "conditional.hpp"
 #include "identity.hpp"
 
 namespace mpl {
@@ -10,9 +10,9 @@ namespace mpl {
 	namespace detail {
 
 		template<typename H, typename... T>
-		struct none_of : eval_if<H, false_, none_of<T...>> { };
+		struct none_of : conditional<H, false_, none_of<T...>> { };
 		template<typename H>
-		struct none_of<H> : eval_if<H, false_, true_> { };
+		struct none_of<H> : conditional<H, false_, true_> { };
 	}
 
 	template<typename... T>
