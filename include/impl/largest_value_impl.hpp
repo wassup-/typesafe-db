@@ -8,7 +8,7 @@
 #include <type_traits>
 
 namespace fp { namespace impl {
-    
+
     template<typename T, T, T...>
     struct largest_value_impl;
 
@@ -16,7 +16,7 @@ namespace fp { namespace impl {
     struct largest_value_impl<S, H, R...> : largest_value_impl<T, ((S >= H) ? S : H), R...> { };
 
     template<typename T, T S>
-    struct largest_value_impl<S> : std::integral_constant<T, S> { };
+    struct largest_value_impl<S> : mpl::const_<T, S> { };
 } }
 
 #endif

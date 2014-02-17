@@ -15,7 +15,7 @@
 #include <string>               // for std::string, std::to_string
 
 namespace fp {
-    
+
     template<typename...>
     struct insert_query;
 
@@ -28,7 +28,7 @@ namespace fp {
     template<typename... TColumns>
     struct insert_query {
     public:
-        
+
         template<typename TRecord>
         struct result_of : mpl::identity<Invoke<typename TRecord::template rebind<TColumns...>>> { };
     public:

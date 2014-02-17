@@ -16,13 +16,13 @@ namespace fp { namespace impl {
     struct is_contained_type_impl<T, H, Ts...> : is_contained_type_impl<T, Ts...> { };
 
     template<typename T, typename... Ts>
-    struct is_contained_type_impl<T, T, Ts...> : std::true_type { };
+    struct is_contained_type_impl<T, T, Ts...> : mpl::true_ { };
 
     template<typename T, typename H>
-    struct is_contained_type_impl<T, H> : std::false_type { };
+    struct is_contained_type_impl<T, H> : mpl::false_ { };
 
     template<typename T>
-    struct is_contained_type_impl<T, T> : std::true_type { };
+    struct is_contained_type_impl<T, T> : mpl::true_ { };
 } }
 
 #endif

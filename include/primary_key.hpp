@@ -7,56 +7,70 @@
 
 namespace fp {
 
-	template<typename Column>
-	struct primary_key {
+	struct unique_key { };
+	struct primary_key { };
+	struct index_key { };
+
+	template<typename Column, typename Tag>
+	struct key {
 	public:
-		constexpr primary_key(const Column& column) noexcept
-		: column_(column)
+		constexpr key(const char* const name) noexcept
+		: name_(name)
 		{ }
 
-	public:
-		template<typename U>
-		constexpr friend bool operator==(const primary_key& k, const U& c) noexcept {
-			return std::is_same<Column, U>::value;
-		}
-
 	private:
-		const Column& column_;
+		const char* const name_;
 	};
 
-	template<typename Column>
-	struct unique_key {
+	template<typename LocalKey, typename RemoteKey>
+	struct keyref {
 	public:
-		constexpr unique_key(const Column& column) noexcept
-		: column_(column)
+		constexpr keyref(const char* const name) noexcept
+		: name_(name)
 		{ }
 
-	public:
-		template<typename U>
-		constexpr friend bool operator==(const unique_key& k, const U& c) noexcept {
-			return std::is_same<Column, U>::value;
-		}
-
 	private:
-		const Column& column_;
+		const char* const name_;
 	};
 
-	template<typename Column>
-	struct index_key {
-	public:
-		constexpr index_key(const Column& column) noexcept
-		: column_(column)
-		{ }
+	namespace detail {
 
-	public:
-		template<typename U>
-		constexpr friend bool operator==(const index_key& k, const U& c) noexcept {
-			return std::is_same<Column, U>::value;
-		}
+		template<typename Key>
+		constexpr static bool is_primary_key(const Key& key)
+		{ return false; }
 
-	private:
-		const Column& column_;
-	};
+		template<typename Column>
+		constexpr static bool is_primary_key(const key<Column, primary_key>& key)
+		{ return true; }
+
+		template<typename Key>
+		constexpr static bool is_unique_key(const Key& key)
+		{ return is_primary_key(key); }
+
+		template<typename Column>
+		constexpr static bool is_unique_key(const key<Column, unique_key>& key)
+		{ return true; }
+
+		template<typename Key>
+		constexpr static bool is_index_key(const Key& key)
+		{ return is_unique_key(key); }
+
+		template<typename Column>
+		constexpr static bool is_index_key(const key<Column, index_key>& key)
+		{ return true; }
+	}
+
+	template<typename Key>
+	constexpr static bool is_primary_key(const Key& key)
+	{ return detail::is_primary_key(key); }
+
+	template<typename Key>
+	constexpr static bool is_unique_key(const Key& key)
+	{ return detail::is_unique_key(key); }
+
+	template<typename Key>
+	constexpr static bool is_index_key(const Key& key)
+	{ return detail::is_index_key(key); }
 }
 
 #endif

@@ -8,7 +8,7 @@
 #include "../type_traits.hpp"
 
 namespace fp { namespace impl {
-    
+
     template<typename T, T, T...>
     struct is_contained_value_impl;
 
@@ -16,13 +16,13 @@ namespace fp { namespace impl {
     struct is_contained_value_impl<T, I, H, R...> : is_contained_value_impl<T, I, R...> { };
 
     template<typename T, T I, T... R>
-    struct is_contained_value_impl<T, I, I, R...> : std::true_type { };
+    struct is_contained_value_impl<T, I, I, R...> : mpl::true_ { };
 
     template<typename T, T I, T H>
-    struct is_contained_value_impl<T, I, H> : std::false_type { };
+    struct is_contained_value_impl<T, I, H> : mpl::false_ { };
 
     template<typename T, T I>
-    struct is_contained_value_impl<T, I, I> : std::true_type { };
+    struct is_contained_value_impl<T, I, I> : mpl::true_ { };
 } }
 
 #endif

@@ -18,7 +18,7 @@
 #include <utility>              // for fix::forward
 
 namespace fp {
-    
+
     template<typename, typename>
     struct ordered_query;
 
@@ -41,10 +41,12 @@ namespace fp {
     public:
         template<typename TRecord>
         struct result_of : mpl::identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
-    
+
     public:
         ordered_query(TQuery q, TColumn c, ordering_e o)
-        : _query(q), _column(c), _order(o)
+        : _query(q)
+        , _column(c)
+        , _order(o)
         { }
 
         friend void swap(ordered_query& l, ordered_query& r) noexcept {

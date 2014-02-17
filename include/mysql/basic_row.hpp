@@ -24,11 +24,13 @@ namespace fp { namespace mysql {
     public:
 
         constexpr basic_row() noexcept
-        : _data(nullptr), _fields(0)
+        : _data(nullptr)
+        , _fields(0)
         { }
 
         constexpr basic_row(::MYSQL_ROW d, size_type fields) noexcept
-        : _data(d), _fields(fields)
+        : _data(d)
+        , _fields(fields)
         { }
 
         friend void swap(basic_row& l, basic_row& r) noexcept {
@@ -54,6 +56,12 @@ namespace fp { namespace mysql {
             return lexical_cast<T>(_data[I]);
         }
     };
+
+    template<std::size_t Idx, typename T>
+    constexpr static T get(const basic_row& row) {
+        return row.template get<Idx, T>();
+    }
+
 } }
 
 #endif

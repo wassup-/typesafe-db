@@ -21,14 +21,14 @@ namespace fp {
 
     template<typename TQuery>
     struct is_query<limit_query<TQuery> > : is_query<TQuery> { };
-    
+
     template<typename TQuery>
     struct is_limit_query<limit_query<TQuery> > : mpl::true_ { };
 
     template<typename TQuery>
     struct limit_query {
     public:
-        
+
         template<typename TRecord>
         struct result_of : mpl::identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
     protected:
@@ -37,7 +37,8 @@ namespace fp {
     public:
 
         constexpr limit_query(TQuery q, int l)
-        : _query(q), _limit(l)
+        : _query(q)
+        , _limit(l)
         { }
 
         friend void swap(limit_query& l, limit_query& r) noexcept {

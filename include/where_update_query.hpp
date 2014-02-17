@@ -15,16 +15,16 @@
 #include <string>               // for std::string, std::to_string
 
 namespace fp {
-    
+
     template<typename /* Update */, typename /* Where */>
     struct where_update_query;
 
     template<typename TUpdate, typename TWhere>
     struct is_query<where_update_query<TUpdate, TWhere> > : mpl::all_<is_update_query<TUpdate>, is_where_query<TWhere>> { };
-    
+
     template<typename TUpdate, typename TWhere>
     struct is_update_query<where_update_query<TUpdate, TWhere> > : is_update_query<TUpdate> { };
-    
+
     template<typename TUpdate, typename TWhere>
     struct is_where_query<where_update_query<TUpdate, TWhere> > : is_where_query<TWhere> { };
 
@@ -70,7 +70,7 @@ namespace fp {
             }
             return ret;
         }
-        
+
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
@@ -88,7 +88,7 @@ namespace fp {
         TUpdate update_;
         TWhere where_;
     };
-    
+
     template<
         typename TUpdate,
         typename TWhere,

@@ -8,7 +8,7 @@
 #include <type_traits>
 
 namespace fp { namespace impl {
-    
+
     template<typename...>
     struct largest_type_impl;
 
@@ -25,7 +25,7 @@ namespace fp { namespace impl {
     struct largest_type_impl<H, T...> : _max<sizeof(H), largest_type_impl<T...>::size> { };
 
     template<typename T>
-    struct largest_type_impl<T> : std::integral_constant<std::size_t, sizeof(T)> { };
+    struct largest_type_impl<T> : mpl::index_<sizeof(T)> { };
 } }
 
 #endif

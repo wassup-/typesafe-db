@@ -26,7 +26,7 @@ namespace mpl {
 
     template<typename T, T... Vs>
     struct integer_sequence {
-        
+
         template<template<T...> class C>
         struct as : identity<C<Vs...>> { };
 
@@ -38,7 +38,7 @@ namespace mpl {
     };
 
     template<std::size_t... Idx>
-    using index_sequence = integer_sequence<std::size_t, Idx...>;
+    using indices_ = integer_sequence<std::size_t, Idx...>;
 
     template<typename T, T V, T... Vs>
     using index_of_v = typename integer_sequence<T, Vs...>::template index_of<V>;

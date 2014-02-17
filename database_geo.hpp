@@ -5,6 +5,8 @@
 #include "include/field.hpp"
 #include "include/primary_key.hpp"
 #include "include/table.hpp"
+#include "include/mpl/identity.hpp"
+#include "include/mpl/type_sequence.hpp"
 
 namespace geo { namespace db {
 

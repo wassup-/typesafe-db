@@ -10,16 +10,10 @@
 
 namespace fp { namespace mysql {
 
-    namespace impl {
-
-        template<typename>
-        struct result_iterator_impl;
-    }
-
     template<typename Provider, typename T>
     struct result_iterator : std::iterator<std::input_iterator_tag, typename std::remove_pointer<T>::type> {
     public:
-        using this_type = result_iterator<Provider, T>;
+        using this_type = result_iterator;
         using traits_type = typename std::iterator_traits<T>;
 
         using value_type = typename traits_type::value_type;
@@ -33,7 +27,8 @@ namespace fp { namespace mysql {
     public:
 
         result_iterator(Provider& self, std::size_t index)
-        : self_(&self), index_(index)
+        : self_(&self)
+        , index_(index)
         { }
 
         friend void swap(result_iterator& l, result_iterator& r) {

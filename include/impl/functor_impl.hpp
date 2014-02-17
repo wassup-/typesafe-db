@@ -38,7 +38,8 @@ namespace fp { namespace impl {
     public:
 
         functor_with_args(Fn fn, Arg... arg)
-        : m_fn(fn), m_arg(arg...)
+        : m_fn(fn)
+        , m_arg(arg...)
         { }
 
         void run() const {
@@ -58,7 +59,8 @@ namespace fp { namespace impl {
     public:
 
         member_functor(void(C::*fn)(), C* obj)
-        : m_fn(fn), m_obj(obj)
+        : m_fn(fn)
+        , m_obj(obj)
         { }
 
         void run() const {
@@ -79,7 +81,9 @@ namespace fp { namespace impl {
     public:
 
         member_functor_with_args(void(C::*fn)(Arg...), C* obj, Arg... arg)
-        : m_fn(fn), m_obj(obj), m_arg(arg...)
+        : m_fn(fn)
+        , m_obj(obj)
+        , m_arg(arg...)
         { }
 
         void run() const {

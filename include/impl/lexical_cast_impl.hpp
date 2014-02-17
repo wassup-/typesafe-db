@@ -13,12 +13,12 @@
 namespace fp { namespace impl {
 
     template<typename Char, std::size_t N>
-    typename std::enable_if<stringutils::is_char_type<Char>::value, std::basic_string<Char>>::type to_string(const Char(&s)[N]) {
+    mpl::enable_if_t<stringutils::is_char_type<Char>, std::basic_string<Char>> to_string(const Char(&s)[N]) {
         return { &s[0], N };
     }
 
     template<typename Char>
-    typename std::enable_if<stringutils::is_char_type<Char>::value, std::basic_string<Char>>::type to_string(const Char* s) {
+    mpl::enable_if_t<stringutils::is_char_type<Char>, std::basic_string<Char>> to_string(const Char* s) {
         return { s };
     }
 

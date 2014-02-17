@@ -15,9 +15,10 @@
 
 #include "database_geo.hpp"             // for geo::db
 
+constexpr static const char GEO_DB[] = "shared";
 constexpr static const char GEO_USER[] = "shared_read";
 constexpr static const char GEO_PASSWD[] = "shared_read";
-constexpr static const char GEO_DB[] = "shared";
+
 
 constexpr auto sq1 = fp::select(
     geo::db::city::alpha,
@@ -37,14 +38,12 @@ int main(int argc, char ** argv) {
     using std::get;
     using std::to_string;
 
-    fp::mysql::basic_engine engine(0, GEO_USER, GEO_PASSWD, GEO_DB);
-    
-    std::cout << "id is primary key?" << geo::db::city::id.is_primary_key() << std::endl;
-    std::cout << "id is unique key?" << geo::db::city::id.is_unique_key() << std::endl;
-    std::cout << "id is index key?" << geo::db::city::id.is_index_key() << std::endl;
-    std::cout << "name is primary key?" << geo::db::city::name.is_primary_key() << std::endl;
-    std::cout << "name is unique key?" << geo::db::city::name.is_unique_key() << std::endl;
-    std::cout << "name is index key?" << geo::db::city::name.is_index_key() << std::endl;
+    const char * db_host = nullptr;
+    if(argc > 1) {
+        db_host = argv[1];
+    }
+
+    fp::mysql::basic_engine engine(db_host, GEO_USER, GEO_PASSWD, GEO_DB);
 
     auto qry = fp::limit(fp::order(sq1 + wq1, geo::db::city::alpha, fp::ascending), 10);
     auto res = fp::query(engine, qry);

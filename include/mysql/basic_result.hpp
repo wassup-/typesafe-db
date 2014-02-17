@@ -46,13 +46,13 @@ namespace fp { namespace mysql {
         size_type rows() const {
             return ::mysql_num_rows(self_.get());
         }
-        
+
         size_type cols() const {
             return ::mysql_num_fields(self_.get());
         }
 
         row_type fetch_row() const {
-            return row_type{ ::mysql_fetch_row(self_.get()), ::mysql_num_fields(self_.get()) };
+            return row_type{ ::mysql_fetch_row(self_.get()), cols() };
         }
 
         iterator begin() {

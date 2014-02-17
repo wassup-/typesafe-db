@@ -14,7 +14,7 @@
 #include <mysql/mysql.h>        // for MYSQL
 
 namespace fp { namespace mysql {
-    
+
     class basic_context;
     class basic_engine;
     class basic_result;
@@ -37,7 +37,7 @@ namespace fp { namespace mysql {
             return _context.get();
         }
 
-        basic_context & operator=(native_handle* const ctx) {
+        basic_context& operator=(native_handle* const ctx) {
             if (_context.get() != ctx) {
                 _context.reset(ctx);
             }
@@ -59,7 +59,7 @@ namespace fp { namespace mysql {
         }
 
         static basic_context * create() {
-            native_handle * const ctx = ::mysql_init(nullptr);
+            native_handle* const ctx = ::mysql_init(nullptr);
             return (ctx) ? new basic_context(ctx) : 0;
         }
 
@@ -69,6 +69,10 @@ namespace fp { namespace mysql {
 
         operator native_handle*() const {
             return _context.get();
+        }
+
+        int query(const std::string& qry) {
+            return ::mysql_query(_context.get(), qry.c_str());
         }
     };
 } }

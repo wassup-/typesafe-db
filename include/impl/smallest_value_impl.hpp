@@ -8,7 +8,7 @@
 #include <type_traits>
 
 namespace fp { namespace impl {
-    
+
     template<typename T, T, T...>
     struct smallest_value_impl;
 
@@ -16,7 +16,7 @@ namespace fp { namespace impl {
     struct smallest_value_impl<T, S, H, R...> : smallest_value_impl<T, (S <= H) ? S : H, R...> { };
 
     template<typename T, T H>
-    struct smallest_value_impl<T, H> : std::integral_constant<T, H> { };
+    struct smallest_value_impl<T, H> : mpl::const_<T, H> { };
 } }
 
 #endif

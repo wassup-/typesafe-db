@@ -18,10 +18,10 @@ namespace fp {
 
     template<typename, typename>
     struct where_select_query;
-    
+
     template<typename TSelect, typename TWhere>
     struct is_select_query<where_select_query<TSelect, TWhere> > : is_select_query<TSelect> { };
-    
+
     template<typename TSelect, typename TWhere>
     struct is_where_query<where_select_query<TSelect, TWhere> > : is_where_query<TWhere> { };
 
@@ -31,7 +31,7 @@ namespace fp {
     template<typename TSelect, typename TWhere>
     struct where_select_query {
     public:
-        
+
         template<typename TRecord>
         struct result_of : mpl::identity<Invoke<typename TSelect::template result_of<TRecord>>> { };
     protected:
@@ -40,7 +40,8 @@ namespace fp {
     public:
 
         constexpr where_select_query(TSelect s, TWhere w)
-        : _select(s), _where(w)
+        : _select(s)
+        , _where(w)
         { }
 
         friend void swap(where_select_query& l, where_select_query& r) noexcept {

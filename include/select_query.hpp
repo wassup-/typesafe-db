@@ -16,10 +16,10 @@
 #include <string>       // for std::string, std::to_string
 
 namespace fp {
-    
+
     template<typename...>
     struct select_query;
-    
+
     template<typename... TColumns>
     struct is_select_query<select_query<TColumns...> > : mpl::all_<is_column<TColumns>...> { };
 
@@ -29,7 +29,7 @@ namespace fp {
     template<typename... TColumns>
     struct select_query {
     public:
-        
+
         template<typename TRecord>
         struct result_of : TRecord::template rebind<TColumns...> { };
     public:
@@ -52,7 +52,7 @@ namespace fp {
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type select(const TContainer& recs, const select_query& q) {
-            using TReturnContainer = typename TRecord::template rebind<Invoke<result_of<TRecord>>>::type;
+            using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
             TReturnContainer ret;
             ret.reserve(recs.size());
             for(const TRecord& cur : recs) {
@@ -60,7 +60,7 @@ namespace fp {
             }
             return ret;
         }
-        
+
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
@@ -76,7 +76,7 @@ namespace fp {
     private:
         fp::ce_tuple<TColumns...> _columns;
     };
-    
+
     template<
         typename... TColumns,
         typename = mpl::enable_if_t<mpl::all_<is_column<TColumns>...>>

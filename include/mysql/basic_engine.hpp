@@ -10,6 +10,7 @@
 #include "basic_context.hpp"
 #include "basic_result.hpp"
 #include "basic_row.hpp"
+#include "../assert.hpp"
 #include "../db_engine.hpp"     // for fp::is_engine
 #include "../forward.hpp"       // for fix::forward
 #include "../is_query.hpp"      // for fp::is_query
@@ -39,18 +40,18 @@ namespace fp {
             basic_engine(const char* host, const char* name, const char* pass)
             : _context(basic_context::create()) {
                 if (_context) {
-                    ::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0);
+                    MYSQL* res = ::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0);
+                    FP_ASSERT(res, "Unable to connect to MySQL server");
+                    *_context = res;
                 }
             }
 
             basic_engine(const char* host, const char* name, const char* pass, const char* db)
             : _context(basic_context::create()) {
                 if (_context) {
-                    if (::mysql_real_connect(_context->handle(), host, name, pass, 0, 0, 0, 0)) {
-                        if (db) {
-                            ::mysql_select_db(_context->handle(), db);
-                        }
-                    }
+                    MYSQL* res = ::mysql_real_connect(_context->handle(), host, name, pass, db, 0, 0, 0);
+                    FP_ASSERT(res, "Unable to connect to MySQL server");
+                    *_context = res;
                 }
             }
 
@@ -80,7 +81,9 @@ namespace fp {
             Container query(TQuery&& q) {
                 using std::to_string; using std::begin; using std::end;
                 const std::string qry = to_string(fix::forward<TQuery>(q));
-                ::mysql_query(_context->handle(), qry.c_str());
+                if(0 != _context->query(qry.c_str())) {
+                    throw std::runtime_error("Could not query database");
+                }
                 mysql::basic_result res(*_context);
                 if(res) {
                     Container ret;

@@ -20,26 +20,27 @@ namespace fp { namespace mysql { namespace impl {
 
     template<int I, typename TRecord>
     struct make_record_impl {
-        
+
         template<typename... TArg>
-        static TRecord make(const mysql::basic_row& r, TArg&&... arg) {
-            return make_record_impl<(I - 1), TRecord>::make(r, r.template get<(I - 1), typename TRecord::template nth_type<(I - 1)>::type::value_type>(), fix::forward<TArg>(arg)...);
+        constexpr static TRecord make(const mysql::basic_row& r, TArg&&... arg) {
+            using value_type = typename TRecord::template nth_type<(I - 1)>::type::value_type;
+            return make_record_impl<(I - 1), TRecord>::make(r, get<(I - 1), value_type>(r), fix::forward<TArg>(arg)...);
         }
     };
 
     template<typename TRecord>
     struct make_record_impl<0, TRecord> {
-        
+
         template<typename... TArg>
-        static TRecord make(const mysql::basic_row& r, TArg&&... arg) {
+        constexpr static TRecord make(const mysql::basic_row& r, TArg&&... arg) {
             return { fix::forward<TArg>(arg)... };
         }
     };
 
     template<typename TRecord>
     struct make_record {
-        
-        static TRecord make(const mysql::basic_row& r) {
+
+        constexpr static TRecord make(const mysql::basic_row& r) {
             return make_record_impl<TRecord::size(), TRecord>::make(r);
         }
     };

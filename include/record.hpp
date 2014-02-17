@@ -66,7 +66,7 @@ namespace fp {
         friend const typename Invoke<nth_type<Idx>>::value_type& get(const record& r) {
             return r.template get<Idx>();
         }
-        
+
     private:
         std::tuple<typename Columns::value_type...> values_;
     };
@@ -92,7 +92,8 @@ namespace fp {
     template<
         typename... Columns,
         typename Column,
-        typename Value = typename Column::value_type
+        typename Value = typename Column::value_type,
+        typename = mpl::enable_if_t<is_column<Column>>
     >
     inline const Value& get(const record<Columns...>& r, const Column& col) {
         return detail::get<const Value&>(r, mpl::index_of_t<Column, Columns...>{});
@@ -110,7 +111,8 @@ namespace fp {
     template<
         typename... Columns,
         typename Column,
-        typename Value = typename Column::value_type
+        typename Value = typename Column::value_type,
+        typename = mpl::enable_if_t<is_column<Column>>
     >
     inline void set(record<Columns...>& r, const Column& col, const Value& x) {
         return detail::set(r, x, mpl::index_of_t<Column, Columns...>{});

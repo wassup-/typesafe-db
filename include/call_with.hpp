@@ -46,39 +46,39 @@ namespace fp {
             using tag = arraylike_tag;
             constexpr static std::size_t size = Sz;
         };
-        
+
         template<std::size_t N, std::size_t... Is>
         struct build_indices_impl : build_indices_impl<(N - 1), (N - 1), Is...>
         { };
 
         template<std::size_t... Is>
-        struct build_indices_impl<0, Is...> : mpl::index_sequence<Is...>
+        struct build_indices_impl<0, Is...> : mpl::indices_<Is...>
         { };
-        
+
         template<std::size_t N>
         struct build_indices : build_indices_impl<N>
         { };
-        
+
         template<std::size_t I, typename T, std::size_t Sz>
         constexpr T& get(T(&arr)[Sz]) {
             static_assert((I < Sz), "Index out of bounds");
             return arr[I];
         }
-        
+
         template<std::size_t I, typename T, std::size_t Sz>
         constexpr const T& get(const T(&arr)[Sz]) {
             static_assert((I < Sz), "Index out of bounds");
             return arr[I];
         }
-        
+
         template<typename F, typename T, std::size_t... Is>
-        auto call_with(F&& f, T&& tup, mpl::index_sequence<Is...>, tuplelike_tag) -> ResultOf<Unqualified<F>> {
+        auto call_with(F&& f, T&& tup, mpl::indices_<Is...>, tuplelike_tag) -> ResultOf<Unqualified<F>> {
             using std::get;     // enable ADL
             return (fix::forward<F>(f))(get<Is>(fix::forward<T>(tup))...);
         }
 
         template<typename F, typename A, std::size_t... Is>
-        auto call_with(F&& f, A&& arr, mpl::index_sequence<Is...>, arraylike_tag) -> ResultOf<Unqualified<F>> {
+        auto call_with(F&& f, A&& arr, mpl::indices_<Is...>, arraylike_tag) -> ResultOf<Unqualified<F>> {
             using std::get;     // enable ADL
             return (fix::forward<F>(f))(get<Is>(fix::forward<A>(arr))...);
         }
@@ -97,7 +97,7 @@ namespace fp {
         template<typename T>
         struct object_creator {
         public:
-            
+
             template<typename... Ts>
             T operator()(Ts&&... ts) const {
                 return T(fix::forward<Ts>(ts)...);
@@ -125,7 +125,7 @@ namespace fp {
             Fn _fn;
             C* const _obj;
         };
-        
+
         template<typename Ret, typename C, typename... Arg>
         struct member_fn_caller<Ret(C::*)(Arg...) const> {
         public:
@@ -145,7 +145,7 @@ namespace fp {
             const C* const _obj;
         };
     }
-    
+
     template<typename T, typename Cont>
     inline T call_constructor(Cont&& cont) {
         return call_with(detail::object_creator<T>(), fix::forward<Cont>(cont));
@@ -155,7 +155,7 @@ namespace fp {
     inline auto call_function(F&& f, Cont&& cont) -> ResultOf<Unqualified<F>> {
         return call_with(fix::forward<F>(f), fix::forward<Cont>(cont));
     }
-    
+
     template<typename F, typename C, typename Cont>
     inline auto call_function(F&& f, C * obj, Cont&& cont) -> ResultOf<Unqualified<F>> {
         return call_with(detail::member_fn_caller<Unqualified<F>>(fix::forward<F>(f), obj), fix::forward<Cont>(cont));
