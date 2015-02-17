@@ -7,27 +7,33 @@
 
 #include "../unique_types.hpp"
 
-namespace fp {
-    template<typename...>
-    struct select_query;
+namespace fp
+{
 
-    namespace impl {
-        template<typename...>
-        struct query_combiner_impl;
+template<typename...>
+struct select_query;
 
-        template<typename>
-        struct make_select_query;
+namespace impl
+{
 
-        template<typename... TFields>
-        struct make_select_query<mpl::type_sequence<TFields...> > : mpl::identity<select_query<TFields...>> { };
+template<typename...>
+struct query_combiner_impl;
 
-        template<typename... TFields>
-        struct query_combiner_impl {
+template<typename>
+struct make_select_query;
 
-            struct normal : mpl::identity<select_query<TFields...>> { };
-            struct unique : mpl::identity<Invoke<make_select_query<Invoke<unique_types<TFields...>>>>> { };
-        };
-    }
+template<typename... TFields>
+struct make_select_query<mpl::type_sequence<TFields...> > : mpl::identity<select_query<TFields...>> { };
+
+template<typename... TFields>
+struct query_combiner_impl
+{
+  struct normal : mpl::identity<select_query<TFields...>> { };
+  struct unique : mpl::identity<Invoke<make_select_query<Invoke<unique_types<TFields...>>>>> { };
+};
+
+}
+
 }
 
 #endif

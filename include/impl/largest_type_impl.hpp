@@ -7,25 +7,34 @@
 
 #include <type_traits>
 
-namespace fp { namespace impl {
+namespace fp
+{
 
-    template<typename...>
-    struct largest_type_impl;
+namespace impl
+{
 
-    namespace {
+template<typename...>
+struct largest_type_impl;
 
-        template<std::size_t L, std::size_t R>
-        struct _max : std::integral_constant<std::size_t, (L < R) ? R : L> { };
+namespace
+{
 
-        template<std::size_t L, std::size_t R>
-        struct _min : std::integral_constant<std::size_t, (L < R) ? L : R> { };
-    }
+template<std::size_t L, std::size_t R>
+struct _max : std::integral_constant<std::size_t, (L < R) ? R : L> { };
 
-    template<typename H, typename... T>
-    struct largest_type_impl<H, T...> : _max<sizeof(H), largest_type_impl<T...>::size> { };
+template<std::size_t L, std::size_t R>
+struct _min : std::integral_constant<std::size_t, (L < R) ? L : R> { };
 
-    template<typename T>
-    struct largest_type_impl<T> : mpl::index_<sizeof(T)> { };
-} }
+}
+
+template<typename H, typename... T>
+struct largest_type_impl<H, T...> : _max<sizeof(H), largest_type_impl<T...>::size> { };
+
+template<typename T>
+struct largest_type_impl<T> : mpl::index_<sizeof(T)> { };
+
+}
+
+}
 
 #endif

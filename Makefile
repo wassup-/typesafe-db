@@ -15,7 +15,7 @@ CXXFLAGS_DEBUG 	= -c -std=c++11 -Wall -Werror -pedantic-errors -g
 
 # Directories
 BINDIR 		= bin/
-SRCDIR 		=	
+SRCDIR 		=
 
 DIR_GUARD 	= @mkdir -p $(@D)
 
@@ -23,16 +23,7 @@ DIR_GUARD 	= @mkdir -p $(@D)
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 
-FILES = src/core/impl/linux/mutex_impl.cpp \
-		src/core/impl/linux/semaphore_impl.cpp \
-		src/core/impl/linux/condition_impl.cpp \
-		src/core/impl/linux/thread_impl.cpp \
-		src/core/mutex.cpp \
-		src/core/semaphore.cpp \
-		src/core/condition.cpp \
-		src/core/thread.cpp \
-		src/core/threadpool.cpp \
-		example.cpp
+FILES = example.cpp
 
 SOURCES	= $(SRCDIR)$(subst $(SPACE), $(SRCDIR),$(FILES))
 OBJECTS	= $(subst .cpp,.o,$(BINDIR)$(subst $(SPACE), $(BINDIR),$(FILES)))

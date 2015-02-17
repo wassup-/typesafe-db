@@ -7,22 +7,29 @@
 
 #include "../type_traits.hpp"
 
-namespace fp { namespace impl {
+namespace fp
+{
 
-    template<typename, typename...>
-    struct is_contained_type_impl;
+namespace impl
+{
 
-    template<typename T, typename H, typename... Ts>
-    struct is_contained_type_impl<T, H, Ts...> : is_contained_type_impl<T, Ts...> { };
+template<typename, typename...>
+struct is_contained_type_impl;
 
-    template<typename T, typename... Ts>
-    struct is_contained_type_impl<T, T, Ts...> : mpl::true_ { };
+template<typename T, typename H, typename... Ts>
+struct is_contained_type_impl<T, H, Ts...> : is_contained_type_impl<T, Ts...> { };
 
-    template<typename T, typename H>
-    struct is_contained_type_impl<T, H> : mpl::false_ { };
+template<typename T, typename... Ts>
+struct is_contained_type_impl<T, T, Ts...> : mpl::true_ { };
 
-    template<typename T>
-    struct is_contained_type_impl<T, T> : mpl::true_ { };
-} }
+template<typename T, typename H>
+struct is_contained_type_impl<T, H> : mpl::false_ { };
+
+template<typename T>
+struct is_contained_type_impl<T, T> : mpl::true_ { };
+
+}
+
+}
 
 #endif

@@ -7,16 +7,23 @@
 
 #include <type_traits>
 
-namespace fp { namespace impl {
+namespace fp
+{
 
-    template<typename T, T, T...>
-    struct smallest_value_impl;
+namespace impl
+{
 
-    template<typename T, T S, T H, T... R>
-    struct smallest_value_impl<T, S, H, R...> : smallest_value_impl<T, (S <= H) ? S : H, R...> { };
+template<typename T, T, T...>
+struct smallest_value_impl;
 
-    template<typename T, T H>
-    struct smallest_value_impl<T, H> : mpl::const_<T, H> { };
-} }
+template<typename T, T S, T H, T... R>
+struct smallest_value_impl<T, S, H, R...> : smallest_value_impl<T, (S <= H) ? S : H, R...> { };
+
+template<typename T, T H>
+struct smallest_value_impl<T, H> : mpl::const_<T, H> { };
+
+}
+
+}
 
 #endif

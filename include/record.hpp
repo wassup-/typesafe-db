@@ -21,6 +21,15 @@ namespace fp {
     template<typename... TColumns>
     struct is_record<record<TColumns...> > : mpl::all_<is_column<TColumns>...> { };
 
+    template<>
+    struct record<>
+    {
+        using this_type = record;
+
+        template<typename... TOther>
+        struct rebind : mpl::identity<record<TOther...>> { };
+    };
+
     template<typename... Columns>
     struct record {
     public:

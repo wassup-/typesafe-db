@@ -3,10 +3,12 @@
 
 #include "const.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	template<std::size_t I>
-	using index_ = const_<std::size_t, I>;
+template<std::size_t I>
+using index_ = const_<std::size_t, I>;
+
 }
 
 #endif

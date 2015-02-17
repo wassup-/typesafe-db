@@ -10,34 +10,46 @@
 
 #include <functional>   // for std::binary_function
 
-namespace fp { namespace impl { namespace ordered_query {
-    
-    constexpr static const char* ORDERINGS[] = { "ASC", "DESC" };
+namespace fp
+{
+namespace impl
+{
 
-    template<
-        typename TRecord,
-        typename TField,
-        typename = mpl::enable_if_t<is_record<TRecord>>
-    >
-    struct ascending_sorter : std::binary_function<const TRecord&, const TRecord&, bool> {
+namespace ordered_query
+{
 
-        bool operator()(const TRecord& l, const TRecord& r) const {
-            return (get<TField>(l) <= get<TField>(r));
-        }
-    };
+constexpr static const char* ORDERINGS[] = { "ASC", "DESC" };
 
-    template<
-        typename TRecord,
-        typename TField,
-        typename = mpl::enable_if_t<is_record<TRecord>>
-    >
-    struct descending_sorter : std::binary_function<const TRecord&, const TRecord&, bool> {
+template<
+typename TRecord,
+typename TField,
+typename = mpl::enable_if_t<is_record<TRecord>>
+>
+struct ascending_sorter : std::binary_function<const TRecord&, const TRecord&, bool>
+{
+  bool operator()(const TRecord& l, const TRecord& r) const
+  {
+    return (get<TField>(l) <= get<TField>(r));
+  }
+};
 
-        bool operator()(const TRecord& l, const TRecord& r) const {
-            return (get<TField>(l) >= get<TField>(r));
-        }
-    };
-    
-} } }
+template<
+typename TRecord,
+typename TField,
+typename = mpl::enable_if_t<is_record<TRecord>>
+>
+struct descending_sorter : std::binary_function<const TRecord&, const TRecord&, bool>
+{
+  bool operator()(const TRecord& l, const TRecord& r) const
+  {
+    return (get<TField>(l) >= get<TField>(r));
+  }
+};
+
+}
+
+}
+
+}
 
 #endif

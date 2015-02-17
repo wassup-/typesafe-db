@@ -5,32 +5,38 @@
 #ifndef _SKIP_VALUES_IMPL_HPP
 #define _SKIP_VALUES_IMPL_HPP
 
-namespace fp {
-    template<typename T, T...>
-    struct integer_sequence;
+namespace fp
+{
 
-    namespace impl {
-        template<int, bool, int...>
-        struct skip_values_helper;
-        
-        template<int, int...>
-        struct skip_values_impl;
+template<typename T, T...>
+struct integer_sequence;
 
-        template<int C, int H, int... T>
-        struct skip_values_impl<C, H, T...> : skip_values_impl<(C - 1), T...> { };
+namespace impl
+{
 
-        template<int H, int... T>
-        struct skip_values_impl<0, H, T...> : mpl::identity<integer_sequence<int, H, T...>> { };
+template<int, bool, int...>
+struct skip_values_helper;
 
-        template<>
-        struct skip_values_impl<0> : mpl::identity<integer_sequence<int>> { };
+template<int, int...>
+struct skip_values_impl;
 
-        template<int C, bool S, int... I>
-        struct skip_values_helper : skip_values_impl<C, I...> { };
+template<int C, int H, int... T>
+struct skip_values_impl<C, H, T...> : skip_values_impl<(C - 1), T...> { };
 
-        template<int C, int... I>
-        struct skip_values_helper<C, true, I...> : mpl::identity<integer_sequence<int>> { };
-    }
+template<int H, int... T>
+struct skip_values_impl<0, H, T...> : mpl::identity<integer_sequence<int, H, T...>> { };
+
+template<>
+struct skip_values_impl<0> : mpl::identity<integer_sequence<int>> { };
+
+template<int C, bool S, int... I>
+struct skip_values_helper : skip_values_impl<C, I...> { };
+
+template<int C, int... I>
+struct skip_values_helper<C, true, I...> : mpl::identity<integer_sequence<int>> { };
+
+}
+
 }
 
 #endif

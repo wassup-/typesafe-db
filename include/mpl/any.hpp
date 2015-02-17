@@ -5,18 +5,22 @@
 #include "conditional.hpp"
 #include "identity.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	namespace detail {
+namespace detail
+{
 
-		template<typename H, typename... T>
-		struct any_of : conditional<H, true_, any_of<T...>> { };
-		template<typename H>
-		struct any_of<H> : conditional<H, true_, false_> { };
-	}
+template<typename H, typename... T>
+struct any_of : conditional<H, true_, any_of<T...>> { };
+template<typename H>
+struct any_of<H> : conditional<H, true_, false_> { };
 
-	template<typename... T>
-	using any_ = identity_t<detail::any_of<T...>>;
+}
+
+template<typename... T>
+using any_ = identity_t<detail::any_of<T...>>;
+
 }
 
 #endif

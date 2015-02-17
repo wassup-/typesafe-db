@@ -16,7 +16,7 @@ namespace fp {
 
     template<typename>
     struct is_table : mpl::false_ { };
-    
+
     template<typename Descriptor, const char* Name>
     struct is_table<table<Descriptor, Name>> : mpl::true_ { };
 
@@ -38,37 +38,39 @@ namespace fp {
     namespace detail {
 
         template<typename Descriptor>
-        struct has_primary_key_impl {
+        struct has_primary_key_impl
+        {
+            template<typename T>
+            static std::true_type test(typename T::primary_key*);
 
-            struct yes { char _; };
-            struct no { yes _[2]; };
+            template<typename T>
+            static std::false_type test(...);
 
-            template<typename T> static yes test(typename T::primary_key*);
-            template<typename T> static no test(...);
-
-            using type = typename std::conditional<(sizeof(yes) == sizeof(test<Descriptor>(0))), std::true_type, std::false_type>::type;
+            using type = decltype(test<Descriptor>(nullptr));
         };
 
         template<typename Descriptor>
-        struct has_unique_keys_impl {
-            struct yes { char _; };
-            struct no { yes _[2]; };
+        struct has_unique_keys_impl
+        {
+            template<typename T>
+            static std::true_type test(typename T::unique_keys*);
 
-            template<typename T> static yes test(typename T::unique_keys*);
-            template<typename T> static no test(...);
+            template<typename T>
+            static std::false_type test(...);
 
-            using type = typename std::conditional<(sizeof(yes) == sizeof(test<Descriptor>(0))), std::true_type, std::false_type>::type;
+            using type = decltype(test<Descriptor>(nullptr));
         };
 
         template<typename Descriptor>
-        struct has_index_keys_impl {
-            struct yes { char _; };
-            struct no { yes _[2]; };
+        struct has_index_keys_impl
+        {
+            template<typename T>
+            static std::true_type test(typename T::index_keys*);
 
-            template<typename T> static yes test(typename T::index_keys*);
-            template<typename T> static no test(...);
+            template<typename T>
+            static std::false_type test(...);
 
-            using type = typename std::conditional<(sizeof(yes) == sizeof(test<Descriptor>(0))), std::true_type, std::false_type>::type;
+            using type = decltype(test<Descriptor>(nullptr));
         };
     }
 

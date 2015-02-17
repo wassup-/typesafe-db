@@ -3,10 +3,12 @@
 
 #include "const.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	template<int I>
-	using int_ = const_<int, I>;
+template<int I>
+using int_ = const_<int, I>;
+
 }
 
 #endif

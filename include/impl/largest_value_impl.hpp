@@ -7,16 +7,23 @@
 
 #include <type_traits>
 
-namespace fp { namespace impl {
+namespace fp
+{
 
-    template<typename T, T, T...>
-    struct largest_value_impl;
+namespace impl
+{
 
-    template<typename T, T S, T H, T... R>
-    struct largest_value_impl<S, H, R...> : largest_value_impl<T, ((S >= H) ? S : H), R...> { };
+template<typename T, T, T...>
+struct largest_value_impl;
 
-    template<typename T, T S>
-    struct largest_value_impl<S> : mpl::const_<T, S> { };
-} }
+template<typename T, T S, T H, T... R>
+struct largest_value_impl<S, H, R...> : largest_value_impl<T, ((S >= H) ? S : H), R...> { };
+
+template<typename T, T S>
+struct largest_value_impl<S> : mpl::const_<T, S> { };
+
+}
+
+}
 
 #endif

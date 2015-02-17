@@ -13,62 +13,75 @@
 #include <string>       // for std::string, std::to_string
 #include <utility>      // for fix::forward
 
-namespace fp { namespace impl {
+namespace fp
+{
 
-    struct where_query_impl;
+namespace impl
+{
 
-    template<typename...>
-    struct clause_evaluator;
-        
-    template<typename H, typename... T>
-    struct clause_evaluator<H, T...> {
-    protected:
-        H head_;
-        clause_evaluator<T...> tail_;
-    public:
+struct where_query_impl;
 
-        clause_evaluator(H h, T&&... t)
-        : head_(h), tail_(fix::forward<T>(t)...)
-        { }
+template<typename...>
+struct clause_evaluator;
 
-        template<typename... Fs>
-        bool operator()(const record<Fs...>& r) const {
-            return (head_(r) && tail_(r));
-        }
-    };
+template<typename H, typename... T>
+struct clause_evaluator<H, T...>
+{
+protected:
+  H head_;
+  clause_evaluator<T...> tail_;
 
-    template<typename H>
-    struct clause_evaluator<H> {
-    protected:
-        H head_;
-    public:
+public:
+  clause_evaluator(H h, T&&... t)
+  : head_(h)
+  , tail_(fix::forward<T>(t)...)
+  { }
 
-        clause_evaluator(H h)
-        : head_(h)
-        { }
+  template<typename... Fs>
+  bool operator()(const record<Fs...>& r) const
+  {
+    return (head_(r) && tail_(r));
+  }
+};
 
-        template<typename... Fs>
-        bool operator()(const record<Fs...>& r) const {
-            return head_(r);
-        }
-    };
+template<typename H>
+struct clause_evaluator<H>
+{
+protected:
+  H head_;
 
-    struct where_query_impl {
-            
-        template<typename... Fs, typename... TWhere>
-        static bool evaluate(const record<Fs...>& r, const TWhere&... c) {
-            return clause_evaluator<TWhere...>{ c... }(r);
-        }
-            
-        template<typename... Ts >
-        static std::string build_where_query(Ts... ts) {
-            using std::to_string;
-            return stringutils::concatenate(
-                "WHERE ",
-                stringutils::implode(" AND ", to_string(ts)...)
-            );
-        }
-    };
-} }
+public:
+  clause_evaluator(H h)
+  : head_(h)
+  { }
+
+  template<typename... Fs>
+  bool operator()(const record<Fs...>& r) const {
+    return head_(r);
+  }
+};
+
+struct where_query_impl
+{
+  template<typename... Fs, typename... TWhere>
+  static bool evaluate(const record<Fs...>& r, const TWhere&... c)
+  {
+    return clause_evaluator<TWhere...>{ c... }(r);
+  }
+
+  template<typename... Ts >
+  static std::string build_where_query(Ts... ts)
+  {
+    using std::to_string;
+    return stringutils::concatenate(
+      "WHERE ",
+      stringutils::implode(" AND ", to_string(ts)...)
+    );
+  }
+};
+
+}
+
+}
 
 #endif

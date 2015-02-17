@@ -10,29 +10,32 @@
 #include <iostream>     // for std::cerr
 
 #if defined(assert)
-#undef assert
+  #undef assert
 #endif
 
 #if defined(FP_DEBUG)
-#define FP_ASSERT(x, msg)       do { if(!(x)) { ::fp::assert((#x), (msg), (__FILE__), (__LINE__), (__PRETTY_FUNCTION__)); } } while(0)
+  #define FP_ASSERT(x, msg)       do { if(!(x)) { ::fp::assert((#x), (msg), (__FILE__), (__LINE__), (__PRETTY_FUNCTION__)); } } while(0)
 #else
-#define FP_ASSERT(x, msg)
+  #define FP_ASSERT(x, msg)
 #endif
 
-namespace fp {
+namespace fp
+{
 
-    enum class assert_method_e {
-        halt_, continue_,
-    };
+enum class assert_method_e {
+  halt_, continue_,
+};
 
-    static assert_method_e assert_method = assert_method_e::halt_;
+static assert_method_e assert_method = assert_method_e::halt_;
 
-    static void assert(const char* cond, const char* msg, const char* file, int line, const char* fn) {
-        std::cerr << file << ":" << line << " in " << fn << " :\n\tAssert " << cond << " failed: " << msg << std::endl;
-        if (assert_method_e::halt_ == assert_method) {
-            exit(0);
-        }
-    }
+static void assert(const char* cond, const char* msg, const char* file, int line, const char* fn)
+{
+  std::cerr << file << ":" << line << " in " << fn << " :\n\tAssert " << cond << " failed: " << msg << std::endl;
+  if (assert_method_e::halt_ == assert_method) {
+    exit(0);
+  }
+}
+
 }
 
 #endif

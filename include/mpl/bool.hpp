@@ -3,16 +3,18 @@
 
 #include "const.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	template<bool V>
-	using bool_ = const_<bool, V>;
+template<bool V>
+using bool_ = const_<bool, V>;
 
-	using true_ = bool_<true>;
-	using false_ = bool_<false>;
+using true_ = bool_<true>;
+using false_ = bool_<false>;
 
-	template<typename T>
-	using not_ = bool_<!T::value>;
+template<typename T>
+using not_ = bool_<!T::value>;
+
 }
 
 #endif

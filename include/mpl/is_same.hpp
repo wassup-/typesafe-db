@@ -4,18 +4,23 @@
 #include "bool.hpp"
 #include "identity.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	namespace detail {
+namespace detail
+{
 
-		template<typename, typename>
-		struct is_same : identity<false_> { };
-		template<typename T>
-		struct is_same<T, T> : identity<true_> { };
-	}
+template<typename, typename>
+struct is_same : identity<false_> { };
 
-	template<typename T, typename U>
-	using is_same = identity_t<detail::is_same<T, U>>;
+template<typename T>
+struct is_same<T, T> : identity<true_> { };
+
+}
+
+template<typename T, typename U>
+using is_same = identity_t<detail::is_same<T, U>>;
+
 }
 
 #endif

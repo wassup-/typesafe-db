@@ -4,10 +4,12 @@
 #include "identity.hpp"
 #include "if.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	template<typename If, typename Then, typename Else>
-	using eval_if = identity_t<if_<If::value, Then, Else>>;
+template<typename If, typename Then, typename Else>
+using eval_if = identity_t<if_<If::value, Then, Else>>;
+
 }
 
 #endif

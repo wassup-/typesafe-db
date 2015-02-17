@@ -4,18 +4,22 @@
 #include "identity.hpp"
 #include "index.hpp"
 
-namespace mpl {
+namespace mpl
+{
 
-	namespace detail {
+namespace detail
+{
 
-        template<typename... T>
-        struct count : mpl::index_<0> { };
-        template<typename Head, typename... Tail>
-        struct count<Head, Tail...> : mpl::index_<(!!Head::value) + count<Tail...>::value> { };
-    }
-    
-    template<typename... T>
-    using count_ = identity_t<detail::count<T...>>;
+template<typename... T>
+struct count : mpl::index_<0> { };
+template<typename Head, typename... Tail>
+struct count<Head, Tail...> : mpl::index_<(!!Head::value) + count<Tail...>::value> { };
+
+}
+
+template<typename... T>
+using count_ = identity_t<detail::count<T...>>;
+
 }
 
 #endif

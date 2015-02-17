@@ -27,13 +27,14 @@ namespace fp {
 
     template<typename Loader, typename Value>
     void prologue(Loader&, const Value&) { }
-    
+
     template<typename Loader, typename Value>
     void epilogue(Loader&, const Value&) { }
 
     template<typename TEngine, typename TQuery>
     inline auto query(TEngine&& eng, TQuery&& qry)
-    -> decltype(fix::forward<TEngine>(eng).query(fix::forward<TQuery>(qry))) {
+    -> decltype(fix::forward<TEngine>(eng).query(fix::forward<TQuery>(qry)))
+    {
         static_assert(is_engine<Unqualified<TEngine>>::value, "TEngine is not an engine");
         static_assert(is_query<Unqualified<TQuery>>::value, "TQuery is not a query");
         return fix::forward<TEngine>(eng).query(fix::forward<TQuery>(qry));
