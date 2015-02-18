@@ -162,13 +162,13 @@ for db in list_databases(conn, args.db):
     # every table denotes a struct
     deferred.append('struct {0}'.format(table))
     deferred.append('{')
-    deferred.append('constexpr static fp::table<{0}, _strings::{0}> table = {1}'.format(table, '{ };'))
+    deferred.append('constexpr static fp::table<{0}, _strings::{0}> table = {1};'.format(table, '{ }'))
     strings.append((table, ''))
 
     for (name, type, nullable, primary, indexed, unique, default) in list_columns(conn, db, table):
       native_type = map_type(type, nullable)
       strings.append((table, name))
-      deferred.append('constexpr static fp::column<{0}, _strings::{0}_{1}, fp::field<{2}> > {1} = {3}'.format(table, name, native_type, '{ };'))
+      deferred.append('constexpr static fp::column<{0}, _strings::{0}_{1}, fp::field<{2}> > {1} = {3};'.format(table, name, native_type, '{ }'))
 
     deferred.append('};')
   # print all referenced strings
