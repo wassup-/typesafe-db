@@ -15,12 +15,6 @@
 
 #include "database_geo.hpp"             // for geo::db
 
-constexpr static const char DB_HOST[] = "localhost";
-constexpr static const char GEO_DB[] = "shared";
-constexpr static const char GEO_USER[] = "shared_read";
-constexpr static const char GEO_PASSWD[] = "shared_read";
-
-
 constexpr auto sq1 = fp::select(
   geo::db::city::alpha,
   geo::db::city::latitude,
@@ -39,36 +33,32 @@ int main(int argc, char ** argv) {
   using std::get;
   using std::to_string;
 
-  const char * db_host = DB_HOST;
-  const char * db_user = GEO_USER;
-  const char * db_pass = GEO_PASSWD;
-  const char * db_dbase = GEO_DB;
+  const char *db_host = "localhost";
+  const char *db_user = "root";
+  const char *db_pass = nullptr;
+  const char *db_dbase = nullptr;
 
   switch(argc)
   {
     case 5: {
-      db_dbase = argv[4];
-      break;
+      db_pass = argv[4];
+      // fall-through
     }
     case 4: {
-      db_pass = argv[3];
-      break;
+      db_user = argv[3];
+      // fall-through
     }
     case 3: {
-      db_user = argv[2];
-      break;
+      db_dbase = argv[2];
+      // fall-through
     }
     case 2: {
       db_host = argv[1];
-      break;
+      // fall-through
     }
-    case 1: // fall-through
     default: {
       break;
     }
-  }
-  if(argc > 1) {
-    db_host = argv[1];
   }
 
   fp::mysql::basic_engine engine(db_host, db_user, db_pass, db_dbase);
