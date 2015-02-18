@@ -30,7 +30,7 @@ static assert_method_e assert_method = assert_method_e::halt_;
 
 static void assert(const char* cond, const char* msg, const char* file, int line, const char* fn)
 {
-  std::cerr << file << ":" << line << " in " << fn << " :\n\tAssert " << cond << " failed: " << msg << std::endl;
+  std::cerr << file << ":" << line << " in " << fn << " :\n\tAssert '" << cond << "' failed: " << msg << std::endl;
   if (assert_method_e::halt_ == assert_method) {
     exit(0);
   }
