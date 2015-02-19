@@ -5,39 +5,39 @@
 #ifndef _FIELD_HPP
 #define _FIELD_HPP
 
-#include "stringutil.hpp"       // for stringutils::concatenate
-#include "table.hpp"            // for fp::table
 #include "type_traits.hpp"      // for fp::Bool
 
-#include <string>               // for std::string, std::to_string
+namespace fp
+{
 
-namespace fp {
-    
-    template<typename /* Type */>
-    struct field;
+template<typename /* Type */>
+struct field;
 
-    template<typename>
-    struct is_field : mpl::false_ { };
+template<typename>
+struct is_field : mpl::false_ { };
 
-    template<typename T>
-    struct is_field<const T> : is_field<T> { };
+template<typename T>
+struct is_field<const T> : is_field<T> { };
 
-    template<typename Type>
-    struct is_field<field<Type>> : mpl::true_ { };
-    
-    template<typename>
-    struct field_traits;
+template<typename Type>
+struct is_field<field<Type>> : mpl::true_ { };
 
-    template<typename Type>
-    struct field_traits<field<Type> > {
-        using value_type = typename std::decay<Type>::type;
-    };
+template<typename>
+struct field_traits;
 
-    template<typename Type>
-    struct field {
-        using this_type = field;
-        using value_type = typename std::decay<Type>::type;
-    };
+template<typename Type>
+struct field_traits<field<Type>>
+{
+  using value_type = typename std::decay<Type>::type;
+};
+
+template<typename Type>
+struct field
+{
+  using this_type = field;
+  using value_type = typename std::decay<Type>::type;
+};
+
 }
 
 #endif

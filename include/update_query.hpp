@@ -17,7 +17,7 @@
 #include <tuple>                // for std::tuple, std::tie
 
 namespace fp {
-    
+
     template<typename...>
     struct update_query;
 
@@ -28,10 +28,11 @@ namespace fp {
     struct is_query<update_query<TUpdate...>> : is_update_query<update_query<TUpdate...>> { };
 
     template<typename... TUpdate>
-    struct update_query {
+    struct update_query
+    {
     public:
         template<typename TRecord>
-        struct result_of : mpl::identity<std::size_t> { };
+        using result_of = std::size_t;
 
     public:
         constexpr update_query(TUpdate... updates)
@@ -74,7 +75,7 @@ namespace fp {
     private:
         std::tuple<TUpdate...> updates_;
     };
-    
+
     template<typename... TUpdate>
     constexpr inline update_query<Unqualified<TUpdate>...> update(TUpdate... u) {
         return { u... };
@@ -122,7 +123,7 @@ namespace fp {
                             >; \
         return impl::update_modifiers::modifier<TLeft, getter_type>{ l, getter_type(l, r) }; \
     }
-    
+
     DECLARE_BIN_OP_UPDATE(add, _add)
     DECLARE_BIN_OP_UPDATE(sub, _sub)
     DECLARE_BIN_OP_UPDATE(mul, _mul)

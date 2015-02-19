@@ -9,84 +9,89 @@
 
 #include <string>
 
-namespace fp {
+namespace fp
+{
 
-    template<typename /* Descriptor */, const char* /* Name */>
-    struct table;
+template<typename /* Descriptor */, const char* /* Name */>
+struct table;
 
-    template<typename>
-    struct is_table : mpl::false_ { };
+template<typename>
+struct is_table : mpl::false_ { };
 
-    template<typename Descriptor, const char* Name>
-    struct is_table<table<Descriptor, Name>> : mpl::true_ { };
+template<typename Descriptor, const char* Name>
+struct is_table<table<Descriptor, Name>> : mpl::true_ { };
 
-    template<typename Descriptor, const char* Name>
-    struct table {
-    public:
-        using this_type = table;
-        using descriptor_type = Descriptor;
-    public:
-        constexpr const char* name() const noexcept {
-            return Name;
-        }
-    public:
-        friend std::string to_string(const table& t) {
-            return t.name();
-        }
-    };
+template<typename Descriptor, const char* Name>
+struct table
+{
+public:
+  using this_type = table;
+  using descriptor_type = Descriptor;
 
-    namespace detail {
+public:
+  constexpr const char* name() const noexcept
+  { return Name; }
 
-        template<typename Descriptor>
-        struct has_primary_key_impl
-        {
-            template<typename T>
-            static std::true_type test(typename T::primary_key*);
+public:
+  friend std::string to_string(const table& t)
+  { return t.name(); }
+};
 
-            template<typename T>
-            static std::false_type test(...);
+namespace detail
+{
 
-            using type = decltype(test<Descriptor>(nullptr));
-        };
+template<typename Descriptor>
+struct has_primary_key_impl
+{
+  template<typename T>
+  static std::true_type test(typename T::primary_key*);
 
-        template<typename Descriptor>
-        struct has_unique_keys_impl
-        {
-            template<typename T>
-            static std::true_type test(typename T::unique_keys*);
+  template<typename T>
+  static std::false_type test(...);
 
-            template<typename T>
-            static std::false_type test(...);
+  using type = decltype(test<Descriptor>(nullptr));
+};
 
-            using type = decltype(test<Descriptor>(nullptr));
-        };
+template<typename Descriptor>
+struct has_unique_keys_impl
+{
+  template<typename T>
+  static std::true_type test(typename T::unique_keys*);
 
-        template<typename Descriptor>
-        struct has_index_keys_impl
-        {
-            template<typename T>
-            static std::true_type test(typename T::index_keys*);
+  template<typename T>
+  static std::false_type test(...);
 
-            template<typename T>
-            static std::false_type test(...);
+  using type = decltype(test<Descriptor>(nullptr));
+};
 
-            using type = decltype(test<Descriptor>(nullptr));
-        };
-    }
+template<typename Descriptor>
+struct has_index_keys_impl
+{
+  template<typename T>
+  static std::true_type test(typename T::index_keys*);
 
-    template<typename Table>
-    struct has_primary_key : detail::has_primary_key_impl<typename Table::descriptor_type>::type { };
-    template<typename Table>
-    struct has_primary_key<const Table> : has_primary_key<Table> { };
+  template<typename T>
+  static std::false_type test(...);
 
-    template<typename T>
-    using HasPrimaryKey = typename detail::has_primary_key_impl<T>::type;
+  using type = decltype(test<Descriptor>(nullptr));
+};
 
-    template<typename T>
-    using HasUniqueKeys = typename detail::has_unique_keys_impl<T>::type;
+} // namespace detail
 
-    template<typename T>
-    using HasIndexKeys = typename detail::has_index_keys_impl<T>::type;
-}
+template<typename Table>
+struct has_primary_key : detail::has_primary_key_impl<typename Table::descriptor_type>::type { };
+template<typename Table>
+struct has_primary_key<const Table> : has_primary_key<Table> { };
+
+template<typename T>
+using HasPrimaryKey = typename detail::has_primary_key_impl<T>::type;
+
+template<typename T>
+using HasUniqueKeys = typename detail::has_unique_keys_impl<T>::type;
+
+template<typename T>
+using HasIndexKeys = typename detail::has_index_keys_impl<T>::type;
+
+} // namespace fp
 
 #endif

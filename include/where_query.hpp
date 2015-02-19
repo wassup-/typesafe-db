@@ -23,7 +23,7 @@ namespace fp {
 
     template<typename... /* Where */>
     struct where_query;
-    
+
     template<typename... TWhere>
     struct is_where_query<where_query<TWhere...>> : mpl::all_<impl::is_where_clause<TWhere>...> { };
 
@@ -31,10 +31,12 @@ namespace fp {
     struct is_query<where_query<TWhere...>> : is_where_query<where_query<TWhere...>> { };
 
     template<typename... TWhere>
-    struct where_query {
-        using descriptor_type = FirstTypeOf<DescriptorOf<TWhere>...>;
+    struct where_query
+    {
     public:
+        using descriptor_type = FirstTypeOf<DescriptorOf<TWhere>...>;
 
+    public:
         constexpr where_query(TWhere... clauses)
         : clauses_(clauses...)
         { }
@@ -67,7 +69,7 @@ namespace fp {
             erase_if(cont, std::bind(&where_query::evaluate, std::cref(q), std::placeholders::_1, std::cref(q)));//[&](const TRecord& cur) { return evaluate(cur, q); });
             return cont;
         }
-        
+
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
@@ -85,7 +87,7 @@ namespace fp {
     private:
         std::tuple<TWhere...> clauses_;
     };
-    
+
     template<typename... TCondition>
     constexpr inline where_query<TCondition...> where(TCondition... c) {
         return { c... };

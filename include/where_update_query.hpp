@@ -29,10 +29,11 @@ namespace fp {
     struct is_where_query<where_update_query<TUpdate, TWhere> > : is_where_query<TWhere> { };
 
     template<typename TUpdate, typename TWhere>
-    struct where_update_query {
+    struct where_update_query
+    {
     public:
         template<typename TRecord>
-        struct result_of : mpl::identity<Invoke<typename TUpdate::template result_of<TRecord>>> { };
+        using result_of = typename TUpdate::template result_of<TRecord>;
 
     public:
         constexpr where_update_query(TUpdate u, TWhere w)
@@ -52,7 +53,7 @@ namespace fp {
         }
 
         template<typename TRecord, typename = mpl::enable_if_t<is_record<Unqualified<TRecord>>>>
-        friend Invoke<result_of<Unqualified<TRecord>>> update(TRecord&& rec, const where_update_query& q) {
+        friend result_of<Unqualified<TRecord>> update(TRecord&& rec, const where_update_query& q) {
             return update(fix::forward<TRecord>(rec), q.update_);
         }
 
@@ -61,8 +62,8 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend Invoke<result_of<TRecord>> update(TContainer& recs, const where_update_query& q) {
-            typename result_of<TRecord>::type ret = 0;
+        friend result_of<TRecord> update(TContainer& recs, const where_update_query& q) {
+            result_of<TRecord> ret = 0;
             for(TRecord& cur : recs) {
                 if(evaluate(cur, q.where_)) {
                     ret += update(cur, q.update_);
@@ -76,7 +77,7 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend Invoke<result_of<TRecord>> query(TContainer& recs, const where_update_query& q) {
+        friend result_of<TRecord> query(TContainer& recs, const where_update_query& q) {
             return update(recs, q);
         }
 

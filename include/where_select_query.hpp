@@ -29,16 +29,17 @@ namespace fp {
     struct is_query<where_select_query<TSelect, TWhere> > : mpl::all_<is_select_query<TSelect>, is_where_query<TWhere>> { };
 
     template<typename TSelect, typename TWhere>
-    struct where_select_query {
+    struct where_select_query
+    {
     public:
-
         template<typename TRecord>
-        struct result_of : mpl::identity<Invoke<typename TSelect::template result_of<TRecord>>> { };
+        using result_of = typename TSelect::template result_of<TRecord>;
+
     protected:
         TSelect _select;
         TWhere _where;
-    public:
 
+    public:
         constexpr where_select_query(TSelect s, TWhere w)
         : _select(s)
         , _where(w)
@@ -62,7 +63,7 @@ namespace fp {
             typename TRecord,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend Invoke<result_of<Unqualified<TRecord>>> select(const TRecord& rec, const where_select_query& q) {
+        friend result_of<Unqualified<TRecord>> select(const TRecord& rec, const where_select_query& q) {
             return select(rec, q._select);
         }
 
@@ -71,8 +72,8 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(const TContainer& recs, const where_select_query& q) {
-            using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
+        friend typename TContainer::template rebind<result_of<TRecord>>::type query(const TContainer& recs, const where_select_query& q) {
+            using TReturnContainer = typename TContainer::template rebind<result_of<TRecord>>::type;
             TReturnContainer ret;
             for(const TRecord& cur : recs) {
                 if (evaluate(cur, q._where)) {

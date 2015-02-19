@@ -37,10 +37,11 @@ namespace fp {
     constexpr ordering_e descending = ordering_e::descending;
 
     template<typename TQuery, typename TColumn>
-    struct ordered_query {
+    struct ordered_query
+    {
     public:
         template<typename TRecord>
-        struct result_of : mpl::identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
+        using result_of = typename TQuery::template result_of<TRecord>;
 
     public:
         ordered_query(TQuery q, TColumn c, ordering_e o)
@@ -75,7 +76,8 @@ namespace fp {
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
         friend TContainer query(TContainer recs, const ordered_query& q) {
-            switch(q._order){
+            switch(q._order)
+            {
                 case ascending:
                     std::sort(begin(recs), end(recs), impl::ordered_query::ascending_sorter<TRecord, TColumn>());
                     break;

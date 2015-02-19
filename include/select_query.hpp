@@ -27,13 +27,13 @@ namespace fp {
     struct is_query<select_query<TColumns...> > : is_select_query<select_query<TColumns...>> { };
 
     template<typename... TColumns>
-    struct select_query {
+    struct select_query
+    {
     public:
-
         template<typename TRecord>
-        struct result_of : TRecord::template rebind<TColumns...> { };
-    public:
+        using result_of = typename TRecord::template rebind<TColumns...>;
 
+    public:
         constexpr select_query(TColumns... cols)
         : _columns(cols...)
         { }
@@ -42,7 +42,7 @@ namespace fp {
             typename TRecord,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend Invoke<result_of<TRecord>> select(const TRecord& rec, const select_query& q) {
+        friend result_of<TRecord> select(const TRecord& rec, const select_query& q) {
             return { fp::get(rec, TColumns())... };
         }
 
@@ -51,8 +51,8 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type select(const TContainer& recs, const select_query& q) {
-            using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
+        friend typename TContainer::template rebind<result_of<TRecord>>::type select(const TContainer& recs, const select_query& q) {
+            using TReturnContainer = typename TContainer::template rebind<result_of<TRecord>>::type;
             TReturnContainer ret;
             ret.reserve(recs.size());
             for(const TRecord& cur : recs) {
@@ -66,7 +66,7 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(const TContainer& recs, const select_query& q) {
+        friend typename TContainer::template rebind<result_of<TRecord>>::type query(const TContainer& recs, const select_query& q) {
             return select(recs, q);
         }
 

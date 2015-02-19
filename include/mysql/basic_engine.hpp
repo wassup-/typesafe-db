@@ -30,13 +30,15 @@ namespace fp {
 
     namespace mysql {
 
-        class basic_engine {
+        class basic_engine
+        {
         public:
             using default_record_type = record<>;
+
         protected:
             std::shared_ptr<basic_context> _context;
-        public:
 
+        public:
             basic_engine(const char* host, const char* name, const char* pass)
             : _context(basic_context::create()) {
                 if (_context) {
@@ -74,7 +76,7 @@ namespace fp {
 
             template<
                 typename TQuery,
-                typename TRecord = Invoke<typename Unqualified<TQuery>::template result_of<default_record_type>>,
+                typename TRecord = typename Unqualified<TQuery>::template result_of<default_record_type>,
                 typename Container = std::vector<TRecord>,
                 typename = mpl::enable_if_t<mpl::all_<is_query<Unqualified<TQuery>>, is_record<TRecord>>>
             >
@@ -107,7 +109,7 @@ namespace fp {
                 typename = mpl::disable_if_t<
                     mpl::all_<
                         is_query<Unqualified<TQuery>>,
-                        is_record<Invoke<typename Unqualified<TQuery>::template result_of<TRecord>>>
+                        is_record<typename Unqualified<TQuery>::template result_of<TRecord>>
                     >
                 >
             >

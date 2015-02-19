@@ -26,16 +26,17 @@ namespace fp {
     struct is_limit_query<limit_query<TQuery> > : mpl::true_ { };
 
     template<typename TQuery>
-    struct limit_query {
+    struct limit_query
+    {
     public:
-
         template<typename TRecord>
-        struct result_of : mpl::identity<Invoke<typename TQuery::template result_of<TRecord>>> { };
+        using result_of = typename TQuery::template result_of<TRecord>;
+
     protected:
         TQuery _query;
         int _limit;
-    public:
 
+    public:
         constexpr limit_query(TQuery q, int l)
         : _query(q)
         , _limit(l)
@@ -59,7 +60,7 @@ namespace fp {
             typename TRecord,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend Invoke<result_of<TRecord>> select(const TRecord& rec, const limit_query& q) {
+        friend result_of<TRecord> select(const TRecord& rec, const limit_query& q) {
             return select(rec, q._query);
         }
 

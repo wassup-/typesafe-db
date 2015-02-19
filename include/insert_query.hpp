@@ -26,13 +26,13 @@ namespace fp {
     struct is_insert_query<insert_query<TColumns...> > : mpl::true_ { };
 
     template<typename... TColumns>
-    struct insert_query {
+    struct insert_query
+    {
     public:
-
         template<typename TRecord>
-        struct result_of : mpl::identity<Invoke<typename TRecord::template rebind<TColumns...>>> { };
-    public:
+        using result_of = typename TRecord::template rebind<TColumns...>;
 
+    public:
         friend void swap(insert_query& l, insert_query& r) noexcept {
             using std::swap;
         }
@@ -42,8 +42,8 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type insert(TContainer& recs, const insert_query& q) {
-            using TReturnContainer = typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type;
+        friend typename TContainer::template rebind<result_of<TRecord>>::type insert(TContainer& recs, const insert_query& q) {
+            using TReturnContainer = typename TContainer::template rebind<result_of<TRecord>>::type;
             TReturnContainer ret;
             ret.reserve(recs.size());
             for(const TRecord& cur : recs) {
@@ -57,7 +57,7 @@ namespace fp {
             typename TRecord = typename TContainer::value_type,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend typename TContainer::template rebind<Invoke<result_of<TRecord>>>::type query(TContainer& recs, const insert_query& q) {
+        friend typename TContainer::template rebind<result_of<TRecord>>::type query(TContainer& recs, const insert_query& q) {
             return insert(recs, q);
         }
 
