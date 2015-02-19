@@ -41,21 +41,63 @@ class MySQLTable:
       print('Unable to list columns')
     else:
       cursor.close()
-    return [MySQLColumn(self, *column) for column in clmns]
+    return [MySQLColumn(self.conn, self, *column) for column in clmns]
 
 class MySQLColumn:
-  def __init__(self, table, name, type, nullable, primary, multiple, unique, default):
+  def __init__(self, conn, table, name, type, nullable, primary, multiple, unique, default):
+    self.conn = conn
     self.table = table
     self.name = name
-    self.type = self.__native_type(type, nullable)
     self.nullable = nullable
     self.primary = primary
     self.indexed = multiple
     self.unique = unique
     self.default = default
+    self.type = self.__native_type(type)
 
-  @staticmethod
-  def __native_type(type, nullable):
+  def __is_foreign_key(self):
+    found = []
+    cursor = self.conn.cursor()
+    query = (( 'SELECT'
+              '  1 '
+              ' FROM '
+              '  INFORMATION_SCHEMA.KEY_COLUMN_USAGE'
+              ' WHERE '
+              '  TABLE_SCHEMA = "{0}"'
+              '  AND TABLE_NAME = "{1}"'
+              '  AND COLUMN_NAME = "{2}"'
+              '  AND REFERENCED_COLUMN_NAME IS NOT NULL').format(self.table.db.name, self.table.name, self.name))
+    try:
+      cursor.execute(query)
+      found = [x for x in cursor]
+    except:
+      print('Unable to list foreign key relationships')
+    else:
+      cursor.close()
+    return True if found else False
+
+  def __get_foreign_type(self):
+    found = []
+    cursor = self.conn.cursor()
+    query = (( 'SELECT'
+              '  REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME '
+              ' FROM '
+              '  INFORMATION_SCHEMA.KEY_COLUMN_USAGE'
+              ' WHERE '
+              '  TABLE_SCHEMA = "{0}"'
+              '  AND TABLE_NAME = "{1}"'
+              '  AND COLUMN_NAME = "{2}"'
+              '  AND REFERENCED_COLUMN_NAME IS NOT NULL').format(self.table.db.name, self.table.name, self.name))
+    try:
+      cursor.execute(query)
+      found = [x for x in cursor]
+    except:
+      print('Unable to list foreign key relationships')
+    else:
+      cursor.close()
+    return '::' + '::'.join(list(found[0]))
+
+  def __native_type(self, type):
     m = re.search(r"^([^(]+)(\((.+)\))?(\sunsigned)?$", type, re.IGNORECASE)
     mt = m.group(1, 4, 3)
     # lambdas
@@ -117,7 +159,12 @@ class MySQLColumn:
     }
 
     mapped = mappings[mt[0]](mt[1], mt[2]);
-    return mapped if not nullable else '{0}*'.format(mapped)
+    if self.__is_foreign_key():
+      return 'fp::foreign_key<{0}, decltype({1})>'.format(mapped, self.__get_foreign_type())
+    elif not self.nullable:
+      return mapped
+    else:
+      return '{0}*'.format(mapped)
 
 
 def connect(host, user, passwd):

@@ -52,9 +52,9 @@ for db in dbms.databases(args.db):
     uniques = map(format_str.format, uniques)
     indices = map(format_str.format, indices)
 
-    deferred.append('using primary_key = mpl::identity<{0}>;'.format(', '.join(primaries)))
-    deferred.append('using unique_key = mpl::identity<{0}>;'.format(', '.join(uniques)))
-    deferred.append('using index_key = mpl::identity<{0}>;'.format(', '.join(indices)))
+    deferred.append('using primary_key = mpl::identity<{0}>;'.format(', '.join(primaries))) if primaries else False
+    deferred.append('using unique_key = mpl::type_sequence<{0}>;'.format(', '.join(uniques))) if uniques else False
+    deferred.append('using index_key = mpl::type_sequence<{0}>;'.format(', '.join(indices))) if indices else False
 
     deferred.append('};')
   # print all referenced strings
