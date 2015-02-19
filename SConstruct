@@ -28,7 +28,7 @@ env = Environment(ENV=os.environ, CPPPATH=[current_dir.abspath])
 env['CC'] = os.environ['CC']
 env['CXX'] = os.environ['CXX']
 env.Append(LIBS=['pthread', 'mysqlclient'])
-env.Append(CCFLAGS=['-std=c++11', '-Wall', '-Werror', '-Wno-psabi', '-pedantic-errors', '-O3', '-MMD'])
+env.Append(CCFLAGS=['-std=c++11', '-Wall', '-Werror', '-pedantic-errors', '-O3', '-MMD'])
 
 sources = get_sourcefiles_recursive(current_dir.abspath)
 sources = filter_unique(sources)
