@@ -24,7 +24,7 @@ def filter_unique(seq):
 
 current_dir = Dir('.')
 
-env = Environment(CPPPATH=[current_dir.abspath])
+env = Environment(ENV=os.environ, CPPPATH=[current_dir.abspath])
 env['CC'] = os.environ['CC']
 env['CXX'] = os.environ['CXX']
 env.Append(LIBS=['pthread', 'mysqlclient'])
