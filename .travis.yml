@@ -6,7 +6,15 @@ compiler:
 services:
   - mysql
 
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get install -qq scons
+
 before_script:
   - mysql -e 'create database myapp_test;'
 
-script: ./configure && make
+script:
+  - ./configure
+  - scons -Q
