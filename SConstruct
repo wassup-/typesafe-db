@@ -25,8 +25,12 @@ def filter_unique(seq):
 current_dir = Dir('.')
 
 env = Environment(ENV=os.environ, CPPPATH=[current_dir.abspath])
-env['CC'] = os.environ['CC']
-env['CXX'] = os.environ['CXX']
+try:
+  env['CC'] = os.environ['CC']
+  env['CXX'] = os.environ['CXX']
+except:
+  True
+
 env.Append(LIBS=['pthread', 'mysqlclient'])
 env.Append(CCFLAGS=['-std=c++11', '-Wall', '-Werror', '-pedantic-errors', '-O3', '-MMD'])
 
