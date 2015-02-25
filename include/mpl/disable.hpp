@@ -1,7 +1,7 @@
 #ifndef MPL_DISABLE_HPP_
 #define MPL_DISABLE_HPP_
 
-#include "identity.hpp"
+#include "../meta.hpp"
 
 namespace mpl
 {
@@ -25,7 +25,7 @@ template<typename If, typename T = void>
 using disable_if = detail::disable_if<If::value, T>;
 
 template<typename If, typename T = void>
-using disable_if_t = identity_t<disable_if<If, T>>;
+using disable_if_t = typename disable_if<If, T>::type;
 
 }
 

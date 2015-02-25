@@ -7,12 +7,15 @@
 
 #include "impl/lexical_cast_impl.hpp"
 
-namespace fp {
+namespace fp
+{
 
-    template<typename Out, typename In>
-    inline Out lexical_cast(const In& v) {
-        return impl::lexical_cast_impl<In, Out>::cast(v);
-    }
+template<typename Out, typename In>
+inline Out lexical_cast(const In& v)
+{
+  return impl::lexical_cast_impl<In, Out>::cast(v);
+}
+
 }
 
 #endif

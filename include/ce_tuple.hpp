@@ -13,16 +13,19 @@ namespace fp {
 	class ce_tuple;
 
 	template<>
-	class ce_tuple<> {
+	class ce_tuple<>
+	{
 	public:
 		template<std::size_t>
 		void get() const = delete;
 	};
 
 	template<typename H>
-	class ce_tuple<H> {
+	class ce_tuple<H>
+	{
 	public:
 		using this_type = ce_tuple;
+
 	public:
 		constexpr ce_tuple() = default;
 		constexpr ce_tuple(H h)
@@ -45,13 +48,16 @@ namespace fp {
 	};
 
 	template<typename H, typename... T>
-	class ce_tuple<H, T...> {
+	class ce_tuple<H, T...>
+	{
 	public:
 		using this_type = ce_tuple;
+
 	public:
 		constexpr ce_tuple() = default;
 		constexpr ce_tuple(H h, T... t)
-		: _head(h), _tail(t...)
+		: _head(h)
+		, _tail(t...)
 		{ }
 
 		template<std::size_t I>
@@ -71,7 +77,8 @@ namespace fp {
 		{ return _tail.template get<(I - 1)>(); }
 
 		constexpr std::size_t size() const
-		{ return sizeof...(T) + 1; }
+		{ return 1 + _tail.size(); }
+
 	private:
 		H _head;
 		ce_tuple<T...> _tail;

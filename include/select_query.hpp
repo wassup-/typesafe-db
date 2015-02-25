@@ -70,8 +70,11 @@ namespace fp {
             return select(recs, q);
         }
 
-        friend std::string to_string(const select_query& q) {
-            return call_with(&impl::select_query_impl<TColumns...>::build_select_query, q._columns);
+        template<typename Formatter>
+        friend std::string to_string(const select_query& q, Formatter& formatter)
+        {
+            std::string(*build_fn)(const TColumns&..., Formatter&) = &impl::select_query_impl<TColumns...>::build_select_query;
+            return call_with(build_fn, q._columns, formatter);
         }
     private:
         fp::ce_tuple<TColumns...> _columns;

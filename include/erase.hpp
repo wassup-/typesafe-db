@@ -7,61 +7,74 @@
 
 #include "container_traits.hpp"
 
-#include <algorithm>	// for std::remove, std::remove_if
+#include <algorithm>  // for std::remove, std::remove_if
 
-namespace fp {
-    namespace impl {
+namespace fp
+{
 
-        template<typename TContainer, typename TValue>
-        typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, vectorlike_tag) {
-            return cont.erase(std::remove(cont.begin(), cont.end(), val), cont.end());
-        }
+namespace impl
+{
 
-        template<typename TContainer, typename TValue>
-        typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, listlike_tag) {
-            return cont.remove(val);
-        }
+template<typename TContainer, typename TValue>
+typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, vectorlike_tag)
+{
+  return cont.erase(std::remove(begin(cont), end(cont), val), end(cont));
+}
 
-        template<typename TContainer, typename TValue>
-        typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, associative_tag) {
-            return cont.erase(val);
-        }
+template<typename TContainer, typename TValue>
+typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, listlike_tag)
+{
+  return cont.remove(val);
+}
 
-        template<typename TContainer, typename TPred>
-        typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, vectorlike_tag) {
-            return cont.erase(std::remove_if(cont.begin(), cont.end(), pred), cont.end());
-        }
+template<typename TContainer, typename TValue>
+typename TContainer::iterator erase_impl(TContainer& cont, const TValue& val, associative_tag)
+{
+  return cont.erase(val);
+}
 
-        template<typename TContainer, typename TPred>
-        typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, listlike_tag) {
-            return cont.remove_if(pred);
-        }
+template<typename TContainer, typename TPred>
+typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, vectorlike_tag)
+{
+  return cont.erase(std::remove_if(begin(cont), end(cont), pred), end(cont));
+}
 
-        template<typename TContainer, typename TPred>
-        typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, associative_tag) {
-            auto ret = cont.end();
-            for (auto it = cont.begin(); it != cont.end(); /* */) {
-                if (pred(*it)) {
-                    ret = cont.erase(it++);
-                } else {
-                    ++it;
-                }
-            }
-            return ret;
-        }
+template<typename TContainer, typename TPred>
+typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, listlike_tag)
+{
+  return cont.remove_if(pred);
+}
+
+template<typename TContainer, typename TPred>
+typename TContainer::iterator erase_if_impl(TContainer& cont, TPred pred, associative_tag)
+{
+  auto ret = cont.end();
+  for (auto it = begin(cont); it != end(cont); /* */) {
+    if (pred(*it)) {
+      ret = cont.erase(it++);
+    } else {
+      ++it;
     }
+  }
+  return ret;
+}
 
-    template<typename TContainer, typename TValue>
-    typename TContainer::iterator erase(TContainer& cont, const TValue& val) {
-        using tag = typename container_traits<TContainer>::category;
-        return impl::erase_impl(cont, val, tag());
-    }
+} // namespace impl
 
-    template<typename TContainer, typename TPred>
-    typename TContainer::iterator erase_if(TContainer& cont, TPred pred) {
-        using tag = typename container_traits<TContainer>::category;
-        return impl::erase_if_impl(cont, pred, tag());
-    }
+template<typename TContainer, typename TValue>
+typename TContainer::iterator erase(TContainer& cont, const TValue& val)
+{
+  using tag = typename container_traits<TContainer>::category;
+  return impl::erase_impl(cont, val, tag{});
+}
+
+template<typename TContainer, typename TPred>
+typename TContainer::iterator erase_if(TContainer& cont, TPred pred)
+{
+  using tag = typename container_traits<TContainer>::category;
+  return impl::erase_if_impl(cont, pred, tag{});
+}
+
 }
 
 #endif

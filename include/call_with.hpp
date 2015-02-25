@@ -80,29 +80,29 @@ constexpr const T& get(const T(&arr)[Sz])
   return arr[I];
 }
 
-template<typename F, typename T, std::size_t... Is>
-auto call_with(F&& f, T&& tup, mpl::indices_<Is...>, tuplelike_tag) -> ResultOf<Unqualified<F>>
+template<typename F, typename T, std::size_t... Is, typename... Args>
+auto call_with(F&& f, T&& tup, mpl::indices_<Is...>, tuplelike_tag, Args&&... args) -> ResultOf<Unqualified<F>>
 {
   using std::get;     // enable ADL
-  return (fix::forward<F>(f))(get<Is>(fix::forward<T>(tup))...);
+  return (fix::forward<F>(f))(get<Is>(fix::forward<T>(tup))..., fix::forward<Args>(args)...);
 }
 
-template<typename F, typename A, std::size_t... Is>
-auto call_with(F&& f, A&& arr, mpl::indices_<Is...>, arraylike_tag) -> ResultOf<Unqualified<F>>
+template<typename F, typename A, std::size_t... Is, typename... Args>
+auto call_with(F&& f, A&& arr, mpl::indices_<Is...>, arraylike_tag, Args&&... args) -> ResultOf<Unqualified<F>>
 {
   using std::get;     // enable ADL
-  return (fix::forward<F>(f))(get<Is>(fix::forward<A>(arr))...);
+  return (fix::forward<F>(f))(get<Is>(fix::forward<A>(arr))..., fix::forward<Args>(args)...);
 }
 
-}
+} // namespace detail
 
-template<typename F, typename Cont>
-inline auto call_with(F&& f, Cont&& cont) -> ResultOf<Unqualified<F>>
+template<typename F, typename Cont, typename... Args>
+inline auto call_with(F&& f, Cont&& cont, Args&&... args) -> ResultOf<Unqualified<F>>
 {
   using traits = detail::call_with_traits<Unqualified<Cont>>;
   using tag = typename traits::tag;
   using indices = detail::build_indices<traits::size>;
-  return detail::call_with(fix::forward<F>(f), fix::forward<Cont>(cont), indices(), tag());
+  return detail::call_with(fix::forward<F>(f), fix::forward<Cont>(cont), indices(), tag(), fix::forward<Args>(args)...);
 }
 
 namespace detail
@@ -165,19 +165,19 @@ protected:
 
 }
 
-template<typename T, typename Cont>
-inline T call_constructor(Cont&& cont) {
-  return call_with(detail::object_creator<T>(), fix::forward<Cont>(cont));
+template<typename T, typename Cont, typename... Args>
+inline T call_constructor(Cont&& cont, Args&&... args) {
+  return call_with(detail::object_creator<T>(), fix::forward<Cont>(cont), fix::forward<Args>(args)...);
 }
 
-template<typename F, typename Cont>
-inline auto call_function(F&& f, Cont&& cont) -> ResultOf<Unqualified<F>> {
-  return call_with(fix::forward<F>(f), fix::forward<Cont>(cont));
+template<typename F, typename Cont, typename... Args>
+inline auto call_function(F&& f, Cont&& cont, Args&&... args) -> ResultOf<Unqualified<F>> {
+  return call_with(fix::forward<F>(f), fix::forward<Cont>(cont), fix::forward<Args>(args)...);
 }
 
-template<typename F, typename C, typename Cont>
-inline auto call_function(F&& f, C * obj, Cont&& cont) -> ResultOf<Unqualified<F>> {
-  return call_with(detail::member_fn_caller<Unqualified<F>>(fix::forward<F>(f), obj), fix::forward<Cont>(cont));
+template<typename F, typename C, typename Cont, typename... Args>
+inline auto call_function(F&& f, C * obj, Cont&& cont, Args&&... args) -> ResultOf<Unqualified<F>> {
+  return call_with(detail::member_fn_caller<Unqualified<F>>(fix::forward<F>(f), obj), fix::forward<Cont>(cont), fix::forward<Args>(args)...);
 }
 
 }

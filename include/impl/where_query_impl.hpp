@@ -19,6 +19,7 @@ namespace fp
 namespace impl
 {
 
+template<typename...>
 struct where_query_impl;
 
 template<typename...>
@@ -61,21 +62,21 @@ public:
   }
 };
 
+template<typename... Clauses>
 struct where_query_impl
 {
-  template<typename... Fs, typename... TWhere>
-  static bool evaluate(const record<Fs...>& r, const TWhere&... c)
+  template<typename Record>
+  static bool evaluate(const Record& r, const Clauses&... clauses)
   {
-    return clause_evaluator<TWhere...>{ c... }(r);
+    return clause_evaluator<Clauses...>{ clauses... }(r);
   }
 
-  template<typename... Ts >
-  static std::string build_where_query(Ts... ts)
+  template<typename Formatter>
+  static std::string build_where_query(Clauses... clauses, Formatter& formatter)
   {
-    using std::to_string;
     return stringutils::concatenate(
       "WHERE ",
-      stringutils::implode(" AND ", to_string(ts)...)
+      stringutils::implode(" AND ", formatter.to_string(clauses)...)
     );
   }
 };

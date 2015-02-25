@@ -8,7 +8,7 @@
 #include "impl/query_combiner_impl.hpp"
 
 namespace fp {
-    
+
     template<typename...>
     struct select_query;
 
@@ -17,7 +17,8 @@ namespace fp {
         typename... RColumns,
         typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...>>
     >
-    constexpr inline Invoke<typename impl::query_combiner_impl<LColumns..., RColumns...>::normal> combine(const select_query<LColumns...>&, const select_query<RColumns...>&) {
+    constexpr inline typename impl::query_combiner_impl<select_query, LColumns..., RColumns...>::normal
+    combine(const select_query<LColumns...>&, const select_query<RColumns...>&) {
         return { };
     }
 
@@ -26,7 +27,8 @@ namespace fp {
         typename... RColumns,
         typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...>>
     >
-    constexpr inline Invoke<typename impl::query_combiner_impl<LColumns..., RColumns...>::unique> combine_unique(const select_query<LColumns...>&, const select_query<RColumns...>&) {
+    constexpr inline typename impl::query_combiner_impl<select_query, LColumns..., RColumns...>::unique
+    combine_unique(const select_query<LColumns...>&, const select_query<RColumns...>&) {
         return { };
     }
 }

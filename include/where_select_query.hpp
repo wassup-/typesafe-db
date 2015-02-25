@@ -16,17 +16,23 @@
 
 namespace fp {
 
-    template<typename, typename>
+    template<typename /* TSelect */, typename /* TWhere */>
     struct where_select_query;
 
     template<typename TSelect, typename TWhere>
-    struct is_select_query<where_select_query<TSelect, TWhere> > : is_select_query<TSelect> { };
+    struct is_select_query<where_select_query<TSelect, TWhere> >
+    : is_select_query<TSelect>
+    { };
 
     template<typename TSelect, typename TWhere>
-    struct is_where_query<where_select_query<TSelect, TWhere> > : is_where_query<TWhere> { };
+    struct is_where_query<where_select_query<TSelect, TWhere> >
+    : is_where_query<TWhere>
+    { };
 
     template<typename TSelect, typename TWhere>
-    struct is_query<where_select_query<TSelect, TWhere> > : mpl::all_<is_select_query<TSelect>, is_where_query<TWhere>> { };
+    struct is_query<where_select_query<TSelect, TWhere> >
+    : mpl::all_<is_select_query<TSelect>, is_where_query<TWhere> >
+    { };
 
     template<typename TSelect, typename TWhere>
     struct where_select_query
@@ -45,7 +51,8 @@ namespace fp {
         , _where(w)
         { }
 
-        friend void swap(where_select_query& l, where_select_query& r) noexcept {
+        friend void swap(where_select_query& l, where_select_query& r) noexcept
+        {
             using std::swap;
             swap(l._select, r._select);
             swap(l._where, r._where);
@@ -55,46 +62,52 @@ namespace fp {
             typename TRecord,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend bool evaluate(const TRecord& rec, const where_select_query& q) {
-            return evaluate(rec, q._where);
+        friend bool evaluate(const TRecord& rec, const where_select_query& self)
+        {
+            return evaluate(rec, self._where);
         }
 
         template<
             typename TRecord,
             typename = mpl::enable_if_t<is_record<TRecord>>
         >
-        friend result_of<Unqualified<TRecord>> select(const TRecord& rec, const where_select_query& q) {
-            return select(rec, q._select);
+        friend result_of<Unqualified<TRecord> > select(const TRecord& rec, const where_select_query& self)
+        {
+            return select(rec, self._select);
         }
 
         template<
             typename TContainer,
             typename TRecord = typename TContainer::value_type,
-            typename = mpl::enable_if_t<is_record<TRecord>>
+            typename = mpl::enable_if_t<is_record<TRecord> >
         >
-        friend typename TContainer::template rebind<result_of<TRecord>>::type query(const TContainer& recs, const where_select_query& q) {
-            using TReturnContainer = typename TContainer::template rebind<result_of<TRecord>>::type;
+        friend typename TContainer::template rebind<result_of<TRecord> >::type query(const TContainer& recs, const where_select_query& self)
+        {
+            using TReturnContainer = typename TContainer::template rebind<result_of<TRecord> >::type;
+
             TReturnContainer ret;
             for(const TRecord& cur : recs) {
-                if (evaluate(cur, q._where)) {
-                    ret.push_back(select(cur, q._select));
+                if (evaluate(cur, self._where)) {
+                    ret.push_back(select(cur, self._select));
                 }
             }
             return ret;
         }
 
-        friend std::string to_string(const where_select_query& q) {
-            using std::to_string;
-            return stringutils::concatenate(to_string(q._select), " ", to_string(q._where));
+        template<typename Formatter>
+        friend std::string to_string(const where_select_query& self, Formatter& formatter)
+        {
+            return stringutils::concatenate(formatter.to_string(self._select), " ", formatter.to_string(self._where));
         }
     };
 
     template<
         typename TSelect,
         typename TWhere,
-        typename = mpl::enable_if_t<mpl::all_<is_select_query<TSelect>, is_where_query<TWhere>>>
+        typename = mpl::enable_if_t<mpl::all_<is_select_query<TSelect>, is_where_query<TWhere> > >
     >
-    constexpr inline where_select_query<TSelect, TWhere> operator+(TSelect s, TWhere w) {
+    constexpr inline where_select_query<TSelect, TWhere> operator+(TSelect s, TWhere w)
+    {
         return { s, w };
     }
 }

@@ -12,62 +12,40 @@ parser.add_argument('--db', nargs='*', help='databases to use')
 args = parser.parse_args();
 
 dbms = importlib.import_module('dbms_{0}'.format(args.engine))
+fmt = importlib.import_module('formatter_{0}'.format('cpp'))
 
 if not dbms.connect(args.host, args.user, args.passwd):
   print("Unable to connect to database")
   sys.exit()
 
+ctx = fmt.Context()
+
 for db in dbms.databases(args.db):
   # every namespace denotes a database
-  print 'namespace', db.name
-  print '{'
-
-  strings = []
-  deferred = []
+  fdb = fmt.Database(db.name)
 
   for table in db.tables():
-    # every table denotes a struct
-    deferred.append('struct {0}'.format(table.name))
-    deferred.append('{')
-
-    primaries = []
-    uniques = []
-    indices = []
-
-    deferred.append('constexpr static fp::table<{0}, _strings::{0}> table = {{ }};'.format(table.name))
-    strings.append((table.name, ''))
+    ftable = fmt.Table(table.name)
 
     for column in table.columns():
-      strings.append((table.name, column.name))
-      deferred.append('constexpr static fp::column<{0}, _strings::{0}_{1}, fp::field<{2}>> {1} = {{ }};'.format(table.name, column.name, column.type))
+      fcolumn = fmt.Column(column.name)
+      fcolumn.type = column.type
+      fcolumn.is_foreign = column.is_foreign
+      fcolumn.foreign_type = column.foreign_type
+
       if column.primary:
-        primaries.append(column.name)
+        ftable.primaries.append(fcolumn)
       elif column.unique:
-        uniques.append(column.name)
+        ftable.uniques.append(fcolumn)
       elif column.indexed:
-        indices.append(column.name)
+        ftable.indices.append(fcolumn)
 
-    format_str = 'fp::Unqualified<decltype({0})>'
-    primaries = map(format_str.format, primaries)
-    uniques = map(format_str.format, uniques)
-    indices = map(format_str.format, indices)
+      ftable.columns.append(fcolumn)
 
-    deferred.append('using primary_key = mpl::identity<{0}>;'.format(', '.join(primaries))) if primaries else False
-    deferred.append('using unique_key = mpl::type_sequence<{0}>;'.format(', '.join(uniques))) if uniques else False
-    deferred.append('using index_key = mpl::type_sequence<{0}>;'.format(', '.join(indices))) if indices else False
+    fdb.tables.append(ftable)
 
-    deferred.append('};')
-  # print all referenced strings
-  print 'namespace', '_strings'
-  print '{'
-  for (table, column) in strings:
-    if column:
-      print 'constexpr static char const {0}_{1}[] = "{1}";'.format(table, column)
-    else:
-      print 'constexpr static char const {0}[] = "{0}";'.format(table)
-  print '}'
-  for line in deferred:
-    print line
-  print '}'
+  ctx.databases.append(fdb)
+
+  print ctx.format()
 
 dbms.disconnect()

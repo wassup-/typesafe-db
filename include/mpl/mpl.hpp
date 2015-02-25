@@ -7,21 +7,11 @@
 
 #include "all.hpp"
 #include "any.hpp"
-#include "bool.hpp"
-#include "conditional.hpp"
 #include "const.hpp"
-#include "count.hpp"
 #include "disable.hpp"
 #include "enable.hpp"
-#include "eval_if.hpp"
-#include "identity.hpp"
-#include "if.hpp"
 #include "index.hpp"
 #include "int.hpp"
 #include "integer_sequence.hpp"
-#include "is_same.hpp"
-#include "minmax.hpp"
-#include "none.hpp"
-#include "type_sequence.hpp"
 
 #endif

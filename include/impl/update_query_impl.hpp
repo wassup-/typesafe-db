@@ -12,9 +12,11 @@
 
 namespace fp
 {
+
 namespace impl
 {
 
+template<typename...>
 struct update_query_impl;
 
 namespace update_modifiers
@@ -33,17 +35,17 @@ template<typename TColumn, typename TGetter>
 struct is_update_modifier<update_modifiers::modifier<TColumn, TGetter>>
 : is_column<TColumn> { };
 
+template<typename... TUpdate>
 struct update_query_impl
 {
-  template<typename TDescriptor, typename... TUpdate>
-  static std::string build_update_query(const TUpdate&... modifiers)
+  template<typename TDescriptor, typename Formatter>
+  static std::string build_update_query(const TUpdate&... modifiers, Formatter& formatter)
   {
-    using std::to_string;
     return stringutils::concatenate(
       "UPDATE ",
-      TDescriptor::table::name,
+      formatter.to_string(TDescriptor{}),
       " SET ",
-      stringutils::implode(", ", to_string(modifiers)...)
+      stringutils::implode(", ", formatter.to_string(modifiers)...)
     );
   }
 };
@@ -111,10 +113,10 @@ namespace update_modifiers
       return get(mapping, rec, column_);
     }
 
-    friend std::string to_string(const column_getter&)
+    template<typename Formatter>
+    friend std::string to_string(const column_getter& self, Formatter& formatter)
     {
-      using std::to_string;
-      return to_string(TColumn());
+      return formatter.to_string(self.column_);
     }
 
   private:
@@ -140,10 +142,10 @@ namespace update_modifiers
       return get(mapping, rec, left_) + get(mapping, rec, right_);
     }
 
-    friend std::string to_string(const column_add& g)
+    template<typename Formatter>
+    friend std::string to_string(const column_add& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.left_), " + ", to_string(g.right_));
+      return stringutils::concatenate(formatter.to_string(self.left_), " + ", formatter.to_string(self.right_));
     }
 
   private:
@@ -170,10 +172,10 @@ namespace update_modifiers
       return get(mapping, rec, left_) - get(mapping, rec, right_);
     }
 
-    friend std::string to_string(const column_sub& g)
+    template<typename Formatter>
+    friend std::string to_string(const column_sub& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.left_), " - ", to_string(g.right_));
+      return stringutils::concatenate(formatter.to_string(self.left_), " - ", formatter.to_string(self.right_));
     }
 
   private:
@@ -200,10 +202,10 @@ namespace update_modifiers
       return get(mapping, rec, left_) * get(mapping, rec, right_);
     }
 
-    friend std::string to_string(const column_mul& g)
+    template<typename Formatter>
+    friend std::string to_string(const column_mul& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.left_), " * ", to_string(g.right_));
+      return stringutils::concatenate(formatter.to_string(self.left_), " * ", formatter.to_string(self.right_));
     }
 
   private:
@@ -230,10 +232,10 @@ namespace update_modifiers
       return get(mapping, rec, left_) / get(mapping, rec, right_);
     }
 
-    friend std::string to_string(const column_div& g)
+    template<typename Formatter>
+    friend std::string to_string(const column_div& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.left_), " / ", to_string(g.right_));
+      return stringutils::concatenate(formatter.to_string(self.left_), " / ", formatter.to_string(self.right_));
     }
 
   private:
@@ -250,24 +252,24 @@ namespace update_modifiers
 
   protected:
     TColumn column_;
-    value_type _value;
+    value_type value_;
 
   public:
     constexpr value_getter(TColumn c, value_type v)
     : column_(c)
-    , _value(v)
+    , value_(v)
     { }
 
     template<typename TMapping, typename TRecord>
     constexpr const value_type& operator()(const TMapping& mapping, const TRecord& rec) const
     {
-      return _value;
+      return value_;
     }
 
-    friend std::string to_string(const value_getter& g)
+    template<typename Formatter>
+    friend std::string to_string(const value_getter& self, Formatter& formatter)
     {
-      using std::to_string;
-      return to_string(g._value);
+      return formatter.to_string(self.value_);
     }
   };
 
@@ -281,24 +283,24 @@ namespace update_modifiers
   public:
     constexpr value_add(TColumn c, value_type v)
     : column_(c)
-    , _value(v)
+    , value_(v)
     { }
 
     template<typename TMapping, typename TRecord>
     constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
     {
-      return get(mapping, rec, column_) + _value;
+      return get(mapping, rec, column_) + value_;
     }
 
-    friend std::string to_string(const value_add& g)
+    template<typename Formatter>
+    friend std::string to_string(const value_add& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.column_), " + ", to_string(g._value));
+      return stringutils::concatenate(formatter.to_string(self.column_), " + ", formatter.to_string(self.value_));
     }
 
   private:
     TColumn column_;
-    value_type _value;
+    value_type value_;
   };
 
   template<typename TColumn>
@@ -311,24 +313,24 @@ namespace update_modifiers
   public:
     constexpr value_sub(TColumn c, value_type v)
     : column_(c)
-    , _value(v)
+    , value_(v)
     { }
 
     template<typename TMapping, typename TRecord>
     constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
     {
-      return get(mapping, rec, column_) - _value;
+      return get(mapping, rec, column_) - value_;
     }
 
-    friend std::string to_string(const value_sub& g)
+    template<typename Formatter>
+    friend std::string to_string(const value_sub& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.column_), " - ", to_string(g._value));
+      return stringutils::concatenate(formatter.to_string(self.column_), " - ", formatter.to_string(self.value_));
     }
 
   private:
     TColumn column_;
-    value_type _value;
+    value_type value_;
   };
 
   template<typename TColumn>
@@ -341,24 +343,24 @@ namespace update_modifiers
   public:
     constexpr value_mul(TColumn c, value_type v)
     : column_(c)
-    , _value(v)
+    , value_(v)
     { }
 
     template<typename TMapping, typename TRecord>
     constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
     {
-      return get(mapping, rec, column_) * _value;
+      return get(mapping, rec, column_) * value_;
     }
 
-    friend std::string to_string(const value_mul& g)
+    template<typename Formatter>
+    friend std::string to_string(const value_mul& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.column_), " * ", to_string(g._value));
+      return stringutils::concatenate(formatter.to_string(self.column_), " * ", formatter.to_string(self.value_));
     }
 
   private:
     TColumn column_;
-    value_type _value;
+    value_type value_;
   };
 
   template<typename TColumn>
@@ -371,24 +373,24 @@ namespace update_modifiers
   public:
     constexpr value_div(TColumn c, value_type v)
     : column_(c)
-    , _value(v)
+    , value_(v)
     { }
 
     template<typename TMapping, typename TRecord>
     constexpr value_type operator()(const TMapping& mapping, const TRecord& rec) const
     {
-      return get(mapping, rec, column_) / _value;
+      return get(mapping, rec, column_) / value_;
     }
 
-    friend std::string to_string(const value_div& g)
+    template<typename Formatter>
+    friend std::string to_string(const value_div& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(g.column_), " / ", to_string(g._value));
+      return stringutils::concatenate(formatter.to_string(self.column_), " / ", formatter.to_string(self.value_));
     }
 
   private:
     TColumn column_;
-    value_type _value;
+    value_type value_;
   };
 
   template<typename TColumn, typename TModifier>
@@ -400,24 +402,24 @@ namespace update_modifiers
 
   protected:
     TColumn column_;
-    TModifier _self;
+    TModifier self_;
 
   public:
     constexpr modifier(TColumn c, TModifier m)
     : column_(c)
-    , _self(m)
+    , self_(m)
     { }
 
     template<typename TMapping, typename TRecord>
     void operator()(const TMapping& mapping, TRecord& rec) const
     {
-      set(mapping, rec, column_, _self(mapping, rec));
+      set(mapping, rec, column_, self_(mapping, rec));
     }
 
-    friend std::string to_string(const modifier& m)
+    template<typename Formatter>
+    friend std::string to_string(const modifier& self, Formatter& formatter)
     {
-      using std::to_string;
-      return stringutils::concatenate(to_string(m.column_), " = (", to_string(m._self), ")");
+      return stringutils::concatenate(formatter.to_string(self.column_), " = (", formatter.to_string(self.self_), ")");
     }
   };
 }

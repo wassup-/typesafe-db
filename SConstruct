@@ -34,7 +34,7 @@ except:
 env.Append(LIBS=['pthread', 'mysqlclient'])
 env.Append(CCFLAGS=['-std=c++11', '-Wall', '-Werror', '-pedantic-errors', '-O3', '-MMD'])
 
-sources = get_sourcefiles_recursive(current_dir.abspath)
+sources = get_sourcefiles(current_dir.abspath)
 sources = filter_unique(sources)
 
 env.Program(target='typesafe-db', source=sources)

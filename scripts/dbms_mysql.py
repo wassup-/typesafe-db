@@ -13,9 +13,9 @@ class MySQLDatabase:
 
   def tables(self):
     tbls = []
-    cursor = self.conn.cursor()
-    query = ('SHOW TABLES FROM ' + self.name)
+    query = ('SHOW TABLES FROM {0}'.format(self.name))
     try:
+      cursor = self.conn.cursor()
       cursor.execute(query)
       tbls = [table for (table,) in cursor]
     except:
@@ -32,9 +32,9 @@ class MySQLTable:
 
   def columns(self):
     clmns = []
-    cursor = self.conn.cursor()
-    query = ('SHOW COLUMNS FROM ' + self.name + ' FROM ' + self.db.name)
+    query = ('SHOW COLUMNS FROM {0} FROM {1}'.format(self.name, self.db.name))
     try:
+      cursor = self.conn.cursor()
       cursor.execute(query)
       clmns = [(name, type, (nullable == 'YES'), (key == 'PRI'), (key == 'MUL'), (key == 'UNI'), default) for (name, type, nullable, key, default, extra) in cursor]
     except:
@@ -53,49 +53,51 @@ class MySQLColumn:
     self.indexed = multiple
     self.unique = unique
     self.default = default
+    self.is_foreign = self.__is_foreign_key()
+    self.foreign_type = self.__get_foreign_type()
     self.type = self.__native_type(type)
 
   def __is_foreign_key(self):
-    found = []
-    cursor = self.conn.cursor()
-    query = (( 'SELECT'
+    result = False
+    query = (('SELECT'
               '  1 '
               ' FROM '
               '  INFORMATION_SCHEMA.KEY_COLUMN_USAGE'
               ' WHERE '
-              '  TABLE_SCHEMA = "{0}"'
-              '  AND TABLE_NAME = "{1}"'
-              '  AND COLUMN_NAME = "{2}"'
-              '  AND REFERENCED_COLUMN_NAME IS NOT NULL').format(self.table.db.name, self.table.name, self.name))
+              '  (TABLE_SCHEMA = "{0}")'
+              '  AND (TABLE_NAME = "{1}")'
+              '  AND (COLUMN_NAME = "{2}")'
+              '  AND (REFERENCED_COLUMN_NAME IS NOT NULL)').format(self.table.db.name, self.table.name, self.name))
     try:
+      cursor = self.conn.cursor()
       cursor.execute(query)
-      found = [x for x in cursor]
+      result = True if cursor.fetchall() else False
     except:
       print('Unable to list foreign key relationships')
     else:
       cursor.close()
-    return True if found else False
+    return result
 
   def __get_foreign_type(self):
-    found = []
-    cursor = self.conn.cursor()
-    query = (( 'SELECT'
+    results = []
+    query = (('SELECT'
               '  REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME '
               ' FROM '
               '  INFORMATION_SCHEMA.KEY_COLUMN_USAGE'
               ' WHERE '
-              '  TABLE_SCHEMA = "{0}"'
-              '  AND TABLE_NAME = "{1}"'
-              '  AND COLUMN_NAME = "{2}"'
-              '  AND REFERENCED_COLUMN_NAME IS NOT NULL').format(self.table.db.name, self.table.name, self.name))
+              '  (TABLE_SCHEMA = "{0}")'
+              '  AND (TABLE_NAME = "{1}")'
+              '  AND (COLUMN_NAME = "{2}")'
+              '  AND (REFERENCED_COLUMN_NAME IS NOT NULL)').format(self.table.db.name, self.table.name, self.name))
     try:
+      cursor = self.conn.cursor()
       cursor.execute(query)
-      found = [x for x in cursor]
+      results = [x for x in cursor]
     except:
       print('Unable to list foreign key relationships')
     else:
       cursor.close()
-    return '::' + '::'.join(list(found[0]))
+    return results[0] if results else None
 
   def __native_type(self, type):
     m = re.search(r"^([^(]+)(\((.+)\))?(\sunsigned)?$", type, re.IGNORECASE)
@@ -159,9 +161,7 @@ class MySQLColumn:
     }
 
     mapped = mappings[mt[0]](mt[1], mt[2]);
-    if self.__is_foreign_key():
-      return 'fp::foreign_key<{0}, decltype({1})>'.format(mapped, self.__get_foreign_type())
-    elif not self.nullable:
+    if not self.nullable:
       return mapped
     else:
       return '{0}*'.format(mapped)

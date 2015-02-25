@@ -7,7 +7,7 @@ namespace mpl
 {
 
 template<int I>
-using int_ = const_<int, I>;
+using int_ = const_<decltype(I), I>;
 
 }
 

@@ -48,7 +48,7 @@ namespace fp {
 
         template<typename TRecord>
         bool evaluate(const TRecord& rec) const {
-            bool(*eval_fn)(const TRecord&, const TWhere&...) = &impl::where_query_impl::evaluate;
+            bool(*eval_fn)(const TRecord&, const TWhere&...) = &impl::where_query_impl<TWhere...>::evaluate;
             return call_function(eval_fn, clauses_, rec);
         }
 
@@ -80,9 +80,11 @@ namespace fp {
             throw not_implemented_exception("Not implemented yet");
         }
 
-        friend std::string to_string(const where_query& q) {
-            std::string(*build_fn)(TWhere...) = &impl::where_query_impl::build_where_query<TWhere...>;
-            return call_function(build_fn, q.clauses_);
+        template<typename Formatter>
+        friend std::string to_string(const where_query& q, Formatter& formatter)
+        {
+            std::string(*build_fn)(TWhere..., Formatter&) = &impl::where_query_impl<TWhere...>::build_where_query;
+            return call_function(build_fn, q.clauses_, formatter);
         }
     private:
         std::tuple<TWhere...> clauses_;

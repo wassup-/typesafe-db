@@ -1,7 +1,7 @@
 #ifndef MPL_ENABLE_HPP_
 #define MPL_ENABLE_HPP_
 
-#include "identity.hpp"
+#include "../meta.hpp"
 
 namespace mpl
 {
@@ -25,7 +25,7 @@ template<typename If, typename T = void>
 using enable_if = detail::enable_if<If::value, T>;
 
 template<typename If, typename T = void>
-using enable_if_t = identity_t<enable_if<If, T>>;
+using enable_if_t = typename enable_if<If, T>::type;
 
 }
 

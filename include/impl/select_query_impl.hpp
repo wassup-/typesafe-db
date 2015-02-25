@@ -6,46 +6,51 @@
 #define _SELECT_QUERY_IMPL_HPP
 
 #include "../config.hpp"
-#include "../record.hpp"
 #include "../stringutil.hpp"
-#include "../unique_types.hpp"
 
 #include <string>       // for std::string, std::to_string
 
-namespace fp {
+namespace fp
+{
 
-    namespace impl {
-        
-        template<typename... /* Columns */>
-        struct select_query_impl;
-        
-        template<typename... /* Descriptors */>
-        struct table_names;
+namespace impl
+{
 
-        template<typename... TDescriptors>
-        struct table_names {
-            constexpr static std::size_t size = sizeof...(TDescriptors);
-            constexpr static const char* names[size] = { TDescriptors::table.name()... };
-        };
-        
-        template<typename... TDescriptors>
-        constexpr const char* table_names<TDescriptors...>::names[table_names<TDescriptors...>::size];
+template<typename... /* Descriptors */>
+struct table_names;
 
-        template<typename... TColumns>
-        struct select_query_impl {
+template<typename... TDescriptors>
+struct table_names
+{
+  constexpr static std::size_t size = sizeof...(TDescriptors);
+  constexpr static const char* const names[size] = { TDescriptors::this_type::name()... };
+};
 
-            static std::string build_select_query(const TColumns&... f) {
-                using std::to_string;
-                using tables = typename Invoke<unique_types<DescriptorOf<TColumns>...>>::template as<table_names>::type;
-                return stringutils::concatenate(
-                    "SELECT ",
-                    stringutils::implode(", ", to_string(f)...),
-                    " FROM ",
-                    stringutils::implode(", ", tables::names)
-                );
-            }
-        };
-    }
+template<typename... TDescriptors>
+constexpr const char* const table_names<TDescriptors...>::names[table_names<TDescriptors...>::size];
+
+template<typename... TColumns>
+struct select_query_impl
+{
+  template<typename Formatter>
+  static std::string build_select_query(const TColumns&... f, Formatter& formatter)
+  {
+    using list = meta::list<TColumns...>;
+    using transformed = meta::transform<list, meta::quote<DescriptorOf>>;
+    using unique = meta::unique<transformed>;
+    using tables = meta::apply_list<meta::quote<table_names>, unique>;
+
+    return stringutils::concatenate(
+      "SELECT ",
+      stringutils::implode(", ", formatter.to_string(f)...),
+      " FROM ",
+      stringutils::implode(", ", tables::names)
+    );
+  }
+};
+
+}
+
 }
 
 #endif

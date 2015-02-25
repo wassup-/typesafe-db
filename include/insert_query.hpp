@@ -14,66 +14,78 @@
 #include <stdexcept>
 #include <string>               // for std::string, std::to_string
 
-namespace fp {
+namespace fp
+{
 
-    template<typename...>
-    struct insert_query;
+template<typename...>
+struct insert_query;
 
-    template<typename... TColumns>
-    struct is_query<insert_query<TColumns...> > : mpl::all_<is_column<TColumns>...> { };
+template<typename... TColumns>
+struct is_query<insert_query<TColumns...> >
+: mpl::all_<is_column<TColumns>...>
+{ };
 
-    template<typename... TColumns>
-    struct is_insert_query<insert_query<TColumns...> > : mpl::true_ { };
+template<typename... TColumns>
+struct is_insert_query<insert_query<TColumns...> >
+: meta::bool_<true>
+{ };
 
-    template<typename... TColumns>
-    struct insert_query
-    {
-    public:
-        template<typename TRecord>
-        using result_of = typename TRecord::template rebind<TColumns...>;
+template<typename... TColumns>
+struct insert_query
+{
+public:
+  template<typename TRecord>
+  using result_of = typename TRecord::template rebind<TColumns...>;
 
-    public:
-        friend void swap(insert_query& l, insert_query& r) noexcept {
-            using std::swap;
-        }
+public:
+  friend void swap(insert_query& l, insert_query& r) noexcept
+  {
+    using std::swap;
+  }
 
-        template<
-            typename TContainer,
-            typename TRecord = typename TContainer::value_type,
-            typename = mpl::enable_if_t<is_record<TRecord>>
-        >
-        friend typename TContainer::template rebind<result_of<TRecord>>::type insert(TContainer& recs, const insert_query& q) {
-            using TReturnContainer = typename TContainer::template rebind<result_of<TRecord>>::type;
-            TReturnContainer ret;
-            ret.reserve(recs.size());
-            for(const TRecord& cur : recs) {
-                ret.push_back({ fp::get(cur, TColumns())... });
-            }
-            return ret;
-        }
-
-        template<
-            typename TContainer,
-            typename TRecord = typename TContainer::value_type,
-            typename = mpl::enable_if_t<is_record<TRecord>>
-        >
-        friend typename TContainer::template rebind<result_of<TRecord>>::type query(TContainer& recs, const insert_query& q) {
-            return insert(recs, q);
-        }
-
-        friend std::string to_string(const insert_query& q) {
-            //return impl::insert_query_impl<TColumns...>::build_insert_query();
-            throw std::runtime_error("Not implemented yet");
-        }
-    };
-
-    template<
-        typename... TColumns,
-        typename = mpl::enable_if_t<mpl::all_<is_column<TColumns>...>>
-    >
-    insert_query<TColumns...> insert(TColumns... c) {
-        return { c... };
+  template<
+    typename TContainer,
+    typename TRecord = typename TContainer::value_type,
+    typename = mpl::enable_if_t<is_record<TRecord>>
+  >
+  friend typename TContainer::template rebind<result_of<TRecord>>::type insert(TContainer& recs, const insert_query& self)
+  {
+    using TReturnContainer = typename TContainer::template rebind<result_of<TRecord>>::type;
+    TReturnContainer ret;
+    ret.reserve(recs.size());
+    for(const TRecord& cur : recs) {
+      ret.push_back({ fp::get(cur, TColumns())... });
     }
+    return ret;
+  }
+
+  template<
+    typename TContainer,
+    typename TRecord = typename TContainer::value_type,
+    typename = mpl::enable_if_t<is_record<TRecord>>
+  >
+  friend typename TContainer::template rebind<result_of<TRecord>>::type query(TContainer& recs, const insert_query& self)
+  {
+    return insert(recs, self);
+  }
+
+  template<typename Formatter>
+  friend std::string to_string(const insert_query& self, Formatter& formatter)
+  {
+    //return impl::insert_query_impl<TColumns...>::build_insert_query();
+    throw std::runtime_error("Not implemented yet");
+  }
+};
+
+template<
+  typename... TColumns,
+  typename = mpl::enable_if_t<mpl::all_<is_column<TColumns>...>>
+>
+insert_query<TColumns...> insert(TColumns... c)
+{
+  return { c... };
 }
+
+} // namespace fp
 
 #endif

@@ -12,39 +12,30 @@
 namespace fp
 {
 
-template<typename /* Descriptor */, const char* /* Name */>
+template<typename...>
+struct record;
+
+template<typename /* Descriptor */>
 struct table;
 
 template<typename>
-struct is_table : mpl::false_ { };
+struct is_table
+: meta::bool_<false>
+{ };
 
-template<typename Descriptor, const char* Name>
-struct is_table<table<Descriptor, Name>> : mpl::true_ { };
-
-template<typename Descriptor, const char* Name>
-struct table
-{
-public:
-  using this_type = table;
-  using descriptor_type = Descriptor;
-
-public:
-  constexpr const char* name() const noexcept
-  { return Name; }
-
-public:
-  friend std::string to_string(const table& t)
-  { return t.name(); }
-};
+template<typename Descriptor>
+struct is_table<table<Descriptor> >
+: meta::bool_<true>
+{ };
 
 namespace detail
 {
 
 template<typename Descriptor>
-struct has_primary_key_impl
+struct has_primary_keys_impl
 {
   template<typename T>
-  static std::true_type test(typename T::primary_key*);
+  static std::true_type test(typename T::primary_keys*);
 
   template<typename T>
   static std::false_type test(...);
@@ -78,19 +69,89 @@ struct has_index_keys_impl
 
 } // namespace detail
 
-template<typename Table>
-struct has_primary_key : detail::has_primary_key_impl<typename Table::descriptor_type>::type { };
-template<typename Table>
-struct has_primary_key<const Table> : has_primary_key<Table> { };
+template<typename T>
+using HasPrimaryKeys = meta::eval<detail::has_primary_keys_impl<T> >;
 
 template<typename T>
-using HasPrimaryKey = typename detail::has_primary_key_impl<T>::type;
+using HasUniqueKeys = meta::eval<detail::has_unique_keys_impl<T> >;
 
 template<typename T>
-using HasUniqueKeys = typename detail::has_unique_keys_impl<T>::type;
+using HasIndexKeys = meta::eval<detail::has_index_keys_impl<T> >;
 
-template<typename T>
-using HasIndexKeys = typename detail::has_index_keys_impl<T>::type;
+namespace detail
+{
+
+template<typename, typename>
+struct table_helper;
+
+template<typename Descriptor, typename... Columns>
+struct table_helper<Descriptor, record<Columns...>>
+{
+  using record_type = record<Columns...>;
+
+  template<typename Key, typename Engine>
+  static record_type by_primary(Key k, Engine& engine)
+  {
+    auto sq = select(Columns{}...);
+    auto wq = where(k);
+    return engine.query(sq + wq, Engine::single_result);
+  }
+
+  template<typename Key, typename Engine>
+  static record_type by_unique(Key k, Engine& engine)
+  {
+    auto sq = select(Columns{}...);
+    auto wq = where(k);
+    return engine.query(sq + wq, Engine::single_result);
+  }
+
+  template<typename Key, typename Engine>
+  static record_type by_index(Key k, Engine& engine)
+  {
+    auto sq = select(Columns{}...);
+    auto wq = where(k);
+    auto res = engine.query(sq + wq);
+    return res[0];
+  }
+};
+
+} // namespace detail
+
+template<typename Descriptor>
+struct table
+{
+public:
+  using this_type = table;
+  using descriptor_type = Descriptor;
+
+public:
+  constexpr static const char* name() noexcept
+  { return Descriptor::_name(); }
+
+public:
+  template<typename Key, typename Engine, typename U = Descriptor, typename = mpl::enable_if<HasPrimaryKeys<U> > >
+  static typename U::record_type by_primary(Key x, Engine& engine)
+  {
+    return detail::table_helper<U, typename U::record_type>::by_primary(x, engine);
+  }
+
+  template<typename Key, typename Engine, typename U = Descriptor, typename = mpl::enable_if<HasUniqueKeys<U> > >
+  static typename U::record_type by_unique(Key x, Engine& engine)
+  {
+    return detail::table_helper<U, typename U::record_type>::by_unique(x, engine);
+  }
+
+  template<typename Key, typename Engine, typename U = Descriptor, typename = mpl::enable_if<HasIndexKeys<U> > >
+  static typename U::record_type by_index(Key x, Engine& engine)
+  {
+    return detail::table_helper<U, typename U::record_type>::by_index(x, engine);
+  }
+
+public:
+  template<typename Formatter>
+  friend std::string to_string(const Descriptor& self, Formatter& formatter)
+  { return name(); }
+};
 
 } // namespace fp
 

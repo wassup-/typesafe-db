@@ -7,25 +7,24 @@
 #include "include/limit_query.hpp"          // for fp::limit, fp::where
 #include "include/update_query.hpp"         // for fp::update
 #include "include/where_select_query.hpp"   // for fp::query, fp::where, fp::select
-#include "include/where_update_query.hpp"
-#include "include/is_contained_value.hpp"
+#include "include/where_update_query.hpp"   // for fp::query, fp::update, fp::where
 
-#include <iostream>                     // for std::cout
-#include <string>                       // for std::string, std::to_string
+#include <iostream>                         // for std::cout
+#include <string>                           // for std::string, std::to_string
 
-#include "database_geo.hpp"             // for geo::db
+#include "geo.hpp"                          // for geo
 
 constexpr auto sq1 = fp::select(
-  geo::db::city::alpha,
-  geo::db::city::latitude,
-  geo::db::city::longitude
+  geo::cities::name,
+  geo::cities::latitude,
+  geo::cities::longitude
 );
 auto wq1 = fp::where(
-  fp::contains(geo::db::city::name, "ken")
+  fp::contains(geo::cities::name, "ken")
 );
 auto uq1 = fp::update(
-  fp::set(geo::db::city::latitude, 1),
-  fp::mul(geo::db::city::longitude, geo::db::city::longitude)
+  fp::set(geo::cities::latitude, 1),
+  fp::mul(geo::cities::longitude, geo::cities::longitude)
 );
 auto wuq1 = uq1 + wq1;
 
@@ -62,17 +61,18 @@ int main(int argc, char ** argv) {
   }
 
   fp::mysql::basic_engine engine(db_host, db_user, db_pass, db_dbase);
+  fp::mysql::basic_formatter formatter { };
 
-  auto qry = fp::limit(fp::order(sq1 + wq1, geo::db::city::alpha, fp::ascending), 10);
+  auto qry = fp::limit(fp::order(sq1 + wq1, geo::cities::name, fp::ascending), 10);
   auto res = fp::query(engine, qry);
 
-  std::cout << "[Query]" << std::endl << to_string(qry) << std::endl;
+  std::cout << "[Query]" << std::endl << to_string(qry, formatter) << std::endl;
   std::cout << "[Results]" << std::endl << res.size() << std::endl;
   std::cout << "----------" << std::endl;
   for (const auto& cur : res) {
-    std::cout << "Alpha: " << get(cur, geo::db::city::alpha) << std::endl;
-    std::cout << "Longitude: " << get(cur, geo::db::city::longitude) << std::endl;
-    std::cout << "Latitude: " << get(cur, geo::db::city::latitude) << std::endl;
+    std::cout << "Alpha: " << get(cur, geo::cities::name) << std::endl;
+    std::cout << "Longitude: " << get(cur, geo::cities::longitude) << std::endl;
+    std::cout << "Latitude: " << get(cur, geo::cities::latitude) << std::endl;
     std::cout << std::endl;
   }
   std::cout << "----------" << std::endl;
