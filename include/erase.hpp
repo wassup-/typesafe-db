@@ -65,14 +65,14 @@ template<typename TContainer, typename TValue>
 typename TContainer::iterator erase(TContainer& cont, const TValue& val)
 {
   using tag = typename container_traits<TContainer>::category;
-  return impl::erase_impl(cont, val, tag{});
+  return impl::erase_impl(cont, val, tag{ });
 }
 
 template<typename TContainer, typename TPred>
 typename TContainer::iterator erase_if(TContainer& cont, TPred pred)
 {
   using tag = typename container_traits<TContainer>::category;
-  return impl::erase_if_impl(cont, pred, tag{});
+  return impl::erase_if_impl(cont, pred, tag{ });
 }
 
 }

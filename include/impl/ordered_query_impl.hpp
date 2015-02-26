@@ -12,6 +12,7 @@
 
 namespace fp
 {
+
 namespace impl
 {
 
@@ -46,10 +47,10 @@ struct descending_sorter : std::binary_function<const TRecord&, const TRecord&, 
   }
 };
 
-}
+} // namespace ordered_query
 
-}
+} // namespace impl
 
-}
+} // namespace fp
 
 #endif

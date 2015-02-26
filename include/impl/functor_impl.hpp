@@ -103,8 +103,8 @@ public:
   }
 };
 
-}
+} // namespace impl
 
-}
+} // namespace fp
 
 #endif

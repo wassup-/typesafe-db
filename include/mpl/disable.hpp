@@ -25,7 +25,7 @@ template<typename If, typename T = void>
 using disable_if = detail::disable_if<If::value, T>;
 
 template<typename If, typename T = void>
-using disable_if_t = typename disable_if<If, T>::type;
+using disable_if_t = meta::eval<disable_if<If, T> >;
 
 }
 

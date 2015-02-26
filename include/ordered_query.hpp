@@ -24,12 +24,17 @@ template<typename, typename>
 struct ordered_query;
 
 template<typename TQuery, typename TColumn>
-struct is_ordered_query<ordered_query<TQuery, TColumn> > : mpl::all_<is_query<TQuery>, is_column<TColumn>> { };
+struct is_ordered_query<ordered_query<TQuery, TColumn> >
+: mpl::all_<is_query<TQuery>, is_column<TColumn> >
+{ };
 
 template<typename TQuery, typename TColumn>
-struct is_query<ordered_query<TQuery, TColumn> > : is_ordered_query<ordered_query<TQuery, TColumn>> { };
+struct is_query<ordered_query<TQuery, TColumn> >
+: is_ordered_query<ordered_query<TQuery, TColumn> >
+{ };
 
-enum class ordering_e {
+enum class ordering_e
+{
   ascending = 0,
   descending = 1
 };
@@ -61,17 +66,20 @@ public:
   template<
     typename TContainer,
     typename TRecord = typename TContainer::value_type,
-    typename = mpl::enable_if_t<is_record<TRecord>>
+    typename = mpl::enable_if_t<is_record<TRecord> >
   >
   friend TContainer query(TContainer recs, const ordered_query& self)
   {
+    using ascending_sorter = impl::ordered_query::ascending_sorter<TRecord, TColumn>;
+    using descending_sorter = impl::ordered_query::descending_sorter<TRecord, TColumn>;
+
     switch(self._order)
     {
       case ascending:
-        std::sort(begin(recs), end(recs), impl::ordered_query::ascending_sorter<TRecord, TColumn>());
+        std::sort(begin(recs), end(recs), ascending_sorter{ });
         break;
       case descending:
-        std::sort(begin(recs), end(recs), impl::ordered_query::descending_sorter<TRecord, TColumn>());
+        std::sort(begin(recs), end(recs), descending_sorter{ });
         break;
     }
     return recs;

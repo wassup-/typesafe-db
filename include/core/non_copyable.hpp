@@ -18,6 +18,6 @@ protected:
   non_copyable() = default;
 };
 
-}
+} // namespace fp
 
 #endif

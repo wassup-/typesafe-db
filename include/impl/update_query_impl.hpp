@@ -25,7 +25,7 @@ namespace update_modifiers
 template<typename, typename>
 struct modifier;
 
-}
+} // namespace update_modifiers
 
 template<typename>
 struct is_update_modifier
@@ -424,8 +424,8 @@ namespace update_modifiers
   };
 }
 
-}
+} // namespace impl
 
-}
+} // namespace fp
 
 #endif

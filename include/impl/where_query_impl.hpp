@@ -19,19 +19,9 @@ namespace fp
 namespace impl
 {
 
-template<typename...>
-struct where_query_impl;
-
-template<typename...>
-struct clause_evaluator;
-
 template<typename H, typename... T>
-struct clause_evaluator<H, T...>
+struct clause_evaluator
 {
-protected:
-  H head_;
-  clause_evaluator<T...> tail_;
-
 public:
   clause_evaluator(H h, T&&... t)
   : head_(h)
@@ -43,14 +33,15 @@ public:
   {
     return (head_(r) && tail_(r));
   }
+
+protected:
+  H head_;
+  clause_evaluator<T...> tail_;
 };
 
 template<typename H>
 struct clause_evaluator<H>
 {
-protected:
-  H head_;
-
 public:
   clause_evaluator(H h)
   : head_(h)
@@ -60,6 +51,9 @@ public:
   bool operator()(const record<Fs...>& r) const {
     return head_(r);
   }
+
+protected:
+  H head_;
 };
 
 template<typename... Clauses>
@@ -81,8 +75,8 @@ struct where_query_impl
   }
 };
 
-}
+} // namespace impl
 
-}
+} // namespace fp
 
 #endif

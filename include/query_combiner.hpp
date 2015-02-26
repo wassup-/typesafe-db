@@ -7,30 +7,33 @@
 
 #include "impl/query_combiner_impl.hpp"
 
-namespace fp {
+namespace fp
+{
 
-    template<typename...>
-    struct select_query;
-
-    template<
-        typename... LColumns,
-        typename... RColumns,
-        typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...>>
-    >
-    constexpr inline typename impl::query_combiner_impl<select_query, LColumns..., RColumns...>::normal
-    combine(const select_query<LColumns...>&, const select_query<RColumns...>&) {
-        return { };
-    }
-
-    template<
-        typename... LColumns,
-        typename... RColumns,
-        typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...>>
-    >
-    constexpr inline typename impl::query_combiner_impl<select_query, LColumns..., RColumns...>::unique
-    combine_unique(const select_query<LColumns...>&, const select_query<RColumns...>&) {
-        return { };
-    }
+template<
+  template<typename...> class Query,
+  typename... LColumns,
+  typename... RColumns,
+  typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...> >
+>
+constexpr inline typename impl::query_combiner_impl<Query, LColumns..., RColumns...>::normal
+combine(const Query<LColumns...>&, const Query<RColumns...>&)
+{
+  return { };
 }
+
+template<
+  template<typename...> class Query,
+  typename... LColumns,
+  typename... RColumns,
+  typename = mpl::enable_if_t<mpl::all_<is_column<LColumns>..., is_column<RColumns>...> >
+>
+constexpr inline typename impl::query_combiner_impl<Query, LColumns..., RColumns...>::unique
+combine_unique(const Query<LColumns...>&, const Query<RColumns...>&)
+{
+  return { };
+}
+
+} // namespace fp
 
 #endif

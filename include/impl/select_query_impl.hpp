@@ -35,10 +35,13 @@ struct select_query_impl
   template<typename Formatter>
   static std::string build_select_query(const TColumns&... f, Formatter& formatter)
   {
-    using list = meta::list<TColumns...>;
-    using transformed = meta::transform<list, meta::quote<DescriptorOf>>;
+    using transformed = meta::transform<
+                          meta::list<TColumns...>,
+                          meta::quote<DescriptorOf> >;
     using unique = meta::unique<transformed>;
-    using tables = meta::apply_list<meta::quote<table_names>, unique>;
+    using tables = meta::apply_list<
+                     meta::quote<table_names>,
+                     unique >;
 
     return stringutils::concatenate(
       "SELECT ",
@@ -49,8 +52,8 @@ struct select_query_impl
   }
 };
 
-}
+} // namespace impl
 
-}
+} // namespace fp
 
 #endif

@@ -25,7 +25,7 @@ template<typename If, typename T = void>
 using enable_if = detail::enable_if<If::value, T>;
 
 template<typename If, typename T = void>
-using enable_if_t = typename enable_if<If, T>::type;
+using enable_if_t = meta::eval<enable_if<If, T> >;
 
 }
 

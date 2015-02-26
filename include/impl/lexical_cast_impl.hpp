@@ -24,6 +24,6 @@ struct lexical_cast_impl
 
 } // namespace impl
 
-}
+} // namespace fp
 
 #endif

@@ -6,7 +6,6 @@
 #define _WHERE_CLAUSES_HPP
 
 #include "field.hpp"
-#include "lexical_cast.hpp"
 #include "stringutil.hpp"       // for stringutils::concatenate
 #include "type_traits.hpp"      // for fp::Bool
 

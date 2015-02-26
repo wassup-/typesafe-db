@@ -37,7 +37,7 @@ namespace detail
 
 template<typename Column, typename Descriptor>
 constexpr static bool is_primary_key_of(std::true_type /* HasPrimaryKey */) noexcept
-{ return Descriptor::primary_keys::template contains<Column>::value; }
+{ return !meta::empty<meta::find<typename Descriptor::primary_keys, Column> >{ }; }
 
 template<typename Column, typename Descriptor>
 constexpr static bool is_primary_key_of(std::false_type /* HasPrimaryKey */) noexcept
@@ -45,7 +45,7 @@ constexpr static bool is_primary_key_of(std::false_type /* HasPrimaryKey */) noe
 
 template<typename Column, typename Descriptor>
 constexpr static bool is_unique_key_of(std::true_type /* HasUniqueKeys */) noexcept
-{ return Descriptor::unique_keys::template contains<Column>::value; }
+{ return !meta::empty<meta::find<typename Descriptor::unique_keys, Column> >{ }; }
 
 template<typename Column, typename Descriptor>
 constexpr static bool is_unique_key_of(std::false_type /* HasUniqueKeys */) noexcept
@@ -53,7 +53,7 @@ constexpr static bool is_unique_key_of(std::false_type /* HasUniqueKeys */) noex
 
 template<typename Column, typename Descriptor>
 constexpr static bool is_index_key_of(std::true_type /* HasIndexKeys */) noexcept
-{ return Descriptor::index_keys::template contains<Column>::value; }
+{ return !meta::empty<meta::find<typename Descriptor::index_keys, Column> >{ }; }
 
 template<typename Column, typename Descriptor>
 constexpr static bool is_index_key_of(std::false_type /* HasIndexKeys */) noexcept
@@ -78,13 +78,13 @@ public:
   { return Name; }
 
   constexpr static bool is_primary_key() noexcept
-  { return detail::is_primary_key_of<this_type, Descriptor>(HasPrimaryKeys<Descriptor>{}); }
+  { return detail::is_primary_key_of<this_type, Descriptor>(HasPrimaryKeys<Descriptor>{ }); }
 
   constexpr static bool is_unique_key() noexcept
-  { return detail::is_unique_key_of<this_type, Descriptor>(HasUniqueKeys<Descriptor>{}); }
+  { return detail::is_unique_key_of<this_type, Descriptor>(HasUniqueKeys<Descriptor>{ }); }
 
   constexpr static bool is_index_key() noexcept
-  { return detail::is_index_key_of<this_type, Descriptor>(HasIndexKeys<Descriptor>{}); }
+  { return detail::is_index_key_of<this_type, Descriptor>(HasIndexKeys<Descriptor>{ }); }
 
 public:
   template<typename Formatter>

@@ -37,40 +37,42 @@ private:
 	const char* const name_;
 };
 
-namespace detail {
+namespace detail
+{
 
-	template<typename Key>
-	constexpr static bool is_primary_key(const Key& key)
-	{ return false; }
+template<typename Key>
+constexpr static bool is_primary_key(const Key& key)
+{ return false; }
 
-	template<typename Column>
-	constexpr static bool is_primary_key(const key<Column, primary_tag>& key)
-	{ return true; }
+template<typename Column>
+constexpr static bool is_primary_key(const key<Column, primary_tag>& key)
+{ return true; }
 
-	template<typename Key>
-	constexpr static bool is_unique_key(const Key& key)
-	{ return is_primary_key(key); }
+template<typename Key>
+constexpr static bool is_unique_key(const Key& key)
+{ return is_primary_key(key); }
 
-	template<typename Column>
-	constexpr static bool is_unique_key(const key<Column, unique_tag>& key)
-	{ return true; }
+template<typename Column>
+constexpr static bool is_unique_key(const key<Column, unique_tag>& key)
+{ return true; }
 
-	template<typename Key>
-	constexpr static bool is_index_key(const Key& key)
-	{ return is_unique_key(key); }
+template<typename Key>
+constexpr static bool is_index_key(const Key& key)
+{ return is_unique_key(key); }
 
-	template<typename Column>
-	constexpr static bool is_index_key(const key<Column, index_tag>& key)
-	{ return true; }
+template<typename Column>
+constexpr static bool is_index_key(const key<Column, index_tag>& key)
+{ return true; }
 
-	template<typename Key>
-	constexpr static bool is_foreign_key(const Key& key)
-	{ return false; }
+template<typename Key>
+constexpr static bool is_foreign_key(const Key& key)
+{ return false; }
 
-	template<typename Column>
-	constexpr static bool is_foreign_key(const key<Column, foreign_tag>& key)
-	{ return true; }
-}
+template<typename Column>
+constexpr static bool is_foreign_key(const key<Column, foreign_tag>& key)
+{ return true; }
+
+} // namespace detail
 
 template<typename Key>
 constexpr static bool is_primary_key(const Key& key)
@@ -88,6 +90,6 @@ template<typename Key>
 constexpr static bool is_foreign_key(const Key& key)
 { return detail::is_foreign_key(key); }
 
-}
+} // namespace fp
 
 #endif
