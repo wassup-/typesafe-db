@@ -9,7 +9,7 @@ class Context:
     output += '#include "include/column.hpp"' '\n'
     output += '#include "include/field.hpp"' '\n'
     output += '#include "include/table.hpp"' '\n'
-    output += '#include <type_traits>' '\n'
+    output += '#include "include/type_traits.hpp"' '\n'
     output += '\n'
     output += '{0}'
     dbs = '\n'.join([db.format() for db in self.databases])
@@ -43,7 +43,7 @@ class Database:
     column_strings = self.__traverse_columns(self.tables)
     column_strings = ['constexpr static char const {0}_{1}[] = "{1}";'.format(table, column) for (table, column) in column_strings]
     table_strings = ['constexpr static char const {0}[] = "{0}";'.format(table.name) for table in self.tables]
-    strings = '\n'.join(['\t{0}'.format(string) for string in (table_strings + column_strings)])
+    strings = '\n'.join(['{0}'.format(string) for string in (table_strings + column_strings)])
 
     tables = '\n'.join([table.format(self) for table in self.tables])
 
@@ -73,10 +73,10 @@ class Table:
     output += '}};' '\n'
 
     columns = '\n'.join(['\t{0}'.format(x) for x in [column.format(self) for column in self.columns]])
-    record    = '\tusing columns = meta::transform<meta::list<{0}>, meta::compose<meta::quote<std::remove_cv>, meta::quote<std::remove_reference>>>;'.format(', '.join('decltype({0})'.format(column.name) for column in self.columns))
-    primaries = '\tusing primary_keys = meta::transform<meta::list<{0}>, meta::compose<meta::quote<std::remove_cv>, meta::quote<std::remove_reference>>>;'.format(', '.join('decltype({0})'.format(column.name) for column in self.primaries))
-    uniques   = '\tusing unique_keys  = meta::transform<meta::list<{0}>, meta::compose<meta::quote<std::remove_cv>, meta::quote<std::remove_reference>>>;'.format(', '.join('decltype({0})'.format(column.name) for column in self.uniques))
-    indices   = '\tusing index_keys   = meta::transform<meta::list<{0}>, meta::compose<meta::quote<std::remove_cv>, meta::quote<std::remove_reference>>>;'.format(', '.join('decltype({0})'.format(column.name) for column in self.indices))
+    record    = '\tusing columns = meta::transform<meta::list<{0}>, meta::quote<fp::Unqualified> >;'.format(', '.join('decltype({0})'.format(column.name) for column in self.columns))
+    primaries = '\tusing primary_keys = meta::transform<meta::list<{0}>, meta::quote<fp::Unqualified> >;'.format(', '.join('decltype({0})'.format(column.name) for column in self.primaries))
+    uniques   = '\tusing unique_keys  = meta::transform<meta::list<{0}>, meta::quote<fp::Unqualified> >;'.format(', '.join('decltype({0})'.format(column.name) for column in self.uniques))
+    indices   = '\tusing index_keys   = meta::transform<meta::list<{0}>, meta::quote<fp::Unqualified> >;'.format(', '.join('decltype({0})'.format(column.name) for column in self.indices))
 
     return output.format(self.name, columns, record, primaries, uniques, indices)
 
