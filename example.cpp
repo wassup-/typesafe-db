@@ -28,6 +28,12 @@ auto uq1 = fp::update(
 );
 auto wuq1 = uq1 + wq1;
 
+template<typename T>
+void pretty_print(T)
+{
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
+}
+
 int main(int argc, char ** argv) {
   using std::get;
   using std::to_string;
